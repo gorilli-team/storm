@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Header } from "./header";
-import { Sidebar } from "./sidebar";
+import { AppSidebar } from "./sidebar";
 import { Menu, X } from "lucide-react";
 
 interface BaseLayoutProps {
@@ -32,7 +32,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <Sidebar />
+        <AppSidebar />
       </div>
 
       {/* Main content with responsive padding */}
