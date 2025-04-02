@@ -1,0 +1,13 @@
+/node_modules
+/dist
+/build
+/public/images
+/public/videos
+/public/audio
+/public/documents
+.next
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
