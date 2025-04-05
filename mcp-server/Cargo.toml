@@ -1,0 +1,12 @@
+[package]
+name = "mcp-server"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "MCP Server for Storm project"
+
+[dependencies]
+# Add your dependencies here
+
+[dev-dependencies]
+# Add your dev dependencies here 

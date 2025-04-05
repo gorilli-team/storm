@@ -1,0 +1,54 @@
+[config]
+default_to_workspace = false
+min_version = "0.37.0"
+
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+[tasks.default]
+description = "Default task"
+dependencies = ["build"]
+
+[tasks.build]
+description = "Build the project"
+command = "cargo"
+args = ["build"]
+
+[tasks.test]
+description = "Run tests"
+command = "cargo"
+args = ["test"]
+
+[tasks.run]
+description = "Run the project"
+command = "cargo"
+args = ["run"]
+
+[tasks.clean]
+description = "Clean the project"
+command = "cargo"
+args = ["clean"]
+
+[tasks.check]
+description = "Check the project"
+command = "cargo"
+args = ["check"]
+
+[tasks.lint]
+description = "Run linters"
+dependencies = ["lint-clippy", "lint-fmt"]
+
+[tasks.lint-clippy]
+description = "Run clippy linter"
+command = "cargo"
+args = ["clippy", "--", "-D", "warnings"]
+
+[tasks.lint-fmt]
+description = "Check code formatting"
+command = "cargo"
+args = ["fmt", "--", "--check"]
+
+[tasks.fmt]
+description = "Format code"
+command = "cargo"
+args = ["fmt"] 
