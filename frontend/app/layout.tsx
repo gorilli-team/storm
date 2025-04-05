@@ -2,6 +2,7 @@ import React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "../app/components/theme-provider";
+import { I18nProvider } from "../lib/i18n";
 
 export const metadata: Metadata = {
   title: "Kommander",
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <I18nProvider>{children}</I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,0 +1,36 @@
+{
+  "common": {
+    "new": "New",
+    "test": "Test",
+    "embed": "Embed",
+    "previous": "Previous",
+    "next": "Next",
+    "showing": "Showing {from}-{to} of {total}"
+  },
+  "widgets": {
+    "title": "Widgets",
+    "subtitle": "Manage your widgets",
+    "newWidget": "New Widget",
+    "tabs": {
+      "widgets": "Widgets",
+      "actions": "Actions",
+      "apiConnections": "API Connections"
+    },
+    "status": {
+      "live": "Live",
+      "draft": "Draft"
+    },
+    "metrics": {
+      "interactions": "Interactions",
+      "apiCalls": "API calls"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "language": {
+      "title": "Language",
+      "en": "English",
+      "it": "Italian"
+    }
+  }
+}

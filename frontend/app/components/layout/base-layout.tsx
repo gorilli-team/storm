@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import { Header } from "./header";
 import { AppSidebar } from "./sidebar";
 import { Menu, X } from "lucide-react";
+import { Button } from "../ui/button";
+import { useI18n } from "../../../lib/i18n";
+import Link from "next/link";
+import { User } from "lucide-react";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -11,6 +15,7 @@ interface BaseLayoutProps {
 
 export function BaseLayout({ children }: BaseLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useI18n();
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,7 +42,28 @@ export function BaseLayout({ children }: BaseLayoutProps) {
 
       {/* Main content with responsive padding */}
       <div className="lg:pl-64">
-        <Header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" />
+        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-16 items-center justify-between">
+            <div className="flex items-center gap-6">
+              <Link href="/dashboard" className="font-semibold">
+                Storm
+              </Link>
+              <nav className="flex gap-4">
+                <Link
+                  href="/dashboard/widgets"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                >
+                  {t("widgets.title")}
+                </Link>
+              </nav>
+            </div>
+            <Link href="/dashboard/profile">
+              <Button variant="ghost" size="sm" className="h-8 w-8">
+                <User className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </header>
         <main className="container mx-auto p-4 lg:p-8">{children}</main>
       </div>
     </div>

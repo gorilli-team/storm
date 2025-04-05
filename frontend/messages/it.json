@@ -1,0 +1,36 @@
+{
+  "common": {
+    "new": "Nuovo",
+    "test": "Test",
+    "embed": "Incorpora",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "showing": "Mostrando {from}-{to} di {total}"
+  },
+  "widgets": {
+    "title": "Widget",
+    "subtitle": "Gestisci i tuoi widget",
+    "newWidget": "Nuovo Widget",
+    "tabs": {
+      "widgets": "Widget",
+      "actions": "Azioni",
+      "apiConnections": "Connessioni API"
+    },
+    "status": {
+      "live": "Attivo",
+      "draft": "Bozza"
+    },
+    "metrics": {
+      "interactions": "Interazioni",
+      "apiCalls": "Chiamate API"
+    }
+  },
+  "profile": {
+    "title": "Profilo",
+    "language": {
+      "title": "Lingua",
+      "en": "Inglese",
+      "it": "Italiano"
+    }
+  }
+}

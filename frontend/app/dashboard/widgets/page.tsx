@@ -4,6 +4,7 @@ import { BaseLayout } from "../../components/layout/base-layout";
 import { Button } from "../../components/ui/button";
 import { Plus, MoreVertical } from "lucide-react";
 import Link from "next/link";
+import { useI18n } from "../../../lib/i18n";
 
 // Skip using recharts components directly
 interface ChartData {
@@ -169,18 +170,20 @@ const widgets: WidgetCard[] = [
 ];
 
 export default function WidgetsPage() {
+  const { t } = useI18n();
+
   return (
     <BaseLayout>
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Widgets</h1>
-            <p className="text-muted-foreground">Manage your widgets</p>
+            <h1 className="text-2xl font-semibold">{t("widgets.title")}</h1>
+            <p className="text-muted-foreground">{t("widgets.subtitle")}</p>
           </div>
           <Link href="/dashboard/widgets/new">
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              New Widget
+              {t("widgets.newWidget")}
             </Button>
           </Link>
         </div>
@@ -192,19 +195,19 @@ export default function WidgetsPage() {
               href="#widgets"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-primary -mb-px"
             >
-              Widgets
+              {t("widgets.tabs.widgets")}
             </Link>
             <Link
               href="#actions"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              Actions
+              {t("widgets.tabs.actions")}
             </Link>
             <Link
               href="#api-connections"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              API Connections
+              {t("widgets.tabs.apiConnections")}
             </Link>
           </nav>
         </div>
@@ -232,7 +235,7 @@ export default function WidgetsPage() {
                           : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
-                      {widget.status}
+                      {t(`widgets.status.${widget.status.toLowerCase()}`)}
                     </span>
                     <Button variant="ghost" className="h-8 w-8 p-0">
                       <MoreVertical className="h-4 w-4" />
@@ -257,22 +260,24 @@ export default function WidgetsPage() {
                 <div className="flex items-center gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">
-                      Interactions:{" "}
+                      {t("widgets.metrics.interactions")}:{" "}
                     </span>
                     <span className="font-medium">{widget.interactions}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">API calls: </span>
+                    <span className="text-muted-foreground">
+                      {t("widgets.metrics.apiCalls")}:{" "}
+                    </span>
                     <span className="font-medium">{widget.apiCalls}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <Button className="w-full" size="sm">
-                    Test
+                    {t("common.test")}
                   </Button>
                   <Button variant="outline" size="sm" className="w-full">
-                    Embed
+                    {t("common.embed")}
                   </Button>
                 </div>
               </div>
@@ -282,10 +287,12 @@ export default function WidgetsPage() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Showing 1-3 of 1000</p>
+          <p className="text-sm text-muted-foreground">
+            {t("common.showing", { from: 1, to: 3, total: 1000 })}
+          </p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled>
-              Previous
+              {t("common.previous")}
             </Button>
             <Button variant="outline" size="sm" className="min-w-[2.5rem]">
               1
@@ -313,7 +320,7 @@ export default function WidgetsPage() {
               100
             </Button>
             <Button variant="outline" size="sm">
-              Next
+              {t("common.next")}
             </Button>
           </div>
         </div>
