@@ -21,7 +21,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -32,13 +32,7 @@ export function AppSidebar() {
     analytics: false,
   });
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
+  // Define navigation items
   const mainNavItems = [
     {
       title: "Dashboard",
@@ -87,6 +81,44 @@ export function AppSidebar() {
     },
   ];
 
+  // Check if current path matches any section's children and expand that section automatically
+  useEffect(() => {
+    const newExpandedSections = { ...expandedSections };
+    let sectionsChanged = false;
+
+    // Check mainNavItems
+    mainNavItems.forEach(item => {
+      if (item.children && item.children.some(child => pathname === child.href || pathname.startsWith(child.href + '/'))) {
+        if (!newExpandedSections[item.section]) {
+          newExpandedSections[item.section] = true;
+          sectionsChanged = true;
+        }
+      }
+    });
+
+    // Check analyticsNavItems
+    analyticsNavItems.forEach(item => {
+      if (item.children && item.children.some(child => pathname === child.href || pathname.startsWith(child.href + '/'))) {
+        if (!newExpandedSections[item.section]) {
+          newExpandedSections[item.section] = true;
+          sectionsChanged = true;
+        }
+      }
+    });
+
+    // Only update state if changes were made to prevent infinite render loop
+    if (sectionsChanged) {
+      setExpandedSections(newExpandedSections);
+    }
+  }, [pathname]);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b px-6 py-5">
@@ -96,14 +128,16 @@ export function AppSidebar() {
           </div>
           <span className="text-xl font-bold">Kommander.ai</span>
         </Link>
-        <Button
-          className="w-full flex items-center gap-2"
-          size="sm"
-          variant="outline"
-        >
-          <Plus className="h-4 w-4" />
-          New Widget
-        </Button>
+        <Link href="/dashboard/widgets/new">
+          <Button
+            className="w-full flex items-center gap-2"
+            size="sm"
+            variant="outline"
+          >
+            <Plus className="h-4 w-4" />
+            New Widget
+          </Button>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
