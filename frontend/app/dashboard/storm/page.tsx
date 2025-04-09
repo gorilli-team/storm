@@ -3,6 +3,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlusCircle, Save, Trash2, FolderPlus, Database, Code, Zap, Cloud, Server } from 'lucide-react';
 import { Button } from "../../components/ui/button";
 import Editor from '@monaco-editor/react';
+// Recall imports
+import { testnet } from "@recallnet/chains";
+import { RecallClient } from "@recallnet/sdk/client";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 interface Tool {
   name: string;
@@ -133,6 +138,37 @@ const StormToolManager: React.FC = () => {
     description: '',
     code: ''  // Start with empty code instead of defaultCodePlaceholder
   });
+
+  useEffect(() => {
+    // Get the private key from environment variables
+    const initializeRecallClient = async () => {
+      try {
+        const privateKeyEnv = process.env.NEXT_PUBLIC_RECALL_PRIVATE_KEY || '';
+        
+        if (!privateKeyEnv || privateKeyEnv === '0x') {
+          console.error('Missing private key for Recall. Set NEXT_PUBLIC_RECALL_PRIVATE_KEY in your environment variables.');
+          return;
+        }
+        
+        const privateKey = privateKeyEnv as `0x${string}`;
+        
+        const walletClient = createWalletClient({
+          account: privateKeyToAccount(privateKey),
+          chain: testnet,
+          transport: http(),
+        });
+        
+        // Create a client from the wallet client
+        const client = new RecallClient({ walletClient });
+        
+        console.log("Recall client initialized successfully", client);
+      } catch (error) {
+        console.error("Failed to initialize Recall client:", error);
+      }
+    };
+    
+    initializeRecallClient();
+  }, []);
 
   // Get active bucket (or null if none exists)
   const activeBucket = activeBucketId 
