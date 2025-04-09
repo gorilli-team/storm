@@ -9,7 +9,7 @@ import {
   Zap,
   Cloud,
   Server,
-  PlusCircle
+  PlusCircle,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -33,8 +33,8 @@ export function AppSidebar() {
       button: {
         title: "New Bucket",
         href: "/buckets/new",
-        icon: FolderPlus
-      }
+        icon: FolderPlus,
+      },
     },
     {
       title: "Tools",
@@ -43,9 +43,19 @@ export function AppSidebar() {
       button: {
         title: "New Tool",
         href: "/tools/new",
-        icon: PlusCircle
-      }
-    }
+        icon: PlusCircle,
+      },
+    },
+    {
+      title: "Storm",
+      href: "/storm",
+      icon: Cloud,
+      button: {
+        title: "Storm",
+        href: "/dashboard/storm",
+        icon: Cloud,
+      },
+    },
   ];
 
   return (
@@ -64,16 +74,22 @@ export function AppSidebar() {
             <div key={item.href} className="mb-4">
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
+                  isActive={
+                    pathname === item.href ||
+                    pathname.startsWith(item.href + "/")
+                  }
                   tooltip={item.title}
                 >
-                  <Link href={item.href} className="flex items-center gap-3 w-full">
+                  <Link
+                    href={item.href}
+                    className="flex items-center gap-3 w-full"
+                  >
                     <item.icon className="h-5 w-5" />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem className="mt-2 px-4">
                 <Link href={item.button.href}>
                   <Button

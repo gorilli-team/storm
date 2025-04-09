@@ -20,11 +20,13 @@ export default function Home() {
           <div className="space-y-6 relative">
             <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
               <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Kommander
+                Storm
               </span>
             </h1>
             <p className="mx-auto max-w-[42rem] text-xl text-gray-300 sm:text-2xl font-light">
-              Adaptive, Privacy-Preserving AI Automation Assistant
+              A decentralized marketplace connecting developers and users
+              through MCP tools, enabling monetization via Recall tokens and
+              creating a seamless ecosystem for specialized AI capabilities.
             </p>
           </div>
 
