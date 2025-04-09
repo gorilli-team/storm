@@ -252,18 +252,18 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@recallnet/chains@0.0.6", "@recallnet/chains@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@recallnet/chains/-/chains-0.0.6.tgz#4c717e1fa0ab2304979cec0f1c910ada3625a543"
-  integrity sha512-GesLuA11tHBSBjd768gUtCFFBMcVTx6Xq18IqeMrYPm2OsITCJUnBxUcafT2T6nQDl4XjF3L1ePZ+fN8IfLnwQ==
+"@recallnet/chains@0.0.7", "@recallnet/chains@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@recallnet/chains/-/chains-0.0.7.tgz#5f4f87c81fb773c17c7448801fdf21a18c5fa881"
+  integrity sha512-G2acd2cJ0zCxEfilK8ffPelKftvGznbRnhpy/PV8ybtjudL5uI43lVo49Wzn5it4nNKj1xdDCnqYc4joIltS5g==
   dependencies:
-    "@recallnet/network-constants" "0.0.6"
+    "@recallnet/network-constants" "0.0.7"
     viem "^2.22.9"
 
-"@recallnet/contracts@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@recallnet/contracts/-/contracts-0.0.4.tgz#23d0a7d658d8a5ebb70111e611d10aef8d4a3a0b"
-  integrity sha512-nF4RhDGqhF7mFcUKteGYx1zXUdfO9jKmlIVhMYYiKfBd67hUhFedQUogYKE9ngg3LQ+S34MxRdJeYxUaPK/Vvg==
+"@recallnet/contracts@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@recallnet/contracts/-/contracts-0.0.5.tgz#0482b9c3e6fb59fdb7372b19dfb7b10b54721489"
+  integrity sha512-SkBFr/oMP1nsAhEUnIMklbVX+5LntdADDtd7ix2xXmS9dYeWlKaeNAcr7OJjLAsbsMp5jayHC8KLXC+VTWVKrQ==
   dependencies:
     viem "^2.22.9"
 
@@ -276,21 +276,21 @@
     cborg "^4.2.6"
     uint8arrays "^5.1.0"
 
-"@recallnet/network-constants@0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@recallnet/network-constants/-/network-constants-0.0.6.tgz#efb2bf89e8de488f611c92fdfc7d131a25645b2d"
-  integrity sha512-r2ycx9jH5+nPs9YmQBHoPvdDRzbbB6+FWSntkMh12kZ0W4rsazyIfj3YJClkNR+oBAfbQEi6a+k1jv2fZSkC6A==
-
-"@recallnet/sdk@^0.0.7":
+"@recallnet/network-constants@0.0.7":
   version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@recallnet/sdk/-/sdk-0.0.7.tgz#4872c21652df03f20080e0dcec3688f0b3083102"
-  integrity sha512-m+KlkI1hoO//rjubAPZ9baO8vu95tVaYN83Cw5IodLGOo5ismBT2VhUg4vT+M+qep4tlDNDxNp45Jhu79DHeSw==
+  resolved "https://registry.yarnpkg.com/@recallnet/network-constants/-/network-constants-0.0.7.tgz#676a7ef415f08133f6aa6a03161fbc13dd9cdd7f"
+  integrity sha512-2POyaRjogpibl9LZO+QrtNe+gk1/vodsOCUP7nQDJk7g3SOjEToIJJpD6/TXk90IyKSNFWlJqUdTLWM8R/5sPg==
+
+"@recallnet/sdk@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@recallnet/sdk/-/sdk-0.0.8.tgz#92150603bd146f445111695af7a8a6bcc20f37e9"
+  integrity sha512-k1r3mva6SsfPTVkwm7SEApL6DgBOn3p5QamqTP7mLHJXRm4EE2Tl9oZLkg3+SHqwCZM18qVSTWvFLtm86hPcpg==
   dependencies:
     "@noble/hashes" "^1.5.0"
-    "@recallnet/chains" "0.0.6"
-    "@recallnet/contracts" "0.0.4"
+    "@recallnet/chains" "0.0.7"
+    "@recallnet/contracts" "0.0.5"
     "@recallnet/fvm" "0.0.1"
-    "@recallnet/network-constants" "0.0.6"
+    "@recallnet/network-constants" "0.0.7"
     "@sindresorhus/fnv1a" "^3.1.0"
     file-type "^19.6.0"
     uint8arrays "^5.1.0"

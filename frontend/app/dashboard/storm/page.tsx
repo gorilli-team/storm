@@ -247,6 +247,8 @@ const StormToolManager: React.FC = () => {
     console.log("Published bucket:", activeBucket);
   };
 
+  const hasBuckets = buckets.length > 0;
+
   return (
     <div className="p-6 bg-gray-900 text-gray-100 min-h-screen">
       <div className='container'>
@@ -260,7 +262,7 @@ const StormToolManager: React.FC = () => {
         <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold flex items-center text-cyan-400">
-                <Database className="mr-2 h-5 w-5 text-blue-400" /> Bucket Selection
+                <Database className="mr-2 h-5 w-5 text-blue-400" /> Bucket
             </h2>
                 <Button
                     onClick={() => setShowNewBucketForm(!showNewBucketForm)}
@@ -342,134 +344,138 @@ const StormToolManager: React.FC = () => {
             )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-blue-800 mb-6">
-            <button
-            className={`py-2 px-4 font-medium text-sm ${activeTab === 'create' ? 'text-cyan-400 border-b-2 border-cyan-500 bg-gray-800' : 'text-gray-400 hover:text-blue-300'}`}
-            onClick={() => setActiveTab('create')}
-            >
-            <div className="flex items-center">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create Tool
+        {hasBuckets && (
+          <>
+            {/* Tabs */}
+            <div className="flex border-b border-blue-800 mb-6">
+                <button
+                className={`py-2 px-4 font-medium text-sm ${activeTab === 'create' ? 'text-cyan-400 border-b-2 border-cyan-500 bg-gray-800' : 'text-gray-400 hover:text-blue-300'}`}
+                onClick={() => setActiveTab('create')}
+                >
+                <div className="flex items-center">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Tool
+                </div>
+                </button>
+                <button
+                className={`py-2 px-4 font-medium text-sm ${activeTab === 'manage' ? 'text-cyan-400 border-b-2 border-cyan-500 bg-gray-800' : 'text-gray-400 hover:text-blue-300'}`}
+                onClick={() => setActiveTab('manage')}
+                >
+                <div className="flex items-center">
+                    <Code className="mr-2 h-4 w-4" /> Manage Tools ({activeBucket ? activeBucket.tools.length : 0})
+                </div>
+                </button>
             </div>
-            </button>
-            <button
-            className={`py-2 px-4 font-medium text-sm ${activeTab === 'manage' ? 'text-cyan-400 border-b-2 border-cyan-500 bg-gray-800' : 'text-gray-400 hover:text-blue-300'}`}
-            onClick={() => setActiveTab('manage')}
-            >
-            <div className="flex items-center">
-                <Code className="mr-2 h-4 w-4" /> Manage Tools ({activeBucket ? activeBucket.tools.length : 0})
-            </div>
-            </button>
-        </div>
 
-        {/* Create Tool Tab */}
-        {activeTab === 'create' && (
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-            <h2 className="text-xl font-bold mb-4 text-cyan-400">
-                {currentTool.name ? `Edit Tool: ${currentTool.name}` : 'Create New Tool'}
-            </h2>
-            
-            <div className="space-y-4 mb-4">
-                <div>
-                <label htmlFor="toolName" className="block text-sm font-medium text-blue-300 mb-1">
-                    Tool Name
-                </label>
-                <input 
-                    id="toolName"
-                    type="text"
-                    value={currentTool.name} 
-                    onChange={(e) => setCurrentTool({...currentTool, name: e.target.value})}
-                    placeholder="getCryptoPrice, getWeather, etc."
-                    className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                />
-                <p className="text-xs text-blue-400 mt-1">
-                    The name that will be used to call your function
-                </p>
-                </div>
-                <div>
-                <label htmlFor="codeEditor" className="block text-sm font-medium text-blue-300 mb-1 flex items-center">
-                    <Server className="mr-2 h-4 w-4 text-cyan-500" />
-                    Tool Code
-                </label>
-                <MonacoEditor 
-                    value={currentTool.code} 
-                    onChange={(newCode) => setCurrentTool({...currentTool, code: newCode})}
-                    placeholder={defaultCodePlaceholder}
-                />
-                <p className="text-xs text-blue-400 mt-1">
-                    Write your TypeScript function with JSDoc comments for parameters and return types
-                </p>
-                </div>
-            </div>
-            
-            <button 
-                onClick={handleSaveTool}
-                disabled={!activeBucketId}
-                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${!activeBucketId ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-                <Save className="mr-2 h-4 w-4" /> 
-                {currentTool.name ? 'Update Tool' : 'Save Tool'} {activeBucket ? `to ${activeBucket.name}` : ''}
-            </button>
-            {!activeBucketId && <p className="text-xs text-yellow-400 mt-2">You need to create a bucket first</p>}
-            </div>
-        )}
-
-        {/* Manage Tools Tab */}
-        {activeTab === 'manage' && (
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-            <h2 className="text-xl font-bold mb-4 text-cyan-400 flex items-center">
-                <Code className="mr-2 h-5 w-5 text-blue-400" />
-                {activeBucket ? `Tools in ${activeBucket.name}` : 'Tools'}
-            </h2>
-            
-            {!activeBucket ? (
-                <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
-                <div className="flex flex-col items-center space-y-2">
-                    <Database className="h-10 w-10 text-blue-700 mb-2" />
-                    <p>No buckets created yet.</p>
-                    <p className="text-xs text-gray-500">Create a bucket to store your tools.</p>
-                </div>
-                </div>
-            ) : activeBucket.tools.length === 0 ? (
-                <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
-                <div className="flex flex-col items-center space-y-2">
-                    <Database className="h-10 w-10 text-blue-700 mb-2" />
-                    <p>No tools in this bucket yet.</p>
-                    <p className="text-xs text-gray-500">Switch to "Create Tool" tab to add one.</p>
-                </div>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                {activeBucket.tools.map((tool, index) => (
-                    <div key={index} className="border border-blue-800 border-opacity-50 rounded-md p-4 bg-gray-900 hover:bg-gray-800 transition-colors">
-                    <div className="flex justify-between items-start">
-                        <div>
-                        <h3 className="font-medium text-lg text-cyan-400">{tool.name}</h3>
-                        <p className="text-blue-300 text-sm">{tool.description}</p>
-                        </div>
-                        <div className="flex space-x-2">
-                        <button 
-                            onClick={() => handleEditTool(tool)}
-                            className="text-cyan-500 hover:text-cyan-300 p-1 border border-cyan-800 rounded px-2 text-xs"
-                        >
-                            Edit
-                        </button>
-                        <button 
-                            onClick={() => handleDeleteTool(tool.name)}
-                            className="text-red-500 hover:text-red-400 p-1 border border-red-900 rounded"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </button>
-                        </div>
+            {/* Create Tool Tab */}
+            {activeTab === 'create' && (
+                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                <h2 className="text-xl font-bold mb-4 text-cyan-400">
+                    {currentTool.name ? `Edit Tool: ${currentTool.name}` : 'Create New Tool'}
+                </h2>
+                
+                <div className="space-y-4 mb-4">
+                    <div>
+                    <label htmlFor="toolName" className="block text-sm font-medium text-blue-300 mb-1">
+                        Tool Name
+                    </label>
+                    <input 
+                        id="toolName"
+                        type="text"
+                        value={currentTool.name} 
+                        onChange={(e) => setCurrentTool({...currentTool, name: e.target.value})}
+                        placeholder="getCryptoPrice, getWeather, etc."
+                        className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    />
+                    <p className="text-xs text-blue-400 mt-1">
+                        The name that will be used to call your function
+                    </p>
                     </div>
-                    <div className="mt-2 bg-gray-800 p-2 rounded text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap text-blue-400 border border-gray-700">
-                        {tool.code.split('\n')[0]}...
+                    <div>
+                    <label htmlFor="codeEditor" className="block text-sm font-medium text-blue-300 mb-1 flex items-center">
+                        <Server className="mr-2 h-4 w-4 text-cyan-500" />
+                        Tool Code
+                    </label>
+                    <MonacoEditor 
+                        value={currentTool.code} 
+                        onChange={(newCode) => setCurrentTool({...currentTool, code: newCode})}
+                        placeholder={defaultCodePlaceholder}
+                    />
+                    <p className="text-xs text-blue-400 mt-1">
+                        Write your TypeScript function with JSDoc comments for parameters and return types
+                    </p>
                     </div>
-                    </div>
-                ))}
+                </div>
+                
+                <button 
+                    onClick={handleSaveTool}
+                    disabled={!activeBucketId}
+                    className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${!activeBucketId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    <Save className="mr-2 h-4 w-4" /> 
+                    {currentTool.name ? 'Update Tool' : 'Save Tool'} {activeBucket ? `to ${activeBucket.name}` : ''}
+                </button>
+                {!activeBucketId && <p className="text-xs text-yellow-400 mt-2">You need to create a bucket first</p>}
                 </div>
             )}
-            </div>
+
+            {/* Manage Tools Tab */}
+            {activeTab === 'manage' && (
+                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                <h2 className="text-xl font-bold mb-4 text-cyan-400 flex items-center">
+                    <Code className="mr-2 h-5 w-5 text-blue-400" />
+                    {activeBucket ? `Tools in ${activeBucket.name}` : 'Tools'}
+                </h2>
+                
+                {!activeBucket ? (
+                    <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
+                    <div className="flex flex-col items-center space-y-2">
+                        <Database className="h-10 w-10 text-blue-700 mb-2" />
+                        <p>No buckets created yet.</p>
+                        <p className="text-xs text-gray-500">Create a bucket to store your tools.</p>
+                    </div>
+                    </div>
+                ) : activeBucket.tools.length === 0 ? (
+                    <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
+                    <div className="flex flex-col items-center space-y-2">
+                        <Database className="h-10 w-10 text-blue-700 mb-2" />
+                        <p>No tools in this bucket yet.</p>
+                        <p className="text-xs text-gray-500">Switch to "Create Tool" tab to add one.</p>
+                    </div>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                    {activeBucket.tools.map((tool, index) => (
+                        <div key={index} className="border border-blue-800 border-opacity-50 rounded-md p-4 bg-gray-900 hover:bg-gray-800 transition-colors">
+                        <div className="flex justify-between items-start">
+                            <div>
+                            <h3 className="font-medium text-lg text-cyan-400">{tool.name}</h3>
+                            <p className="text-blue-300 text-sm">{tool.description}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                            <button 
+                                onClick={() => handleEditTool(tool)}
+                                className="text-cyan-500 hover:text-cyan-300 p-1 border border-cyan-800 rounded px-2 text-xs"
+                            >
+                                Edit
+                            </button>
+                            <button 
+                                onClick={() => handleDeleteTool(tool.name)}
+                                className="text-red-500 hover:text-red-400 p-1 border border-red-900 rounded"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
+                            </div>
+                        </div>
+                        <div className="mt-2 bg-gray-800 p-2 rounded text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap text-blue-400 border border-gray-700">
+                            {tool.code.split('\n')[0]}...
+                        </div>
+                        </div>
+                    ))}
+                    </div>
+                )}
+                </div>
+            )}
+          </>
         )}
 
         {/* Info Card */}
