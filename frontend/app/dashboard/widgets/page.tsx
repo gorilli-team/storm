@@ -192,19 +192,19 @@ export default function WidgetsPage() {
         <div className="border-b">
           <nav className="flex gap-4">
             <Link
-              href="#widgets"
+              href="/dashboard/widgets"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 border-primary -mb-px"
             >
               {t("widgets.tabs.widgets")}
             </Link>
             <Link
-              href="#actions"
+              href="/dashboard/actions"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               {t("widgets.tabs.actions")}
             </Link>
             <Link
-              href="#api-connections"
+              href="/dashboard/api-connections"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               {t("widgets.tabs.apiConnections")}

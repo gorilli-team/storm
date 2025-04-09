@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  MessageSquare,
-  Link2,
-  BarChart2,
-  FileText,
-  HelpCircle,
-  Plus,
-  ChevronDown,
+  Database,
+  Code,
+  FolderPlus,
+  Zap,
+  Cloud,
+  Server,
+  PlusCircle
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -25,182 +24,68 @@ import { useState } from "react";
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({
-    dashboard: false,
-    analytics: false,
-  });
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const mainNavItems = [
+  const navItems = [
     {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: LayoutDashboard,
-      section: "dashboard",
-      children: [
-        { title: "Widgets", href: "/dashboard/widgets" },
-        { title: "Actions", href: "/dashboard/actions" },
-        { title: "API Connections", href: "/dashboard/api-connections" },
-      ],
-    },
-  ];
-
-  const analyticsNavItems = [
-    {
-      title: "Analytics",
-      href: "/analytics",
-      icon: BarChart2,
-      section: "analytics",
-      children: [
-        { title: "Overview", href: "/analytics/overview" },
-        { title: "Widgets", href: "/analytics/widgets" },
-        { title: "Actions", href: "/analytics/actions" },
-        { title: "Users", href: "/analytics/users" },
-      ],
-    },
-  ];
-
-  const bottomNavItems = [
-    {
-      title: "Conversations",
-      href: "/conversations",
-      icon: MessageSquare,
-      badge: true,
+      title: "Buckets",
+      href: "/buckets",
+      icon: Database,
+      button: {
+        title: "New Bucket",
+        href: "/buckets/new",
+        icon: FolderPlus
+      }
     },
     {
-      title: "Docs",
-      href: "/docs",
-      icon: FileText,
-    },
-    {
-      title: "Help",
-      href: "/help",
-      icon: HelpCircle,
-    },
+      title: "Tools",
+      href: "/tools",
+      icon: Code,
+      button: {
+        title: "New Tool",
+        href: "/tools/new",
+        icon: PlusCircle
+      }
+    }
   ];
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b px-6 py-5">
         <Link href="/" className="flex items-center gap-2 mb-6">
-          <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground">
-            <Link2 className="h-3.5 w-3.5" />
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-600 text-white">
+            <Zap className="h-3.5 w-3.5" />
           </div>
-          <span className="text-xl font-bold">Kommander.ai</span>
+          <span className="text-xl font-bold">Storm</span>
         </Link>
-        <Button
-          className="w-full flex items-center gap-2"
-          size="sm"
-          variant="outline"
-        >
-          <Plus className="h-4 w-4" />
-          New Widget
-        </Button>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {mainNavItems.map((item) => (
-            <div key={item.href}>
+          {navItems.map((item) => (
+            <div key={item.href} className="mb-4">
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={() => toggleSection(item.section)}
+                  isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
                   tooltip={item.title}
                 >
-                  <div className="flex items-center gap-3 w-full">
+                  <Link href={item.href} className="flex items-center gap-3 w-full">
                     <item.icon className="h-5 w-5" />
                     <span>{item.title}</span>
-                    <ChevronDown
-                      className={`ml-auto h-4 w-4 transition-transform ${
-                        expandedSections[item.section] ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {expandedSections[item.section] &&
-                item.children?.map((child) => (
-                  <SidebarMenuItem key={child.href} className="pl-11">
-                    <SidebarMenuButton
-                      isActive={pathname === child.href}
-                      tooltip={child.title}
-                    >
-                      <Link
-                        href={child.href}
-                        className="flex items-center gap-3 w-full"
-                      >
-                        <span>{child.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-            </div>
-          ))}
-
-          {analyticsNavItems.map((item) => (
-            <div key={item.href}>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => toggleSection(item.section)}
-                  tooltip={item.title}
-                >
-                  <div className="flex items-center gap-3 w-full">
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.title}</span>
-                    <ChevronDown
-                      className={`ml-auto h-4 w-4 transition-transform ${
-                        expandedSections[item.section] ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              {expandedSections[item.section] &&
-                item.children?.map((child) => (
-                  <SidebarMenuItem key={child.href} className="pl-11">
-                    <SidebarMenuButton
-                      isActive={pathname === child.href}
-                      tooltip={child.title}
-                    >
-                      <Link
-                        href={child.href}
-                        className="flex items-center gap-3 w-full"
-                      >
-                        <span>{child.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-            </div>
-          ))}
-
-          {bottomNavItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                isActive={pathname === item.href}
-                tooltip={item.title}
-              >
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-3 w-full"
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="flex items-center gap-2">
-                    {item.title}
-                    {item.badge && (
-                      <span className="flex h-2 w-2 rounded-full bg-red-500" />
-                    )}
-                  </span>
+              
+              <SidebarMenuItem className="mt-2 px-4">
+                <Link href={item.button.href}>
+                  <Button
+                    className="w-full flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                    size="sm"
+                  >
+                    <item.button.icon className="h-4 w-4" />
+                    {item.button.title}
+                  </Button>
                 </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+              </SidebarMenuItem>
+            </div>
           ))}
         </SidebarMenu>
       </SidebarContent>
