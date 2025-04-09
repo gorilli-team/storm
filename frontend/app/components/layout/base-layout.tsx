@@ -46,14 +46,14 @@ export function BaseLayout({ children }: BaseLayoutProps) {
           <div className="container flex h-16 items-center justify-between">
             <div className="flex items-center gap-6">
               <Link href="/dashboard" className="font-semibold text-cyan-400">
-                Storm
+                Developer
               </Link>
               <nav className="flex gap-4">
                 <Link
                   href="/dashboard/widgets"
-                  className="text-sm font-medium text-blue-300 hover:text-cyan-400"
+                  className="font-semibold text-cyan-400"
                 >
-                  {t("widgets.title")}
+                  User
                 </Link>
               </nav>
             </div>
@@ -61,9 +61,9 @@ export function BaseLayout({ children }: BaseLayoutProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 text-cyan-400 hover:text-cyan-300 hover:bg-gray-800"
+                className="h-12 w-12 text-cyan-400 hover:text-cyan-300 hover:bg-gray-800"
               >
-                <User className="h-4 w-4" />
+                <User className="h-8 w-8" />
               </Button>
             </Link>
           </div>

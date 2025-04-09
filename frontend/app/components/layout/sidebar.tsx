@@ -27,32 +27,22 @@ export function AppSidebar() {
 
   const navItems = [
     {
-      title: "Buckets",
-      href: "/buckets",
-      icon: Database,
-      button: {
-        title: "New Bucket",
-        href: "/buckets/new",
-        icon: FolderPlus,
-      },
-    },
-    {
-      title: "Tools",
-      href: "/tools",
-      icon: Code,
-      button: {
-        title: "New Tool",
-        href: "/tools/new",
-        icon: PlusCircle,
-      },
-    },
-    {
-      title: "Storm",
-      href: "/storm",
+      title: "Developer",
+      href: "/dashboard",
       icon: Cloud,
       button: {
-        title: "Storm",
+        title: "MCP Tools",
         href: "/dashboard/storm",
+        icon: Cloud,
+      },
+    },
+    {
+      title: "User",
+      href: "/user",
+      icon: Cloud,
+      button: {
+        title: "MCP Tools",
+        href: "/user/storm",
         icon: Cloud,
       },
     },

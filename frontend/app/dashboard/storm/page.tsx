@@ -333,6 +333,25 @@ const StormToolManager: React.FC = () => {
             </p>
           </div>
 
+          {/* Info Card */}
+          <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
+            <div className="flex">
+              <div>
+                <h3 className="text-sm font-medium text-cyan-400 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-yellow-500" /> Getting
+                  Started
+                </h3>
+                <p className="text-sm text-blue-300 mt-1">
+                  1. Create a new bucket to store your tools
+                  <br />
+                  2. Add tools to your bucket with TypeScript code
+                  <br />
+                  3. Publish your bucket to make your tools available
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Bucket Selection */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
@@ -597,25 +616,6 @@ const StormToolManager: React.FC = () => {
               )}
             </>
           )}
-
-          {/* Info Card */}
-          <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mt-6">
-            <div className="flex">
-              <div>
-                <h3 className="text-sm font-medium text-cyan-400 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-yellow-500" /> Getting
-                  Started
-                </h3>
-                <p className="text-sm text-blue-300 mt-1">
-                  1. Create a new bucket to store your tools
-                  <br />
-                  2. Add tools to your bucket with TypeScript code
-                  <br />
-                  3. Publish your bucket to make your tools available
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </BaseLayout>
