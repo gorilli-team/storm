@@ -60,12 +60,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-6 py-5">
+      <SidebarHeader className="border-b border-blue-800/30 px-6 py-5">
         <Link href="/" className="flex items-center gap-2 mb-6">
-          <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-600 text-white">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
             <Zap className="h-3.5 w-3.5" />
           </div>
-          <span className="text-xl font-bold">Storm</span>
+          <span className="text-xl font-bold text-cyan-400">Storm</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

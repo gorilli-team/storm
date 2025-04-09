@@ -18,11 +18,11 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const { t } = useI18n();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-900">
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-white/80 backdrop-blur-sm border border-black/5"
+        className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-gray-800/80 backdrop-blur-sm border border-blue-700/30 text-cyan-400"
       >
         {isMobileMenuOpen ? (
           <X className="w-6 h-6" />
@@ -33,7 +33,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
 
       {/* Sidebar with mobile responsiveness */}
       <div
-        className={`fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white/80 backdrop-blur-sm transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-blue-800/30 bg-gray-900/95 backdrop-blur-sm transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -42,23 +42,27 @@ export function BaseLayout({ children }: BaseLayoutProps) {
 
       {/* Main content with responsive padding */}
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-30 border-b border-blue-800/30 bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-gray-900/80">
           <div className="container flex h-16 items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="font-semibold">
+              <Link href="/dashboard" className="font-semibold text-cyan-400">
                 Storm
               </Link>
               <nav className="flex gap-4">
                 <Link
                   href="/dashboard/widgets"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                  className="text-sm font-medium text-blue-300 hover:text-cyan-400"
                 >
                   {t("widgets.title")}
                 </Link>
               </nav>
             </div>
             <Link href="/dashboard/profile">
-              <Button variant="ghost" size="sm" className="h-8 w-8">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 text-cyan-400 hover:text-cyan-300 hover:bg-gray-800"
+              >
                 <User className="h-4 w-4" />
               </Button>
             </Link>
