@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "./header";
 import { AppSidebar } from "./sidebar";
 import { Menu, X } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { useI18n } from "../../../lib/i18n";
 import Link from "next/link";
 import { User } from "lucide-react";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -16,7 +17,9 @@ interface BaseLayoutProps {
 export function BaseLayout({ children }: BaseLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useI18n();
-
+  
+  const { ready, authenticated, login, logout, user } = usePrivy();
+  
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Mobile menu button */}
@@ -57,15 +60,41 @@ export function BaseLayout({ children }: BaseLayoutProps) {
                 </Link>
               </nav>
             </div>
-            <Link href="/dashboard/profile">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-12 w-12 text-cyan-400 hover:text-cyan-300 hover:bg-gray-800"
-              >
-                <User className="h-8 w-8" />
-              </Button>
-            </Link>
+            <div className="flex items-center gap-4">
+              {ready && authenticated ? (
+                <Button
+                  onClick={() => {
+                    logout();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="h-12 text-cyan-400 hover:bg-gray-800"
+                >
+                  Log out
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    login();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="h-12 text-cyan-400 hover:bg-gray-800"
+                >
+                  Login
+                </Button>
+              )}
+
+              <Link href="/dashboard/profile">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-12 w-12 text-cyan-400 hover:text-cyan-300 hover:bg-gray-800"
+                >
+                  <User className="h-8 w-8" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </header>
         <main className="container mx-auto p-4 lg:p-8">{children}</main>
