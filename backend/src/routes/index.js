@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { createBucket } from '../controllers/BucketController.js';
 
 const router = express.Router();
 
@@ -15,5 +16,8 @@ router.get('/db-status', (req, res) => {
         res.status(500).json({ error: 'Error checking database status' });
     }
 });
+
+// Create bucket
+router.post('/api/buckets', createBucket);
 
 export default router;
