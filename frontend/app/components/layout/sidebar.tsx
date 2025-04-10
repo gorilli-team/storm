@@ -42,7 +42,7 @@ export function AppSidebar() {
       icon: Cloud,
       button: {
         title: "MCP Tools",
-        href: "/user/storm",
+        href: "/user/tools",
         icon: Cloud,
       },
     },

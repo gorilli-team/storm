@@ -89,7 +89,7 @@ export default function ProfilePage() {
                   "Loading..."
                 ) : (
                   <>
-                    <Zap className="mr-2 h-4 w-4" /> Get Testnet Tokens
+                    <Zap className="mr-2 h-4 w-4" /> Get STORM Tokens
                   </>
                 )}
               </Button>
