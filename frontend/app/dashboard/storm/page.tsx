@@ -146,9 +146,9 @@ const StormToolManager: React.FC = () => {
    * @returns {Promise<boolean>} Success or failure
    */
   const addTool = async () => {
-    if (!recallClient || !bucket) {
-      console.error("RecallClient or bucket not initialized");
-      setAddToolError("RecallClient or bucket not initialized");
+    if (!recallClient) {
+      console.error("RecallClient not initialized");
+      setAddToolError("RecallClient not initialized");
       return false;
     }
 
@@ -174,14 +174,14 @@ const StormToolManager: React.FC = () => {
       const bucketAddress = "0xFf0000000000000000000000000000000000626B";
       
       // Create the key using the tool name
-      const key = `tool/${toolName.toLowerCase().replace(/\s+/g, '_')}`;
+      const key = `tool/${toolName.replace(/\s+/g, '_')}`;
       
       // Encrypt the function string (we're using a placeholder secret key here)
       const encryptionKey = "temp-encryption-key";
       const encryptedFunctionString = CryptoJS.AES.encrypt(code, encryptionKey).toString();
       
       // Create a file with the encrypted string
-      const file = new File([encryptedFunctionString], `${toolName.toLowerCase().replace(/\s+/g, '_')}.txt`, {
+      const file = new File([encryptedFunctionString], `${toolName.replace(/\s+/g, '_')}.txt`, {
         type: "text/plain",
       });
       
@@ -434,8 +434,8 @@ const StormToolManager: React.FC = () => {
 
               <button
                 onClick={addTool}
-                disabled={!bucket || isAddingTool}
-                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(!bucket || isAddingTool) ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={isAddingTool || !recallClient}
+                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient) ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {isAddingTool ? (
                   <>
@@ -448,11 +448,7 @@ const StormToolManager: React.FC = () => {
                   </>
                 )}
               </button>
-              {!bucket ? (
-                <p className="text-xs text-yellow-400 mt-2">
-                  You need to create a bucket first
-                </p>
-              ) : toolAdded ? (
+              {toolAdded ? (
                 <p className="text-xs text-green-400 mt-2 flex items-center">
                   <CheckCircle className="w-3 h-3 mr-1" /> Tool added successfully!
                 </p>
