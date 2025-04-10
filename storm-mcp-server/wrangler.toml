@@ -1,0 +1,6 @@
+name = "storm-mcp-server"
+main = "src/index.ts"
+compatibility_date = "2025-04-07"
+
+binding = "MY_DATA_STORE"
+id = "85b8ad7304c640f1acf9f6798f8c77c4"
