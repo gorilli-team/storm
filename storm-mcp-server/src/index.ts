@@ -1,8 +1,17 @@
 import { WorkerEntrypoint } from 'cloudflare:workers'
 import { ProxyToSelf } from 'workers-mcp'
+// Recall imports
+import { testnet } from "@recallnet/chains";
+import { RecallClient } from "@recallnet/sdk/client";
+import { createWalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { http } from "viem";
+import CryptoJS from "crypto-js";
 
 interface Env {
   SHARED_SECRET: string;
+  RECALL_PRIVATE_KEY: string;
+  ENCRYPTION_SECRET_KEY: string;
 }
 
 interface NWSWeatherResponse {
@@ -26,34 +35,93 @@ export default class MyWorker extends WorkerEntrypoint<Env> {
     return `Hello from an MCP Worker, ${name}!`
   }
 
-/**
- * Get the current price of a cryptocurrency
- * @param coinName {string} The name of the cryptocurrency (e.g., 'bitcoin', 'ethereum')
- * @returns {Promise<string>} The current price of the cryptocurrency
- */
-async getCryptoPrice(coinName: string): Promise<string> {
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinName}&vs_currencies=usd`;
-  
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'crypto-price-app/1.0',
-        'Accept': 'application/json'
-      }
+  /**
+   * Retrieves a tool function from a Recall bucket
+   * @param toolKey {string} The key of the tool to retrieve (e.g., 'tool/GetCryptoPrice')
+   * @returns {Promise<Function>} The retrieved function
+   */
+  async retrieveObject(toolKey: string): Promise<Function> {
+    // Set up the wallet client
+    const privateKey = this.env.RECALL_PRIVATE_KEY;
+    if (!privateKey) {
+      throw new Error("Missing RECALL_PRIVATE_KEY in environment variables");
+    }
+
+    const walletClient = createWalletClient({
+      account: privateKeyToAccount(privateKey as `0x${string}`),
+      chain: testnet,
+      transport: http(),
     });
-    if (!response.ok) {
-      return `Failed to fetch price for ${coinName}. Status: ${response.status}`;
-    }
-    const data: any = await response.json();
-    if (!data[coinName] || !data[coinName].usd) {
-      return `Price data not found for ${coinName}`;
-    }
-    const price = data[coinName].usd;
-    return `Current price of ${coinName}: ${price.toLocaleString()} USD`;
-  } catch (error) {
-    return `Error fetching price: ${error instanceof Error ? error.message : 'Unknown error'}`;
+
+    // Create the RecallClient
+    const client = new RecallClient({ walletClient });
+
+    // Create the bucket manager
+    const bucketManager = client.bucketManager();
+
+    // Fixed bucket address
+    const bucketAddress = "0xFf0000000000000000000000000000000000626B";
+
+    // Retrieve the object from the bucket
+    const { result: object } = await bucketManager.get(bucketAddress, toolKey);
+    const decodedObject = new TextDecoder().decode(object);
+
+    // Decrypt the function string
+    const encryptionKey = this.env.ENCRYPTION_SECRET_KEY || "temp-encryption-key";
+    const decryptedBytes = CryptoJS.AES.decrypt(decodedObject, encryptionKey);
+    const decryptedFunctionString = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+    // Convert the function string back to a function
+    const recoveredFunction = new Function("return " + decryptedFunctionString)();
+
+    return recoveredFunction;
   }
-}
+
+  /**
+   * Executes a tool by its name
+   * @param toolName {string} The name of the tool to execute
+   * @param params {any[]} Parameters to pass to the tool function
+   * @returns {Promise<any>} The result of the tool execution
+   */
+  async executeTool(toolName: string, ...params: any[]): Promise<any> {
+    const toolKey = `tool/${toolName}`;
+    
+    try {
+      const toolFunction = await this.retrieveObject(toolKey);
+      return await toolFunction(...params);
+    } catch (error) {
+      return `Error executing tool ${toolName}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    }
+  }
+
+  /**
+   * Get the current price of a cryptocurrency
+   * @param coinName {string} The name of the cryptocurrency (e.g., 'bitcoin', 'ethereum')
+   * @returns {Promise<string>} The current price of the cryptocurrency
+   */
+  async getCryptoPrice(coinName: string): Promise<string> {
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinName}&vs_currencies=usd`;
+    
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'crypto-price-app/1.0',
+          'Accept': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        return `Failed to fetch price for ${coinName}. Status: ${response.status}`;
+      }
+      const data: any = await response.json();
+      if (!data[coinName] || !data[coinName].usd) {
+        return `Price data not found for ${coinName}`;
+      }
+      const price = data[coinName].usd;
+      return `Current price of ${coinName}: ${price.toLocaleString()} USD`;
+    } catch (error) {
+      return `Error fetching price: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    }
+  }
 
   /**
    * Get the current weather for a specific location
