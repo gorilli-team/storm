@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Header } from "./header";
 import { AppSidebar } from "./sidebar";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { useI18n } from "../../../lib/i18n";
 import Link from "next/link";
-import { User } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 
 interface BaseLayoutProps {
@@ -16,9 +14,24 @@ interface BaseLayoutProps {
 
 export function BaseLayout({ children }: BaseLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const { t } = useI18n();
   
   const { ready, authenticated, login, logout, user } = usePrivy();
+
+  useEffect(() => {
+    if (authenticated && user && user.wallet) {
+      const address = user.wallet.address;
+      if (address) {
+        setWalletAddress(address);
+      }
+    }
+  }, [authenticated, user]);
+  
+  const formatAddress = (address: string) => {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
   
   return (
     <div className="min-h-screen bg-gray-900">
@@ -62,16 +75,23 @@ export function BaseLayout({ children }: BaseLayoutProps) {
             </div>
             <div className="flex items-center gap-4">
               {ready && authenticated ? (
-                <Button
-                  onClick={() => {
-                    logout();
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="h-12 text-cyan-400 hover:bg-gray-800"
-                >
-                  Log out
-                </Button>
+                <>
+                  {walletAddress && (
+                    <div className="px-3 py-2 rounded-md bg-gray-800/70 border border-blue-700/30 text-cyan-400">
+                      <span className="text-sm font-mono">{formatAddress(walletAddress)}</span>
+                    </div>
+                  )}
+                  <Button
+                    onClick={() => {
+                      logout();
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="h-12 text-cyan-400 hover:bg-gray-800"
+                  >
+                    Log out
+                  </Button>
+                </>
               ) : (
                 <Button
                   onClick={() => {
