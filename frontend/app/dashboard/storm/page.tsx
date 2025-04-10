@@ -144,11 +144,14 @@ const StormToolManager: React.FC = () => {
   const [addToolError, setAddToolError] = useState<string | null>(null);
   const [toolAdded, setToolAdded] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  
-  // Aggiungi gli stati mancanti
+
   const [backendSaveSuccess, setBackendSaveSuccess] = useState<boolean>(false);
   const [backendSaveError, setBackendSaveError] = useState<string | null>(null);
   const [isSavingToBackend, setIsSavingToBackend] = useState<boolean>(false);
+  
+  const [buckets, setBuckets] = useState<any[]>([]);
+  const [isLoadingBuckets, setIsLoadingBuckets] = useState<boolean>(false);
+  const [bucketsError, setBucketsError] = useState<string | null>(null);
 
   const { ready, authenticated, login, logout, user } = usePrivy();
 
@@ -171,6 +174,51 @@ const StormToolManager: React.FC = () => {
       });
     }
   }, [authenticated, user]);
+  
+  /**
+   * Fetches all buckets for a wallet address
+   * @param {string} address The wallet address to fetch buckets for
+   * @returns {Promise<Array>} Array of buckets
+   */
+  const fetchBucketsByWallet = async (address: string) => {
+    if (!address) {
+      console.error("Wallet address is required");
+      return [];
+    }
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      const response = await axios.get(`${API_URL}/buckets/wallet/${address}`);
+      
+      console.log('Buckets fetched:', response.data);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error fetching buckets:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const loadBuckets = async () => {
+      if (walletAddress) {
+        setIsLoadingBuckets(true);
+        setBucketsError(null);
+        
+        try {
+          const fetchedBuckets = await fetchBucketsByWallet(walletAddress);
+          console.log('Buckets loaded:', fetchedBuckets);
+          setBuckets(fetchedBuckets);
+        } catch (error: any) {
+          console.error("Failed to load buckets:", error);
+          setBucketsError(error.message || 'Failed to load buckets');
+        } finally {
+          setIsLoadingBuckets(false);
+        }
+      }
+    };
+    
+    loadBuckets();
+  }, [walletAddress]);
 
   /**
    * Adds a tool to the specified bucket
@@ -278,6 +326,9 @@ const createBucket = async () => {
         
         console.log('Backend response:', response.data);
         setBackendSaveSuccess(true);
+        
+        const updatedBuckets = await fetchBucketsByWallet(walletAddress);
+        setBuckets(updatedBuckets);
       } catch (error: any) {
         console.error('Error saving to backend:', error);
         setBackendSaveError(
@@ -470,7 +521,7 @@ const createBucket = async () => {
               onClick={() => setActiveTab("manage")}
             >
               <div className="flex items-center">
-                <Code className="mr-2 h-4 w-4" /> Manage Tools (0)
+                <Code className="mr-2 h-4 w-4" /> Manage Tools ({buckets.length})
               </div>
             </button>
           </div>
@@ -554,29 +605,49 @@ const createBucket = async () => {
           {activeTab === "manage" && (
             <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
               <h2 className="text-xl font-bold mb-4 text-cyan-400 flex items-center">
-                <Code className="mr-2 h-5 w-5 text-blue-400" />
-                Tools
+                <Database className="mr-2 h-5 w-5 text-blue-400" />
+                Buckets
               </h2>
 
-              {!bucket ? (
+              {bucketsError && (
+                <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-3 mb-4 flex items-center">
+                  <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
+                  <p className="text-red-400 text-sm">{bucketsError}</p>
+                </div>
+              )}
+
+              {isLoadingBuckets ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
+                </div>
+              ) : buckets.length === 0 ? (
                 <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
                   <div className="flex flex-col items-center space-y-2">
                     <Database className="h-10 w-10 text-blue-700 mb-2" />
-                    <p>No buckets created yet.</p>
+                    <p>No buckets found for your wallet</p>
                     <p className="text-xs text-gray-500">
-                      Create a bucket to store your tools.
+                      Create a bucket to get started.
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
-                  <div className="flex flex-col items-center space-y-2">
-                    <Database className="h-10 w-10 text-blue-700 mb-2" />
-                    <p>No tools in this bucket yet.</p>
-                    <p className="text-xs text-gray-500">
-                      Switch to "Create Tool" tab to add one.
-                    </p>
-                  </div>
+                <div className="space-y-4">
+                  {buckets.map((bucket) => (
+                    <div 
+                      key={bucket._id} 
+                      className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 hover:border-blue-500"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-lg font-medium text-blue-400">{bucket.bucketId}</h3>
+                        <span className="text-xs text-gray-500">
+                          Created: {new Date(bucket.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                        {JSON.stringify(bucket, null, 2)}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
