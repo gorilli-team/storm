@@ -37,7 +37,7 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
   value,
   onChange,
   placeholder = "// Write your code here",
-  language = "typescript",
+  language = "javascript",
 }) => {
   const editorRef = useRef<any>(null);
   const [isEmpty, setIsEmpty] = useState(value === placeholder || value === "");
@@ -89,7 +89,7 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
       </div>
       <Editor
         height="100%"
-        defaultLanguage="typescript"
+        defaultLanguage="javascript"
         language={language}
         value={isEmpty ? placeholder : value}
         theme="vs-dark"
@@ -434,9 +434,7 @@ const createBucket = async () => {
                 <p className="text-sm text-blue-300 mt-1">
                   1. Create a new bucket to store your tools
                   <br />
-                  2. Add tools to your bucket with TypeScript code
-                  <br />
-                  3. Publish your bucket to make your tools available
+                  2. Add tools to your bucket
                 </p>
               </div>
             </div>
@@ -531,22 +529,35 @@ const createBucket = async () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  {buckets.map((bucket) => (
-                    <div 
-                      key={bucket._id} 
-                      className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 hover:border-blue-500 transition-colors duration-200"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-medium text-blue-400 truncate">{bucket.bucketId}</h3>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                          {new Date(bucket.createdAt).toLocaleString()}
-                        </span>
+                 {buckets.map((bucket) => (
+                  <div 
+                    key={bucket._id} 
+                    className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 hover:border-blue-500 transition-colors duration-200"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-medium text-blue-400 truncate">{bucket.bucketId}</h3>
+                      <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                        {new Date(bucket.createdAt).toLocaleDateString('en-US', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: false
+                        })}
+                      </span>
+                    </div>
+                    <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                      <div>
+                        <span className="text-blue-400">Bucket ID:</span> {bucket.bucketId}
                       </div>
-                      <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700 max-h-28">
-                        {JSON.stringify(bucket, null, 2)}
+                      <div>
+                        <span className="text-blue-400">Wallet Address:</span> {bucket.walletAddress}
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
                 </div>
               )}
             </div>
@@ -621,7 +632,7 @@ const createBucket = async () => {
                     placeholder={defaultCodePlaceholder}
                   />
                   <p className="text-xs text-blue-400 mt-1">
-                    Write your TypeScript function with JSDoc comments for
+                    Write your Javascript function with JSDoc comments for
                     parameters and return types
                   </p>
                 </div>
