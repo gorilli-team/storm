@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { createBucket } from '../controllers/BucketController.js';
+import { createBucket, getBucketsByWallet } from '../controllers/BucketController.js';
 
 const router = express.Router();
 
@@ -19,5 +19,8 @@ router.get('/db-status', (req, res) => {
 
 // Create bucket
 router.post('/api/buckets', createBucket);
+
+// get all buckets for a wallet address
+router.get('/api/buckets/wallet/:walletAddress', getBucketsByWallet);
 
 export default router;
