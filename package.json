@@ -10,6 +10,7 @@
     "mcp": "node run-mcp.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
     "@recallnet/chains": "^0.0.7",
     "@recallnet/sdk": "^0.0.8",
     "crypto-js": "^4.2.0",
@@ -17,7 +18,8 @@
     "next": "14.1.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "viem": "^2.26.2"
+    "viem": "^2.26.2",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/recharts": "^1.8.29"
