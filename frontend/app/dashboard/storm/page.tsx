@@ -21,6 +21,7 @@ import { RecallClient } from "@recallnet/sdk/client";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { BaseLayout } from "../../components/layout/base-layout";
+import CryptoJS from "crypto-js";
 
 interface CodeEditorProps {
   value: string;
@@ -136,10 +137,77 @@ const StormToolManager: React.FC = () => {
   const [bucket, setBucket] = useState<any>(null);
   const [isCreatingBucket, setIsCreatingBucket] = useState<boolean>(false);
   const [bucketCreationError, setBucketCreationError] = useState<string | null>(null);
+  const [isAddingTool, setIsAddingTool] = useState<boolean>(false);
+  const [addToolError, setAddToolError] = useState<string | null>(null);
+  const [toolAdded, setToolAdded] = useState<boolean>(false);
+
+  /**
+   * Adds a tool to the specified bucket
+   * @returns {Promise<boolean>} Success or failure
+   */
+  const addTool = async () => {
+    if (!recallClient || !bucket) {
+      console.error("RecallClient or bucket not initialized");
+      setAddToolError("RecallClient or bucket not initialized");
+      return false;
+    }
+
+    if (!toolName.trim()) {
+      setAddToolError("Tool name is required");
+      return false;
+    }
+
+    if (!code.trim()) {
+      setAddToolError("Tool code is required");
+      return false;
+    }
+
+    setIsAddingTool(true);
+    setAddToolError(null);
+    setToolAdded(false);
+
+    try {
+      // Get the bucket manager
+      const bucketManager = recallClient.bucketManager();
+      
+      // Fixed bucket address for now (will be dynamic later)
+      const bucketAddress = "0xFf0000000000000000000000000000000000626B";
+      
+      // Create the key using the tool name
+      const key = `tool/${toolName.toLowerCase().replace(/\s+/g, '_')}`;
+      
+      // Encrypt the function string (we're using a placeholder secret key here)
+      const encryptionKey = "temp-encryption-key";
+      const encryptedFunctionString = CryptoJS.AES.encrypt(code, encryptionKey).toString();
+      
+      // Create a file with the encrypted string
+      const file = new File([encryptedFunctionString], `${toolName.toLowerCase().replace(/\s+/g, '_')}.txt`, {
+        type: "text/plain",
+      });
+      
+      // Add the object to the bucket
+      const { meta: addMeta } = await bucketManager.add(bucketAddress, key, file);
+      
+      console.log("Tool added successfully:", addMeta?.tx?.transactionHash);
+      setToolAdded(true);
+      
+      // Reset the form
+      setToolName("");
+      setCode("");
+      
+      return true;
+    } catch (error) {
+      console.error("Error adding tool:", error);
+      setAddToolError(`Failed to add tool: ${error instanceof Error ? error.message : "Unknown error"}`);
+      return false;
+    } finally {
+      setIsAddingTool(false);
+    }
+  };
 
   /**
    * Creates a new bucket using the current RecallClient
-   * @returns {Promise<RecallBucket | null>} The created bucket or null if failed
+   * @returns {Promise<any | null>} The created bucket or null if failed
    */
   const createBucket = async () => {
     if (!recallClient) {
@@ -365,17 +433,34 @@ const StormToolManager: React.FC = () => {
               </div>
 
               <button
-                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${!bucket ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={!bucket}
+                onClick={addTool}
+                disabled={!bucket || isAddingTool}
+                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(!bucket || isAddingTool) ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                <Save className="mr-2 h-4 w-4" />
-                Save Tool
+                {isAddingTool ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Tool
+                  </>
+                )}
               </button>
-              {!bucket && (
+              {!bucket ? (
                 <p className="text-xs text-yellow-400 mt-2">
                   You need to create a bucket first
                 </p>
-              )}
+              ) : toolAdded ? (
+                <p className="text-xs text-green-400 mt-2 flex items-center">
+                  <CheckCircle className="w-3 h-3 mr-1" /> Tool added successfully!
+                </p>
+              ) : addToolError ? (
+                <p className="text-xs text-red-400 mt-2">
+                  {addToolError}
+                </p>
+              ) : null}
             </div>
           )}
 
