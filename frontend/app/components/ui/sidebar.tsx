@@ -8,7 +8,7 @@ const Sidebar = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex h-full w-64 flex-col bg-white/50 backdrop-blur-xl border-r-2 border-black/5",
+      "flex h-full w-64 flex-col bg-gray-900/95 backdrop-blur-xl border-r-2 border-blue-800/30",
       className
     )}
     {...props}
@@ -72,8 +72,8 @@ const SidebarMenuButton = React.forwardRef<
     className={cn(
       "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all",
       isActive
-        ? "bg-black text-white shadow-lg shadow-black/10"
-        : "text-black/60 hover:bg-black/5 hover:text-black",
+        ? "bg-blue-900 text-cyan-400 shadow-lg shadow-blue-900/30 border border-blue-700/50"
+        : "text-gray-300 hover:bg-gray-800 hover:text-cyan-400",
       className
     )}
     title={tooltip}

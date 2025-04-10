@@ -2,7 +2,7 @@
 
 import { BaseLayout } from "../../components/layout/base-layout";
 import { Button } from "../../components/ui/button";
-import { Plus, MoreVertical } from "lucide-react";
+import { Plus, MoreVertical, Zap } from "lucide-react";
 import Link from "next/link";
 import { useI18n } from "../../../lib/i18n";
 
@@ -36,7 +36,9 @@ const SimpleAreaChart = ({
 }) => {
   // Only render if we have valid data
   if (!data || !data.length || !data[0].interactions) {
-    return <div style={{ height, width }} className="bg-gray-50 rounded"></div>;
+    return (
+      <div style={{ height, width }} className="bg-gray-800 rounded"></div>
+    );
   }
 
   // Find max value for scaling
@@ -174,18 +176,20 @@ export default function WidgetsPage() {
 
   return (
     <BaseLayout>
-      <div className="space-y-8">
+      <div className="space-y-8 w-full px-6 text-gray-100">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">{t("widgets.title")}</h1>
-            <p className="text-muted-foreground">{t("widgets.subtitle")}</p>
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+              {t("widgets.title")}
+            </h1>
+            <p className="text-blue-300 mt-2 flex items-center">
+              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" />{" "}
+              {t("widgets.description")}
+            </p>
           </div>
-          <Link href="/dashboard/widgets/new">
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t("widgets.newWidget")}
-            </Button>
-          </Link>
+          <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500">
+            <Plus className="mr-2 h-4 w-4" /> {t("widgets.create")}
+          </Button>
         </div>
 
         {/* Tabs */}

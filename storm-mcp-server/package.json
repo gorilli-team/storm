@@ -1,0 +1,22 @@
+{
+  "name": "storm-mcp-server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "workers-mcp docgen src/index.ts && wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.7.5",
+    "@cloudflare/workers-types": "^4.20250407.0",
+    "typescript": "^5.5.2",
+    "vitest": "~3.0.7",
+    "wrangler": "^4.7.2"
+  },
+  "dependencies": {
+    "workers-mcp": "^0.0.13"
+  }
+}
