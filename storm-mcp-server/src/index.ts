@@ -1,6 +1,5 @@
-import { WorkerEntrypoint } from 'cloudflare:workers'
-import { ProxyToSelf } from 'workers-mcp'
-// Recall imports
+import { WorkerEntrypoint } from 'cloudflare:workers';
+import { ProxyToSelf } from 'workers-mcp';
 import { testnet } from "@recallnet/chains";
 import { RecallClient } from "@recallnet/sdk/client";
 import { createWalletClient } from "viem";
@@ -14,14 +13,12 @@ interface Env {
   ENCRYPTION_SECRET_KEY: string;
 }
 
+interface RetrieveRequest {
+  toolKey: string;
+}
+
 export default class MyWorker extends WorkerEntrypoint<Env> {
-  /**
-   * Retrieves a tool function from a Recall bucket
-   * @param toolKey {string} The key of the tool to retrieve (e.g., 'tool/getGetGet')
-   * @returns {Promise<Function>} The retrieved function
-   */
-  async retrieveObject(toolKey: string): Promise<Function> {
-    // Set up the wallet client
+  async retrieveObject(toolKey: string): Promise<string> {
     const privateKey = this.env.RECALL_PRIVATE_KEY;
     if (!privateKey) {
       throw new Error("Missing RECALL_PRIVATE_KEY in environment variables");
@@ -33,54 +30,52 @@ export default class MyWorker extends WorkerEntrypoint<Env> {
       transport: http(),
     });
 
-    // Create the RecallClient
     const client = new RecallClient({ walletClient });
-
-    // Create the bucket manager
     const bucketManager = client.bucketManager();
-
-    // Fixed bucket address
     const bucketAddress = "0xFf0000000000000000000000000000000000626B";
 
-    // Retrieve the object from the bucket
     const { result: object } = await bucketManager.get(bucketAddress, toolKey);
     const decodedObject = new TextDecoder().decode(object);
 
-    // Decrypt the function string
     const encryptionKey = this.env.ENCRYPTION_SECRET_KEY || "temp-encryption-key";
     const decryptedBytes = CryptoJS.AES.decrypt(decodedObject, encryptionKey);
-    const decryptedFunctionString = decryptedBytes.toString(CryptoJS.enc.Utf8);
-
-    // Convert the function string back to a function
-    const recoveredFunction = new Function("return " + decryptedFunctionString)();
-
-    return recoveredFunction;
+    return decryptedBytes.toString(CryptoJS.enc.Utf8);
   }
 
-  /**
-   * Tests retrieving and executing a tool from Recall bucket
-   * @param toolKey {string} The key of the tool to retrieve
-   * @param param {string} Parameter to pass to the tool function
-   * @returns {Promise<string>} The result from executing the tool
-   */
-  async testRecallTool(toolKey: string, param: string): Promise<string> {
-    try {
-      // Retrieve the function from Recall
-      const toolFunction = await this.retrieveObject(toolKey);
-      
-      // Execute the retrieved function with the provided parameter
-      const result = await toolFunction(param);
-      
-      return result;
-    } catch (error) {
-      return `Error using tool: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    }
+  private handleError(error: unknown): Response {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  /**
-   * @ignore
-   **/
   async fetch(request: Request): Promise<Response> {
-    return new ProxyToSelf(this).fetch(request)
+    const url = new URL(request.url);
+    
+    if (url.pathname === '/retrieve' && request.method === 'POST') {
+      try {
+        const requestBody = await request.json() as Partial<RetrieveRequest>;
+        
+        if (!requestBody.toolKey) {
+          return new Response(JSON.stringify({ success: false, error: "Missing toolKey in request body" }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        const decryptedContent = await this.retrieveObject(requestBody.toolKey);
+        return new Response(JSON.stringify({ 
+          success: true, 
+          content: decryptedContent
+        }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        return this.handleError(error);
+      }
+    }
+    
+    return new ProxyToSelf(this).fetch(request);
   }
 }
