@@ -176,8 +176,7 @@ const StormToolManager: React.FC = () => {
       // Create the key using the tool name
       const key = `tool/${toolName.replace(/\s+/g, '_')}`;
       
-      // Encrypt the function string (we're using a placeholder secret key here)
-      const encryptionKey = "temp-encryption-key";
+      const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY || "temp-encryption-key";
       const encryptedFunctionString = CryptoJS.AES.encrypt(code, encryptionKey).toString();
       
       // Create a file with the encrypted string
