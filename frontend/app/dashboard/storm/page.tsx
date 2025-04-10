@@ -12,6 +12,7 @@ import {
   Server,
   CheckCircle,
   Loader2,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
@@ -22,6 +23,8 @@ import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { BaseLayout } from "../../components/layout/base-layout";
 import CryptoJS from "crypto-js";
+import axios from "axios";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface CodeEditorProps {
   value: string;
@@ -140,6 +143,34 @@ const StormToolManager: React.FC = () => {
   const [isAddingTool, setIsAddingTool] = useState<boolean>(false);
   const [addToolError, setAddToolError] = useState<string | null>(null);
   const [toolAdded, setToolAdded] = useState<boolean>(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  
+  // Aggiungi gli stati mancanti
+  const [backendSaveSuccess, setBackendSaveSuccess] = useState<boolean>(false);
+  const [backendSaveError, setBackendSaveError] = useState<string | null>(null);
+  const [isSavingToBackend, setIsSavingToBackend] = useState<boolean>(false);
+
+  const { ready, authenticated, login, logout, user } = usePrivy();
+
+  useEffect(() => {
+    console.log("Checking wallet connection:", { authenticated, user });
+    
+    if (authenticated && user && user.wallet) {
+      const address = user.wallet.address;
+      console.log("Found wallet with address:", address);
+      
+      if (address) {
+        setWalletAddress(address);
+        console.log("Wallet address set to:", address);
+      }
+    } else {
+      console.log("No wallet available:", { 
+        authenticated, 
+        hasUser: !!user, 
+        hasWallet: user ? !!user.wallet : false 
+      });
+    }
+  }, [authenticated, user]);
 
   /**
    * Adds a tool to the specified bucket
@@ -204,41 +235,72 @@ const StormToolManager: React.FC = () => {
     }
   };
 
-  /**
-   * Creates a new bucket using the current RecallClient
-   * @returns {Promise<any | null>} The created bucket or null if failed
-   */
-  const createBucket = async () => {
-    if (!recallClient) {
-      console.error("RecallClient not initialized");
-      setBucketCreationError("RecallClient not initialized");
-      return null;
-    }
+/**
+ * Creates a new bucket using the current RecallClient and saves it to the backend
+ * @returns {Promise<any | null>} The created bucket or null if failed
+ */
+const createBucket = async () => {
+  if (!recallClient) {
+    console.error("RecallClient not initialized");
+    setBucketCreationError("RecallClient not initialized");
+    return null;
+  }
 
-    setIsCreatingBucket(true);
-    setBucketCreationError(null);
+  setIsCreatingBucket(true);
+  setBucketCreationError(null);
+  setBackendSaveSuccess(false);
+  setBackendSaveError(null);
 
-    try {
-      // Get the bucket manager
-      const bucketManager = recallClient.bucketManager();
-      
-      // Create a new bucket
-      const {
-        result: { bucket },
-      } = await bucketManager.create();
-      
-      console.log("Bucket created:", bucket);
-      setBucket(bucket);
-      setShowNewBucketForm(false);
-      return bucket;
-    } catch (error) {
-      console.error("Error creating bucket:", error);
-      setBucketCreationError("Failed to create bucket. Please try again.");
-      return null;
-    } finally {
-      setIsCreatingBucket(false);
+  try {
+    // Get the bucket manager
+    const bucketManager = recallClient.bucketManager();
+    
+    // Create a new bucket
+    const {
+      result: { bucket: newBucket },
+    } = await bucketManager.create();
+    
+    console.log("Bucket created:", newBucket);
+    setBucket(newBucket);
+    setShowNewBucketForm(false);
+    
+    if (walletAddress && newBucket) {
+      try {
+        setIsSavingToBackend(true);
+        console.log(`Saving bucket to backend - Bucket ID: ${JSON.stringify(newBucket)}, Wallet: ${walletAddress}`);
+        
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        
+        const response = await axios.post(`${API_URL}/buckets`, {
+          bucketId: newBucket,
+          walletAddress: walletAddress
+        });
+        
+        console.log('Backend response:', response.data);
+        setBackendSaveSuccess(true);
+      } catch (error: any) {
+        console.error('Error saving to backend:', error);
+        setBackendSaveError(
+          error.response?.data?.message || 
+          error.message ||
+          'Error saving bucket to backend'
+        );
+      } finally {
+        setIsSavingToBackend(false);
+      }
+    } else {
+      console.log("Cannot save to backend: missing wallet address or bucket contract");
     }
-  };
+    
+    return newBucket;
+  } catch (error) {
+    console.error("Error creating bucket:", error);
+    setBucketCreationError("Failed to create bucket. Please try again.");
+    return null;
+  } finally {
+    setIsCreatingBucket(false);
+  }
+};
 
   useEffect(() => {
     // Get the private key from environment variables
@@ -289,6 +351,16 @@ const StormToolManager: React.FC = () => {
             </p>
           </div>
 
+          {/* Wallet Debug */}
+          {walletAddress && (
+            <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
+              <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
+              <div className="bg-gray-900 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                {walletAddress}
+              </div>
+            </div>
+          )}
+
           {/* Info Card */}
           <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
             <div className="flex">
@@ -336,7 +408,19 @@ const StormToolManager: React.FC = () => {
             </div>
 
             {bucketCreationError && (
-              <p className="text-red-400 text-sm mt-2 mb-4">{bucketCreationError}</p>
+              <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-3 mb-4 flex items-center">
+                <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
+                <p className="text-red-400 text-sm">{bucketCreationError}</p>
+              </div>
+            )}
+            
+            {backendSaveError && (
+              <div className="bg-yellow-900 bg-opacity-20 border border-yellow-800 rounded-md p-3 mb-4 flex items-center">
+                <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2" />
+                <p className="text-yellow-400 text-sm">
+                  Bucket created but error saving to backend: {backendSaveError}
+                </p>
+              </div>
             )}
 
             {!bucket ? (
@@ -352,6 +436,13 @@ const StormToolManager: React.FC = () => {
                 <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
                   {JSON.stringify(bucket, null, 2)}
                 </div>
+                
+                {backendSaveSuccess && (
+                  <div className="mt-2 bg-green-900 bg-opacity-20 border border-green-800 rounded-md p-2 flex items-center">
+                    <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                    <p className="text-green-400 text-xs">Bucket saved to database</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
