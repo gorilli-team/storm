@@ -64,6 +64,9 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     if (editorRef.current) {
       const currentValue = editorRef.current.getValue();
+
+      // Only update if the editor value is different from the new value
+      // and we're not just toggling between empty and placeholder
       if (
         currentValue !== value &&
         !(isEmpty && value === placeholder) &&
@@ -244,43 +247,29 @@ const StormToolManager: React.FC = () => {
               <h2 className="text-xl font-bold flex items-center text-cyan-400">
                 <Database className="mr-2 h-5 w-5 text-blue-400" /> Bucket
               </h2>
-              {!bucket && !isCreatingBucket && (
-                <Button
-                  onClick={() => setShowNewBucketForm(!showNewBucketForm)}
-                  className="flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
-                  size="sm"
-                >
-                  <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
-                  {showNewBucketForm ? "Cancel" : "New Bucket"}
-                </Button>
-              )}
+              <Button
+                onClick={!isCreatingBucket ? createBucket : undefined}
+                disabled={isCreatingBucket || !recallClient}
+                className={`flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 ${
+                  isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                size="sm"
+              >
+                {isCreatingBucket ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Creating...
+                  </>
+                ) : (
+                  <>
+                    <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
+                    Create Bucket
+                  </>
+                )}
+              </Button>
             </div>
 
-            {showNewBucketForm && !bucket && (
-              <div className="mb-4 p-4 border border-blue-500 border-opacity-50 rounded-md bg-gray-900">
-                <div className="flex">
-                  <button
-                    onClick={createBucket}
-                    disabled={isCreatingBucket || !recallClient}
-                    className={`bg-gradient-to-r from-blue-700 to-cyan-700 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-cyan-600 flex items-center ${
-                      isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {isCreatingBucket ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
-                      </>
-                    ) : (
-                      <>
-                        <FolderPlus className="mr-2 h-4 w-4" /> Create Bucket
-                      </>
-                    )}
-                  </button>
-                </div>
-                {bucketCreationError && (
-                  <p className="text-red-400 text-sm mt-2">{bucketCreationError}</p>
-                )}
-              </div>
+            {bucketCreationError && (
+              <p className="text-red-400 text-sm mt-2 mb-4">{bucketCreationError}</p>
             )}
 
             {!bucket ? (
