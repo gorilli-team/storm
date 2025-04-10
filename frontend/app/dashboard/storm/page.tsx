@@ -155,6 +155,18 @@ const StormToolManager: React.FC = () => {
 
   const { ready, authenticated, login, logout, user } = usePrivy();
 
+  // Reset states when user logs out
+  useEffect(() => {
+    if (!authenticated) {
+      setBuckets([]);
+      setWalletAddress(null);
+      setBucket(null);
+      setBackendSaveSuccess(false);
+      setBackendSaveError(null);
+      setBucketCreationError(null);
+    }
+  }, [authenticated]);
+
   useEffect(() => {
     console.log("Checking wallet connection:", { authenticated, user });
     
@@ -200,7 +212,7 @@ const StormToolManager: React.FC = () => {
 
   useEffect(() => {
     const loadBuckets = async () => {
-      if (walletAddress) {
+      if (walletAddress && authenticated) {
         setIsLoadingBuckets(true);
         setBucketsError(null);
         
@@ -218,7 +230,7 @@ const StormToolManager: React.FC = () => {
     };
     
     loadBuckets();
-  }, [walletAddress]);
+  }, [walletAddress, authenticated]);
 
   /**
    * Adds a tool to the specified bucket
@@ -402,8 +414,7 @@ const createBucket = async () => {
             </p>
           </div>
 
-          {/* Wallet Debug */}
-          {walletAddress && (
+          {authenticated && walletAddress && (
             <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
               <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
               <div className="bg-gray-900 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
@@ -435,27 +446,38 @@ const createBucket = async () => {
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold flex items-center text-cyan-400">
-                <Database className="mr-2 h-5 w-5 text-blue-400" /> Bucket
+                <Database className="mr-2 h-5 w-5 text-blue-400" /> Buckets
               </h2>
-              <Button
-                onClick={!isCreatingBucket ? createBucket : undefined}
-                disabled={isCreatingBucket || !recallClient}
-                className={`flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 ${
-                  isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                size="sm"
-              >
-                {isCreatingBucket ? (
-                  <>
-                    <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Creating...
-                  </>
-                ) : (
-                  <>
-                    <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
-                    Create Bucket
-                  </>
-                )}
-              </Button>
+              {authenticated ? (
+                <Button
+                  onClick={!isCreatingBucket ? createBucket : undefined}
+                  disabled={isCreatingBucket || !recallClient}
+                  className={`flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 ${
+                    isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  size="sm"
+                >
+                  {isCreatingBucket ? (
+                    <>
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Creating...
+                    </>
+                  ) : (
+                    <>
+                      <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
+                      Create Bucket
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => login()}
+                  className="flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                  size="sm"
+                >
+                  <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
+                  Login to Create
+                </Button>
+              )}
             </div>
 
             {bucketCreationError && (
@@ -474,12 +496,8 @@ const createBucket = async () => {
               </div>
             )}
 
-            {!bucket ? (
-              <div className="text-center py-8 text-blue-300">
-                <p>No buckets created yet. Create a bucket to get started.</p>
-              </div>
-            ) : (
-              <div className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
+            {authenticated && bucket && (
+              <div className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 mb-4">
                 <div className="flex items-center mb-2">
                   <CheckCircle className="text-green-400 mr-2 h-5 w-5" />
                   <h3 className="text-lg font-medium text-green-400">Bucket Created Successfully</h3>
@@ -496,6 +514,42 @@ const createBucket = async () => {
                 )}
               </div>
             )}
+
+            {/* Bucket Cards Display */}
+            <div className="mt-4">
+              {!authenticated ? (
+                <div className="text-center py-8 text-blue-300">
+                  <p>Please login to view and manage your buckets.</p>
+                </div>
+              ) : isLoadingBuckets ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
+                </div>
+              ) : buckets.length === 0 ? (
+                <div className="text-center py-8 text-blue-300">
+                  <p>No buckets created yet. Create a bucket to get started.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  {buckets.map((bucket) => (
+                    <div 
+                      key={bucket._id} 
+                      className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 hover:border-blue-500 transition-colors duration-200"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-lg font-medium text-blue-400 truncate">{bucket.bucketId}</h3>
+                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                          {new Date(bucket.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700 max-h-28">
+                        {JSON.stringify(bucket, null, 2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Tabs */}
@@ -521,7 +575,7 @@ const createBucket = async () => {
               onClick={() => setActiveTab("manage")}
             >
               <div className="flex items-center">
-                <Code className="mr-2 h-4 w-4" /> Manage Tools ({buckets.length})
+                <Code className="mr-2 h-4 w-4" /> Manage Tools {authenticated && `(${buckets.length})`}
               </div>
             </button>
           </div>
@@ -575,12 +629,17 @@ const createBucket = async () => {
 
               <button
                 onClick={addTool}
-                disabled={isAddingTool || !recallClient}
-                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient) ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={isAddingTool || !recallClient || !authenticated}
+                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient || !authenticated) ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {isAddingTool ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+                  </>
+                ) : !authenticated ? (
+                  <>
+                    <FolderPlus className="mr-2 h-4 w-4" />
+                    Login to Save Tool
                   </>
                 ) : (
                   <>
@@ -616,7 +675,21 @@ const createBucket = async () => {
                 </div>
               )}
 
-              {isLoadingBuckets ? (
+              {!authenticated ? (
+                <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Database className="h-10 w-10 text-blue-700 mb-2" />
+                    <p>Please login to view your buckets</p>
+                    <Button
+                      onClick={() => login()}
+                      className="mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                      size="sm"
+                    >
+                      Login
+                    </Button>
+                  </div>
+                </div>
+              ) : isLoadingBuckets ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
                 </div>
