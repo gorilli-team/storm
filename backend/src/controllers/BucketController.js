@@ -41,3 +41,33 @@ export const createBucket = async (req, res) => {
     });
   }
 };
+
+// Get all buckets for a specific wallet address
+export const getBucketsByWallet = async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    
+    if (!walletAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Wallet address is required' 
+      });
+    }
+    
+    const buckets = await Bucket.find({ walletAddress });
+    
+    return res.status(200).json({
+      success: true,
+      count: buckets.length,
+      data: buckets
+    });
+    
+  } catch (error) {
+    console.error('Error fetching buckets:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error while fetching buckets',
+      error: error.message
+    });
+  }
+};
