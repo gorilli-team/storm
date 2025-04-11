@@ -87,7 +87,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
                     }}
                     variant="outline"
                     size="sm"
-                    className="h-12 text-cyan-400 hover:bg-gray-800"
+                    className="px-3 py-2 rounded-md bg-gray-800/70 border border-blue-700/30 text-cyan-400"
                   >
                     Log out
                   </Button>
@@ -99,7 +99,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
                   }}
                   variant="outline"
                   size="sm"
-                  className="h-12 text-cyan-400 hover:bg-gray-800"
+                  className="px-3 py-2 rounded-md bg-gray-800/70 border border-blue-700/30 text-cyan-400"
                 >
                   Login
                 </Button>
