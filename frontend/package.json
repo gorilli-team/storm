@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@privy-io/react-auth": "^2.8.3",
     "@recallnet/chains": "^0.0.7",
     "@recallnet/sdk": "^0.0.8",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "crypto-js": "^4.2.0",

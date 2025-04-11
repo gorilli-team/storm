@@ -12,6 +12,7 @@ import {
   Server,
   CheckCircle,
   Loader2,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
@@ -22,6 +23,8 @@ import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { BaseLayout } from "../../components/layout/base-layout";
 import CryptoJS from "crypto-js";
+import axios from "axios";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface CodeEditorProps {
   value: string;
@@ -34,7 +37,7 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
   value,
   onChange,
   placeholder = "// Write your code here",
-  language = "typescript",
+  language = "javascript",
 }) => {
   const editorRef = useRef<any>(null);
   const [isEmpty, setIsEmpty] = useState(value === placeholder || value === "");
@@ -86,7 +89,7 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
       </div>
       <Editor
         height="100%"
-        defaultLanguage="typescript"
+        defaultLanguage="javascript"
         language={language}
         value={isEmpty ? placeholder : value}
         theme="vs-dark"
@@ -129,8 +132,7 @@ const defaultCodePlaceholder = `/**
 // }`;
 
 const StormToolManager: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"create" | "manage">("create");
-  const [showNewBucketForm, setShowNewBucketForm] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<"create" | "tools">("create");
   const [code, setCode] = useState<string>("");
   const [toolName, setToolName] = useState<string>("");
   const [recallClient, setRecallClient] = useState<RecallClient | null>(null);
@@ -140,11 +142,129 @@ const StormToolManager: React.FC = () => {
   const [isAddingTool, setIsAddingTool] = useState<boolean>(false);
   const [addToolError, setAddToolError] = useState<string | null>(null);
   const [toolAdded, setToolAdded] = useState<boolean>(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [backendSaveSuccess, setBackendSaveSuccess] = useState<boolean>(false);
+  const [backendSaveError, setBackendSaveError] = useState<string | null>(null);
+  const [isSavingToBackend, setIsSavingToBackend] = useState<boolean>(false);
+  const [buckets, setBuckets] = useState<any[]>([]);
+  const [isLoadingBuckets, setIsLoadingBuckets] = useState<boolean>(false);
+  const [bucketsError, setBucketsError] = useState<string | null>(null);
+  const [selectedBucket, setSelectedBucket] = useState<any>(null);
+  const [bucketTools, setBucketTools] = useState<any[]>([]);
+  const [isLoadingTools, setIsLoadingTools] = useState<boolean>(false);
+  const [toolSaveSuccess, setToolSaveSuccess] = useState<boolean>(false);
+  const [toolSaveError, setToolSaveError] = useState<string | null>(null);
+
+  const { ready, authenticated, login, logout, user } = usePrivy();
+
+  // Reset states when user logs out
+  useEffect(() => {
+    if (!authenticated) {
+      setBuckets([]);
+      setWalletAddress(null);
+      setBucket(null);
+      setBackendSaveSuccess(false);
+      setBackendSaveError(null);
+      setBucketCreationError(null);
+      setSelectedBucket(null);
+      setBucketTools([]);
+    }
+  }, [authenticated]);
+
+  useEffect(() => {
+    console.log("Checking wallet connection:", { authenticated, user });
+    
+    if (authenticated && user && user.wallet) {
+      const address = user.wallet.address;
+      console.log("Found wallet with address:", address);
+      
+      if (address) {
+        setWalletAddress(address);
+        console.log("Wallet address set to:", address);
+      }
+    } else {
+      console.log("No wallet available:", { 
+        authenticated, 
+        hasUser: !!user, 
+        hasWallet: user ? !!user.wallet : false 
+      });
+    }
+  }, [authenticated, user]);
+  
+  /**
+   * Fetches all buckets for a wallet address
+   */
+  const fetchBucketsByWallet = async (address: string) => {
+    if (!address) {
+      console.error("Wallet address is required");
+      return [];
+    }
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      const response = await axios.get(`${API_URL}/buckets/wallet/${address}`);
+      console.log('Buckets fetched:', response.data);
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Error fetching buckets:', error);
+      throw error;
+    }
+  };
 
   /**
-   * Adds a tool to the specified bucket
-   * @returns {Promise<boolean>} Success or failure
+   * Fetches tools for a specific bucket
    */
+  const fetchToolsForBucket = async (bucketId: string) => {
+    if (!bucketId) return [];
+    
+    try {
+      setIsLoadingTools(true);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      const response = await axios.get(`${API_URL}/tools/bucket/${bucketId}`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching tools:', error);
+      return [];
+    } finally {
+      setIsLoadingTools(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadBuckets = async () => {
+      if (walletAddress && authenticated) {
+        setIsLoadingBuckets(true);
+        setBucketsError(null);
+        
+        try {
+          const fetchedBuckets = await fetchBucketsByWallet(walletAddress);
+          console.log('Buckets loaded:', fetchedBuckets);
+          setBuckets(fetchedBuckets);
+        } catch (error: any) {
+          console.error("Failed to load buckets:", error);
+          setBucketsError(error.message || 'Failed to load buckets');
+        } finally {
+          setIsLoadingBuckets(false);
+        }
+      }
+    };
+    
+    loadBuckets();
+  }, [walletAddress, authenticated]);
+
+  // Load tools when bucket is selected
+  useEffect(() => {
+    if (selectedBucket) {
+      const loadTools = async () => {
+        const tools = await fetchToolsForBucket(selectedBucket.bucketId);
+        setBucketTools(tools);
+      };
+      loadTools();
+    } else {
+      setBucketTools([]);
+    }
+  }, [selectedBucket]);
+
   const addTool = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
@@ -162,52 +282,68 @@ const StormToolManager: React.FC = () => {
       return false;
     }
 
+    if (!selectedBucket) {
+      setAddToolError("Please select a bucket first");
+      return false;
+    }
+
     setIsAddingTool(true);
     setAddToolError(null);
     setToolAdded(false);
+    setToolSaveSuccess(false);
+    setToolSaveError(null);
 
     try {
-      // Get the bucket manager
       const bucketManager = recallClient.bucketManager();
-      
-      // Fixed bucket address for now (will be dynamic later)
-      const bucketAddress = "0xFf0000000000000000000000000000000000626B";
-      
-      // Create the key using the tool name
+      const bucketAddress = selectedBucket.bucketId;
       const key = `tool/${toolName.replace(/\s+/g, '_')}`;
       
       const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY || "temp-encryption-key";
       const encryptedFunctionString = CryptoJS.AES.encrypt(code, encryptionKey).toString();
       
-      // Create a file with the encrypted string
       const file = new File([encryptedFunctionString], `${toolName.replace(/\s+/g, '_')}.txt`, {
         type: "text/plain",
       });
       
-      // Add the object to the bucket
       const { meta: addMeta } = await bucketManager.add(bucketAddress, key, file);
       
-      console.log("Tool added successfully:", addMeta?.tx?.transactionHash);
-      setToolAdded(true);
+      console.log("Tool added successfully to Recall:", addMeta?.tx?.transactionHash);
       
-      // Reset the form
-      setToolName("");
-      setCode("");
-      
-      return true;
-    } catch (error) {
+      // Save tool to backend database
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        await axios.post(`${API_URL}/tools`, {
+          bucketId: selectedBucket.bucketId,
+          toolName: toolName,
+        });
+        
+        console.log("Tool saved to backend database");
+        setToolAdded(true);
+        setToolSaveSuccess(true);
+        
+        // Refresh tools list
+        const tools = await fetchToolsForBucket(selectedBucket.bucketId);
+        setBucketTools(tools);
+
+        // Reset form
+        setToolName("");
+        setCode("");
+        
+        return true;
+      } catch (error: any) {
+        console.error("Error saving tool to backend:", error);
+        setToolSaveError(`Tool added to Recall but failed to save to backend: ${error.response?.data?.message || error.message || "Unknown error"}`);
+        return false;
+      }
+    } catch (error: any) {
       console.error("Error adding tool:", error);
-      setAddToolError(`Failed to add tool: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setAddToolError(`Failed to add tool: ${error.message || "Unknown error"}`);
       return false;
     } finally {
       setIsAddingTool(false);
     }
   };
 
-  /**
-   * Creates a new bucket using the current RecallClient
-   * @returns {Promise<any | null>} The created bucket or null if failed
-   */
   const createBucket = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
@@ -217,20 +353,40 @@ const StormToolManager: React.FC = () => {
 
     setIsCreatingBucket(true);
     setBucketCreationError(null);
+    setBackendSaveSuccess(false);
+    setBackendSaveError(null);
 
     try {
-      // Get the bucket manager
       const bucketManager = recallClient.bucketManager();
+      const { result: { bucket: newBucket } } = await bucketManager.create();
       
-      // Create a new bucket
-      const {
-        result: { bucket },
-      } = await bucketManager.create();
+      console.log("Bucket created:", newBucket);
+      setBucket(newBucket);
       
-      console.log("Bucket created:", bucket);
-      setBucket(bucket);
-      setShowNewBucketForm(false);
-      return bucket;
+      if (walletAddress && newBucket) {
+        try {
+          setIsSavingToBackend(true);
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+          await axios.post(`${API_URL}/buckets`, {
+            bucketId: newBucket,
+            walletAddress: walletAddress
+          });
+          setBackendSaveSuccess(true);
+          const updatedBuckets = await fetchBucketsByWallet(walletAddress);
+          setBuckets(updatedBuckets);
+        } catch (error: any) {
+          console.error('Error saving to backend:', error);
+          setBackendSaveError(
+            error.response?.data?.message || 
+            error.message ||
+            'Error saving bucket to backend'
+          );
+        } finally {
+          setIsSavingToBackend(false);
+        }
+      }
+      
+      return newBucket;
     } catch (error) {
       console.error("Error creating bucket:", error);
       setBucketCreationError("Failed to create bucket. Please try again.");
@@ -241,30 +397,24 @@ const StormToolManager: React.FC = () => {
   };
 
   useEffect(() => {
-    // Get the private key from environment variables
     const initializeRecallClient = async () => {
       try {
         const privateKeyEnv = process.env.NEXT_PUBLIC_RECALL_PRIVATE_KEY || "";
 
         if (!privateKeyEnv || privateKeyEnv === "0x") {
-          console.error(
-            "Missing private key for Recall. Set NEXT_PUBLIC_RECALL_PRIVATE_KEY in your environment variables."
-          );
+          console.error("Missing private key for Recall");
           return;
         }
 
         const privateKey = privateKeyEnv as `0x${string}`;
-
         const walletClient = createWalletClient({
           account: privateKeyToAccount(privateKey),
           chain: testnet,
           transport: http(),
         });
 
-        // Create a client from the wallet client
         const client = new RecallClient({ walletClient });
         setRecallClient(client);
-
         console.log("Recall client initialized successfully", client);
       } catch (error) {
         console.error("Failed to initialize Recall client:", error);
@@ -289,20 +439,26 @@ const StormToolManager: React.FC = () => {
             </p>
           </div>
 
+          {authenticated && walletAddress && (
+            <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
+              <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
+              <div className="bg-gray-900 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                {walletAddress}
+              </div>
+            </div>
+          )}
+
           {/* Info Card */}
           <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
             <div className="flex">
               <div>
                 <h3 className="text-sm font-medium text-cyan-400 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-yellow-500" /> Getting
-                  Started
+                  <Zap className="w-4 h-4 mr-2 text-yellow-500" /> Getting Started
                 </h3>
                 <p className="text-sm text-blue-300 mt-1">
                   1. Create a new bucket to store your tools
                   <br />
-                  2. Add tools to your bucket with TypeScript code
-                  <br />
-                  3. Publish your bucket to make your tools available
+                  2. Add tools to your bucket
                 </p>
               </div>
             </div>
@@ -312,39 +468,58 @@ const StormToolManager: React.FC = () => {
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold flex items-center text-cyan-400">
-                <Database className="mr-2 h-5 w-5 text-blue-400" /> Bucket
+                <Database className="mr-2 h-5 w-5 text-blue-400" /> Buckets
               </h2>
-              <Button
-                onClick={!isCreatingBucket ? createBucket : undefined}
-                disabled={isCreatingBucket || !recallClient}
-                className={`flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 ${
-                  isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                size="sm"
-              >
-                {isCreatingBucket ? (
-                  <>
-                    <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Creating...
-                  </>
-                ) : (
-                  <>
-                    <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
-                    Create Bucket
-                  </>
-                )}
-              </Button>
+              {authenticated ? (
+                <Button
+                  onClick={!isCreatingBucket ? createBucket : undefined}
+                  disabled={isCreatingBucket || !recallClient}
+                  className={`flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 ${
+                    isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  size="sm"
+                >
+                  {isCreatingBucket ? (
+                    <>
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" /> Creating...
+                    </>
+                  ) : (
+                    <>
+                      <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
+                      Create Bucket
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => login()}
+                  className="flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                  size="sm"
+                >
+                  <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
+                  Login to Create
+                </Button>
+              )}
             </div>
 
             {bucketCreationError && (
-              <p className="text-red-400 text-sm mt-2 mb-4">{bucketCreationError}</p>
+              <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-3 mb-4 flex items-center">
+                <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
+                <p className="text-red-400 text-sm">{bucketCreationError}</p>
+              </div>
+            )}
+            
+            {backendSaveError && (
+              <div className="bg-yellow-900 bg-opacity-20 border border-yellow-800 rounded-md p-3 mb-4 flex items-center">
+                <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2" />
+                <p className="text-yellow-400 text-sm">
+                  Bucket created but error saving to backend: {backendSaveError}
+                </p>
+              </div>
             )}
 
-            {!bucket ? (
-              <div className="text-center py-8 text-blue-300">
-                <p>No buckets created yet. Create a bucket to get started.</p>
-              </div>
-            ) : (
-              <div className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
+            {authenticated && bucket && (
+              <div className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 mb-4">
                 <div className="flex items-center mb-2">
                   <CheckCircle className="text-green-400 mr-2 h-5 w-5" />
                   <h3 className="text-lg font-medium text-green-400">Bucket Created Successfully</h3>
@@ -352,143 +527,264 @@ const StormToolManager: React.FC = () => {
                 <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
                   {JSON.stringify(bucket, null, 2)}
                 </div>
+                
+                {backendSaveSuccess && (
+                  <div className="mt-2 bg-green-900 bg-opacity-20 border border-green-800 rounded-md p-2 flex items-center">
+                    <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                    <p className="text-green-400 text-xs">Bucket saved to database</p>
+                  </div>
+                )}
               </div>
             )}
-          </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-blue-800 mb-6">
-            <button
-              className={`py-2 px-4 font-medium text-sm ${
-                activeTab === "create"
-                  ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
-                  : "text-gray-400 hover:text-blue-300"
-              }`}
-              onClick={() => setActiveTab("create")}
-            >
-              <div className="flex items-center">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create Tool
-              </div>
-            </button>
-            <button
-              className={`py-2 px-4 font-medium text-sm ${
-                activeTab === "manage"
-                  ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
-                  : "text-gray-400 hover:text-blue-300"
-              }`}
-              onClick={() => setActiveTab("manage")}
-            >
-              <div className="flex items-center">
-                <Code className="mr-2 h-4 w-4" /> Manage Tools (0)
-              </div>
-            </button>
-          </div>
-
-          {/* Create Tool Tab */}
-          {activeTab === "create" && (
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-              <h2 className="text-xl font-bold mb-4 text-cyan-400">
-                Create New Tool
-              </h2>
-
-              <div className="space-y-4 mb-4">
-                <div>
-                  <label
-                    htmlFor="toolName"
-                    className="block text-sm font-medium text-blue-300 mb-1"
-                  >
-                    Tool Name
-                  </label>
-                  <input
-                    id="toolName"
-                    type="text"
-                    value={toolName}
-                    onChange={(e) => setToolName(e.target.value)}
-                    placeholder="getCryptoPrice, getWeather, etc."
-                    className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                  />
-                  <p className="text-xs text-blue-400 mt-1">
-                    The name that will be used to call your function
-                  </p>
+            {/* Bucket Cards Display */}
+            <div className="mt-4">
+              {!authenticated ? (
+                <div className="text-center py-8 text-blue-300">
+                  <p>Please login to view and manage your buckets.</p>
                 </div>
-                <div>
-                  <label
-                    htmlFor="codeEditor"
-                    className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
-                  >
-                    <Server className="mr-2 h-4 w-4 text-cyan-500" />
-                    Tool Code
-                  </label>
-                  <MonacoEditor
-                    value={code}
-                    onChange={(newCode) => setCode(newCode)}
-                    placeholder={defaultCodePlaceholder}
-                  />
-                  <p className="text-xs text-blue-400 mt-1">
-                    Write your TypeScript function with JSDoc comments for
-                    parameters and return types
-                  </p>
+              ) : isLoadingBuckets ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
                 </div>
-              </div>
-
-              <button
-                onClick={addTool}
-                disabled={isAddingTool || !recallClient}
-                className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient) ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {isAddingTool ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Tool
-                  </>
-                )}
-              </button>
-              {toolAdded ? (
-                <p className="text-xs text-green-400 mt-2 flex items-center">
-                  <CheckCircle className="w-3 h-3 mr-1" /> Tool added successfully!
-                </p>
-              ) : addToolError ? (
-                <p className="text-xs text-red-400 mt-2">
-                  {addToolError}
-                </p>
-              ) : null}
-            </div>
-          )}
-
-          {/* Manage Tools Tab */}
-          {activeTab === "manage" && (
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-              <h2 className="text-xl font-bold mb-4 text-cyan-400 flex items-center">
-                <Code className="mr-2 h-5 w-5 text-blue-400" />
-                Tools
-              </h2>
-
-              {!bucket ? (
-                <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
-                  <div className="flex flex-col items-center space-y-2">
-                    <Database className="h-10 w-10 text-blue-700 mb-2" />
-                    <p>No buckets created yet.</p>
-                    <p className="text-xs text-gray-500">
-                      Create a bucket to store your tools.
-                    </p>
-                  </div>
+              ) : buckets.length === 0 ? (
+                <div className="text-center py-8 text-blue-300">
+                  <p>No buckets created yet. Create a bucket to get started.</p>
                 </div>
               ) : (
-                <div className="text-center py-12 text-blue-400 border border-dashed border-blue-800 rounded-md bg-gray-900">
-                  <div className="flex flex-col items-center space-y-2">
-                    <Database className="h-10 w-10 text-blue-700 mb-2" />
-                    <p>No tools in this bucket yet.</p>
-                    <p className="text-xs text-gray-500">
-                      Switch to "Create Tool" tab to add one.
-                    </p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  {buckets.map((bucket) => (
+                    <div 
+                      key={bucket._id} 
+                      className={`bg-gray-900 p-4 rounded-md border transition-colors duration-200 cursor-pointer ${
+                        selectedBucket?._id === bucket._id 
+                          ? "border-blue-500" 
+                          : "border-blue-600 border-opacity-30 hover:border-blue-500"
+                      }`}
+                      onClick={() => setSelectedBucket(bucket)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-medium text-blue-400 truncate">{bucket.bucketId}</h3>
+                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                          {new Date(bucket.createdAt).toLocaleDateString('en-US', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                          })}
+                        </span>
+                      </div>
+                      <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                        <div>
+                          <span className="text-blue-400">Bucket ID:</span> {bucket.bucketId}
+                        </div>
+                        <div>
+                          <span className="text-blue-400">Wallet Address:</span> {bucket.walletAddress}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
+          </div>
+
+          {selectedBucket && (
+            <>
+              {/* Tabs */}
+              <div className="flex border-b border-blue-800 mb-6">
+                <button
+                  className={`py-2 px-4 font-medium text-sm ${
+                    activeTab === "create"
+                      ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
+                      : "text-blue-300 hover:text-cyan-400"
+                  }`}
+                  onClick={() => setActiveTab("create")}
+                >
+                  <div className="flex items-center">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Tool
+                  </div>
+                </button>
+                <button
+                  className={`py-2 px-4 font-medium text-sm ${
+                    activeTab === "tools"
+                      ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
+                      : "text-blue-300 hover:text-cyan-400"
+                  }`}
+                  onClick={() => setActiveTab("tools")}
+                >
+                  <div className="flex items-center">
+                    <Code className="mr-2 h-4 w-4" /> Bucket Tools
+                  </div>
+                </button>
+              </div>
+
+              {/* Content based on active tab */}
+              {activeTab === "create" ? (
+                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-cyan-400">
+                      Create Tool for Bucket
+                    </h2>
+                    <button 
+                      onClick={() => setSelectedBucket(null)}
+                      className="text-sm text-gray-400 hover:text-blue-300"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  
+                  <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm font-medium text-blue-400">Selected Bucket:</span>
+                      <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 mb-4">
+                    <div>
+                      <label
+                        htmlFor="toolName"
+                        className="block text-sm font-medium text-blue-300 mb-1"
+                      >
+                        Tool Name
+                      </label>
+                      <input
+                        id="toolName"
+                        type="text"
+                        value={toolName}
+                        onChange={(e) => setToolName(e.target.value)}
+                        placeholder="getCryptoPrice, getWeather, etc."
+                        className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-blue-400 mt-1">
+                        The name that will be used to call your function
+                      </p>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="codeEditor"
+                        className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
+                      >
+                        <Server className="mr-2 h-4 w-4 text-cyan-500" />
+                        Tool Code
+                      </label>
+                      <MonacoEditor
+                        value={code}
+                        onChange={(newCode) => setCode(newCode)}
+                        placeholder={defaultCodePlaceholder}
+                      />
+                      <p className="text-xs text-blue-400 mt-1">
+                        Write your Javascript function with JSDoc comments for
+                        parameters and return types
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={addTool}
+                    disabled={isAddingTool || !recallClient || !authenticated}
+                    className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient || !authenticated) ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isAddingTool ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+                      </>
+                    ) : !authenticated ? (
+                      <>
+                        <FolderPlus className="mr-2 h-4 w-4" />
+                        Login to Save Tool
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Tool to Bucket
+                      </>
+                    )}
+                  </button>
+                  {toolAdded && toolSaveSuccess ? (
+                    <div className="mt-2 bg-green-900 bg-opacity-20 border border-green-800 rounded-md p-2 flex items-center">
+                      <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                      <p className="text-green-400 text-xs">Tool added successfully!</p>
+                    </div>
+                  ) : toolSaveError ? (
+                    <div className="mt-2 bg-yellow-900 bg-opacity-20 border border-yellow-800 rounded-md p-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2" />
+                      <p className="text-yellow-400 text-xs">{toolSaveError}</p>
+                    </div>
+                  ) : addToolError ? (
+                    <div className="mt-2 bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
+                      <p className="text-red-400 text-xs">{addToolError}</p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-cyan-400">
+                      Tools in Bucket
+                    </h2>
+                    <div className="text-sm text-blue-400">
+                      {bucketTools.length} tool{bucketTools.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm font-medium text-blue-400">Bucket:</span>
+                      <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
+                    </div>
+                  </div>
+
+                  {isLoadingTools ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
+                    </div>
+                  ) : bucketTools.length === 0 ? (
+                    <div className="text-center py-8 text-blue-300">
+                      <p>No tools found in this bucket.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {bucketTools.map((tool, index) => (
+                        <div key={index} className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-blue-400">
+                              {tool.toolName}
+                            </h3>
+                            <span className="text-xs text-gray-500">
+                              {new Date(tool.createdAt).toLocaleDateString('en-US', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
+                              })}
+                            </span>
+                          </div>
+                          <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
+                            <div>
+                              <span className="text-blue-400">Tool Name:</span> {tool.toolName}
+                            </div>
+                            <div>
+                              <span className="text-blue-400">Bucket ID:</span> {tool.bucketId}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

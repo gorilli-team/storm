@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "../app/components/theme-provider";
 import { I18nProvider } from "../lib/i18n";
+import { Providers } from "../app/providers";
 
 export const metadata: Metadata = {
   title: "Storm",
@@ -18,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <ThemeProvider>
-          <I18nProvider>{children}</I18nProvider>
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider>
+            <I18nProvider>{children}</I18nProvider>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
