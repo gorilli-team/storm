@@ -133,7 +133,6 @@ const defaultCodePlaceholder = `/**
 
 const StormToolManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"create" | "tools">("create");
-  const [showNewBucketForm, setShowNewBucketForm] = useState<boolean>(false);
   const [code, setCode] = useState<string>("");
   const [toolName, setToolName] = useState<string>("");
   const [recallClient, setRecallClient] = useState<RecallClient | null>(null);
@@ -151,7 +150,6 @@ const StormToolManager: React.FC = () => {
   const [isLoadingBuckets, setIsLoadingBuckets] = useState<boolean>(false);
   const [bucketsError, setBucketsError] = useState<string | null>(null);
   const [selectedBucket, setSelectedBucket] = useState<any>(null);
-  const [showToolCreator, setShowToolCreator] = useState<boolean>(false);
   const [bucketTools, setBucketTools] = useState<any[]>([]);
   const [isLoadingTools, setIsLoadingTools] = useState<boolean>(false);
 
@@ -167,7 +165,6 @@ const StormToolManager: React.FC = () => {
       setBackendSaveError(null);
       setBucketCreationError(null);
       setSelectedBucket(null);
-      setShowToolCreator(false);
       setBucketTools([]);
     }
   }, [authenticated]);
@@ -342,7 +339,6 @@ const StormToolManager: React.FC = () => {
       
       console.log("Bucket created:", newBucket);
       setBucket(newBucket);
-      setShowNewBucketForm(false);
       
       if (walletAddress && newBucket) {
         try {
@@ -542,10 +538,7 @@ const StormToolManager: React.FC = () => {
                           ? "border-blue-500" 
                           : "border-blue-600 border-opacity-30 hover:border-blue-500"
                       }`}
-                      onClick={() => {
-                        setSelectedBucket(bucket);
-                        setShowToolCreator(true);
-                      }}
+                      onClick={() => setSelectedBucket(bucket)}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-sm font-medium text-blue-400 truncate">{bucket.bucketId}</h3>
@@ -576,199 +569,186 @@ const StormToolManager: React.FC = () => {
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-blue-800 mb-6">
-            <button
-              className={`py-2 px-4 font-medium text-sm ${
-                activeTab === "create"
-                  ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
-                  : "text-blue-300 hover:text-cyan-400"
-              }`}
-              onClick={() => setActiveTab("create")}
-            >
-              <div className="flex items-center">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create Tool
-              </div>
-            </button>
-            <button
-              className={`py-2 px-4 font-medium text-sm ${
-                activeTab === "tools"
-                  ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
-                  : "text-blue-300 hover:text-cyan-400"
-              }`}
-              onClick={() => setActiveTab("tools")}
-            >
-              <div className="flex items-center">
-                <Code className="mr-2 h-4 w-4" /> Bucket Tools
-              </div>
-            </button>
-          </div>
-
-          {/* Content based on active tab */}
-          {activeTab === "create" ? (
-            /* Create Tool Tab */
-            showToolCreator && selectedBucket ? (
-              <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-cyan-400">
-                    Create Tool for Bucket
-                  </h2>
-                  <button 
-                    onClick={() => {
-                      setSelectedBucket(null);
-                      setShowToolCreator(false);
-                    }}
-                    className="text-sm text-gray-400 hover:text-blue-300"
-                  >
-                    Close
-                  </button>
-                </div>
-                
-                <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm font-medium text-blue-400">Selected Bucket:</span>
-                    <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4 mb-4">
-                  <div>
-                    <label
-                      htmlFor="toolName"
-                      className="block text-sm font-medium text-blue-300 mb-1"
-                    >
-                      Tool Name
-                    </label>
-                    <input
-                      id="toolName"
-                      type="text"
-                      value={toolName}
-                      onChange={(e) => setToolName(e.target.value)}
-                      placeholder="getCryptoPrice, getWeather, etc."
-                      className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                    />
-                    <p className="text-xs text-blue-400 mt-1">
-                      The name that will be used to call your function
-                    </p>
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="codeEditor"
-                      className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
-                    >
-                      <Server className="mr-2 h-4 w-4 text-cyan-500" />
-                      Tool Code
-                    </label>
-                    <MonacoEditor
-                      value={code}
-                      onChange={(newCode) => setCode(newCode)}
-                      placeholder={defaultCodePlaceholder}
-                    />
-                    <p className="text-xs text-blue-400 mt-1">
-                      Write your Javascript function with JSDoc comments for
-                      parameters and return types
-                    </p>
-                  </div>
-                </div>
-
+          {selectedBucket && (
+            <>
+              {/* Tabs */}
+              <div className="flex border-b border-blue-800 mb-6">
                 <button
-                  onClick={addTool}
-                  disabled={isAddingTool || !recallClient || !authenticated}
-                  className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient || !authenticated) ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`py-2 px-4 font-medium text-sm ${
+                    activeTab === "create"
+                      ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
+                      : "text-blue-300 hover:text-cyan-400"
+                  }`}
+                  onClick={() => setActiveTab("create")}
                 >
-                  {isAddingTool ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-                    </>
-                  ) : !authenticated ? (
-                    <>
-                      <FolderPlus className="mr-2 h-4 w-4" />
-                      Login to Save Tool
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Tool to Bucket
-                    </>
-                  )}
+                  <div className="flex items-center">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Tool
+                  </div>
                 </button>
-                {toolAdded ? (
-                  <p className="text-xs text-green-400 mt-2 flex items-center">
-                    <CheckCircle className="w-3 h-3 mr-1" /> Tool added successfully!
-                  </p>
-                ) : addToolError ? (
-                  <p className="text-xs text-red-400 mt-2">
-                    {addToolError}
-                  </p>
-                ) : null}
+                <button
+                  className={`py-2 px-4 font-medium text-sm ${
+                    activeTab === "tools"
+                      ? "text-cyan-400 border-b-2 border-cyan-500 bg-gray-800"
+                      : "text-blue-300 hover:text-cyan-400"
+                  }`}
+                  onClick={() => setActiveTab("tools")}
+                >
+                  <div className="flex items-center">
+                    <Code className="mr-2 h-4 w-4" /> Bucket Tools
+                  </div>
+                </button>
               </div>
-            ) : (
-              <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-                <div className="text-center py-8 text-blue-300">
-                  <p>Select a bucket to create tools.</p>
-                </div>
-              </div>
-            )
-          ) : (
-            /* Your Tools Tab */
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-              {!selectedBucket ? (
-                <div className="text-center py-8 text-blue-300">
-                  <p>Select a bucket to view its tools.</p>
-                </div>
-              ) : isLoadingTools ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
-                </div>
-              ) : bucketTools.length === 0 ? (
-                <div className="text-center py-8 text-blue-300">
-                  <p>No tools found in this bucket.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
+
+              {/* Content based on active tab */}
+              {activeTab === "create" ? (
+                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                  <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-cyan-400">
-                      Tools in Bucket
+                      Create Tool for Bucket
                     </h2>
-                    <div className="text-sm text-blue-400">
-                      {bucketTools.length} tool{bucketTools.length !== 1 ? 's' : ''}
-                    </div>
+                    <button 
+                      onClick={() => setSelectedBucket(null)}
+                      className="text-sm text-gray-400 hover:text-blue-300"
+                    >
+                      Close
+                    </button>
                   </div>
                   
                   <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
                     <div className="flex items-center gap-2">
                       <Database className="h-4 w-4 text-blue-400" />
-                      <span className="text-sm font-medium text-blue-400">Bucket:</span>
+                      <span className="text-sm font-medium text-blue-400">Selected Bucket:</span>
                       <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    {bucketTools.map((tool, index) => (
-                      <div key={index} className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-sm font-medium text-blue-400">
-                            {tool.key.replace('tool/', '')}
-                          </h3>
-                          <span className="text-xs text-gray-500">
-                            {new Date(tool.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
-                          <div>
-                            <span className="text-blue-400">Key:</span> {tool.key}
-                          </div>
-                          <div>
-                            <span className="text-blue-400">Size:</span> {tool.size} bytes
-                          </div>
+                  <div className="space-y-4 mb-4">
+                    <div>
+                      <label
+                        htmlFor="toolName"
+                        className="block text-sm font-medium text-blue-300 mb-1"
+                      >
+                        Tool Name
+                      </label>
+                      <input
+                        id="toolName"
+                        type="text"
+                        value={toolName}
+                        onChange={(e) => setToolName(e.target.value)}
+                        placeholder="getCryptoPrice, getWeather, etc."
+                        className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-blue-400 mt-1">
+                        The name that will be used to call your function
+                      </p>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="codeEditor"
+                        className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
+                      >
+                        <Server className="mr-2 h-4 w-4 text-cyan-500" />
+                        Tool Code
+                      </label>
+                      <MonacoEditor
+                        value={code}
+                        onChange={(newCode) => setCode(newCode)}
+                        placeholder={defaultCodePlaceholder}
+                      />
+                      <p className="text-xs text-blue-400 mt-1">
+                        Write your Javascript function with JSDoc comments for
+                        parameters and return types
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={addTool}
+                    disabled={isAddingTool || !recallClient || !authenticated}
+                    className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient || !authenticated) ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isAddingTool ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+                      </>
+                    ) : !authenticated ? (
+                      <>
+                        <FolderPlus className="mr-2 h-4 w-4" />
+                        Login to Save Tool
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Tool to Bucket
+                      </>
+                    )}
+                  </button>
+                  {toolAdded ? (
+                    <p className="text-xs text-green-400 mt-2 flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-1" /> Tool added successfully!
+                    </p>
+                  ) : addToolError ? (
+                    <p className="text-xs text-red-400 mt-2">
+                      {addToolError}
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                  {isLoadingTools ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
+                    </div>
+                  ) : bucketTools.length === 0 ? (
+                    <div className="text-center py-8 text-blue-300">
+                      <p>No tools found in this bucket.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold text-cyan-400">
+                          Tools in Bucket
+                        </h2>
+                        <div className="text-sm text-blue-400">
+                          {bucketTools.length} tool{bucketTools.length !== 1 ? 's' : ''}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      
+                      <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Database className="h-4 w-4 text-blue-400" />
+                          <span className="text-sm font-medium text-blue-400">Bucket:</span>
+                          <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4">
+                        {bucketTools.map((tool, index) => (
+                          <div key={index} className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-sm font-medium text-blue-400">
+                                {tool.key.replace('tool/', '')}
+                              </h3>
+                              <span className="text-xs text-gray-500">
+                                {new Date(tool.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
+                              <div>
+                                <span className="text-blue-400">Key:</span> {tool.key}
+                              </div>
+                              <div>
+                                <span className="text-blue-400">Size:</span> {tool.size} bytes
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
