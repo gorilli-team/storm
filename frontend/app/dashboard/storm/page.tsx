@@ -152,6 +152,8 @@ const StormToolManager: React.FC = () => {
   const [selectedBucket, setSelectedBucket] = useState<any>(null);
   const [bucketTools, setBucketTools] = useState<any[]>([]);
   const [isLoadingTools, setIsLoadingTools] = useState<boolean>(false);
+  const [toolSaveSuccess, setToolSaveSuccess] = useState<boolean>(false);
+  const [toolSaveError, setToolSaveError] = useState<string | null>(null);
 
   const { ready, authenticated, login, logout, user } = usePrivy();
 
@@ -280,13 +282,20 @@ const StormToolManager: React.FC = () => {
       return false;
     }
 
+    if (!selectedBucket) {
+      setAddToolError("Please select a bucket first");
+      return false;
+    }
+
     setIsAddingTool(true);
     setAddToolError(null);
     setToolAdded(false);
+    setToolSaveSuccess(false);
+    setToolSaveError(null);
 
     try {
       const bucketManager = recallClient.bucketManager();
-      const bucketAddress = selectedBucket?.bucketId || "0xFf0000000000000000000000000000000000626B";
+      const bucketAddress = selectedBucket.bucketId;
       const key = `tool/${toolName.replace(/\s+/g, '_')}`;
       
       const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY || "temp-encryption-key";
@@ -298,23 +307,37 @@ const StormToolManager: React.FC = () => {
       
       const { meta: addMeta } = await bucketManager.add(bucketAddress, key, file);
       
-      console.log("Tool added successfully:", addMeta?.tx?.transactionHash);
-      setToolAdded(true);
+      console.log("Tool added successfully to Recall:", addMeta?.tx?.transactionHash);
       
-      // Refresh tools list
-      if (selectedBucket) {
+      // Save tool to backend database
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        await axios.post(`${API_URL}/tools`, {
+          bucketId: selectedBucket.bucketId,
+          toolName: toolName,
+        });
+        
+        console.log("Tool saved to backend database");
+        setToolAdded(true);
+        setToolSaveSuccess(true);
+        
+        // Refresh tools list
         const tools = await fetchToolsForBucket(selectedBucket.bucketId);
         setBucketTools(tools);
-      }
 
-      // Reset form
-      setToolName("");
-      setCode("");
-      
-      return true;
-    } catch (error) {
+        // Reset form
+        setToolName("");
+        setCode("");
+        
+        return true;
+      } catch (error: any) {
+        console.error("Error saving tool to backend:", error);
+        setToolSaveError(`Tool added to Recall but failed to save to backend: ${error.response?.data?.message || error.message || "Unknown error"}`);
+        return false;
+      }
+    } catch (error: any) {
       console.error("Error adding tool:", error);
-      setAddToolError(`Failed to add tool: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setAddToolError(`Failed to add tool: ${error.message || "Unknown error"}`);
       return false;
     } finally {
       setIsAddingTool(false);
@@ -683,18 +706,42 @@ const StormToolManager: React.FC = () => {
                       </>
                     )}
                   </button>
-                  {toolAdded ? (
-                    <p className="text-xs text-green-400 mt-2 flex items-center">
-                      <CheckCircle className="w-3 h-3 mr-1" /> Tool added successfully!
-                    </p>
+                  {toolAdded && toolSaveSuccess ? (
+                    <div className="mt-2 bg-green-900 bg-opacity-20 border border-green-800 rounded-md p-2 flex items-center">
+                      <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                      <p className="text-green-400 text-xs">Tool added successfully!</p>
+                    </div>
+                  ) : toolSaveError ? (
+                    <div className="mt-2 bg-yellow-900 bg-opacity-20 border border-yellow-800 rounded-md p-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2" />
+                      <p className="text-yellow-400 text-xs">{toolSaveError}</p>
+                    </div>
                   ) : addToolError ? (
-                    <p className="text-xs text-red-400 mt-2">
-                      {addToolError}
-                    </p>
+                    <div className="mt-2 bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-2 flex items-center">
+                      <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
+                      <p className="text-red-400 text-xs">{addToolError}</p>
+                    </div>
                   ) : null}
                 </div>
               ) : (
                 <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-cyan-400">
+                      Tools in Bucket
+                    </h2>
+                    <div className="text-sm text-blue-400">
+                      {bucketTools.length} tool{bucketTools.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm font-medium text-blue-400">Bucket:</span>
+                      <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
+                    </div>
+                  </div>
+
                   {isLoadingTools ? (
                     <div className="flex justify-center py-8">
                       <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
@@ -704,46 +751,35 @@ const StormToolManager: React.FC = () => {
                       <p>No tools found in this bucket.</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-cyan-400">
-                          Tools in Bucket
-                        </h2>
-                        <div className="text-sm text-blue-400">
-                          {bucketTools.length} tool{bucketTools.length !== 1 ? 's' : ''}
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gray-900 p-3 rounded-md border border-blue-600 border-opacity-30 mb-4">
-                        <div className="flex items-center gap-2">
-                          <Database className="h-4 w-4 text-blue-400" />
-                          <span className="text-sm font-medium text-blue-400">Bucket:</span>
-                          <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4">
-                        {bucketTools.map((tool, index) => (
-                          <div key={index} className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
-                            <div className="flex items-center justify-between mb-2">
-                              <h3 className="text-sm font-medium text-blue-400">
-                                {tool.key.replace('tool/', '')}
-                              </h3>
-                              <span className="text-xs text-gray-500">
-                                {new Date(tool.createdAt).toLocaleDateString()}
-                              </span>
+                    <div className="grid grid-cols-1 gap-4">
+                      {bucketTools.map((tool, index) => (
+                        <div key={index} className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-blue-400">
+                              {tool.toolName}
+                            </h3>
+                            <span className="text-xs text-gray-500">
+                              {new Date(tool.createdAt).toLocaleDateString('en-US', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
+                              })}
+                            </span>
+                          </div>
+                          <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
+                            <div>
+                              <span className="text-blue-400">Tool Name:</span> {tool.toolName}
                             </div>
-                            <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
-                              <div>
-                                <span className="text-blue-400">Key:</span> {tool.key}
-                              </div>
-                              <div>
-                                <span className="text-blue-400">Size:</span> {tool.size} bytes
-                              </div>
+                            <div>
+                              <span className="text-blue-400">Bucket ID:</span> {tool.bucketId}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
