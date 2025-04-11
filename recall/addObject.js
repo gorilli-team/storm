@@ -5,8 +5,9 @@ import { privateKeyToAccount } from "viem/accounts";
 import { config } from "dotenv";
 import { http } from "viem";
 import CryptoJS from "crypto-js";
+import { z } from "zod";
 
-config()
+config();
 
 ///////// SETTING UP THE RECALL CLIENT ////////
 const privateKey = process.env.PRIVATE_KEY;
@@ -22,7 +23,13 @@ const client = new RecallClient({ walletClient });
 const bucketManager = client.bucketManager();
 
 ///////////// START OBJECT TO ADD //////////////
-async function getCryptoPrice(coinName) {
+const params = {
+  coinName: z
+    .string()
+    .describe("The name of the token, all in lower case letters."),
+};
+
+async function getCryptoPrice({coinName}) {
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinName}&vs_currencies=usd`;
 
   try {
@@ -32,34 +39,57 @@ async function getCryptoPrice(coinName) {
         Accept: "application/json",
       },
     });
-    if (!response.ok) {
-      return `Failed to fetch price for ${coinName}. Status: ${response.status}`;
-    }
     const data = await response.json();
     if (!data[coinName] || !data[coinName].usd) {
       return `Price data not found for ${coinName}`;
     }
     const price = data[coinName].usd;
-    return `Current price of ${coinName}: ${price.toLocaleString()} USD`;
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Current price of ${coinName}: ${price.toLocaleString()} USD`,
+        },
+      ],
+    };
   } catch (error) {
-    return `Error fetching price: ${
-      error instanceof Error ? error.message : "Unknown error"
-    }`;
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error fetching price...`,
+        },
+      ],
+    };
   }
 }
 
+
+const paramsString = JSON.stringify(params);
+const encryptedParamsString = CryptoJS.AES.encrypt(
+  paramsString,
+  process.env.ENCRYPTION_SECRET_KEY
+).toString();
+
 const functionString = getCryptoPrice.toString();
-const encryptedFunctionString = CryptoJS.AES.encrypt(functionString, process.env.ENCRYPTION_SECRET_KEY).toString();
-/////////////// END OBJECT TO ADD //////////////
+const encryptedFunctionString = CryptoJS.AES.encrypt(
+  functionString,
+  process.env.ENCRYPTION_SECRET_KEY
+).toString();
 
+const encryptedData = JSON.stringify({
+    params: encryptedParamsString,
+    function: encryptedFunctionString,
+  });
+// /////////////// END OBJECT TO ADD //////////////
 
-////////// ADDING THE OBJECT TO THE BUCKET /////////
-const bucketAddress = "0xff00000000000000000000000000000000001Edf"
+// ////////// ADDING THE OBJECT TO THE BUCKET /////////
+const bucketAddress = "0xFf0000000000000000000000000000000000951f";
 
-const key = "test/get_crypto_price";
-const file = new File([encryptedFunctionString], "get_crypto_price.txt", {
+const key = "tool/get_crypto_price";
+const file = new File([encryptedData], "get_crypto_price.txt", {
   type: "text/plain",
 });
- 
+
 const { meta: addMeta } = await bucketManager.add(bucketAddress, key, file);
 console.log("Object added at:", addMeta?.tx?.transactionHash);

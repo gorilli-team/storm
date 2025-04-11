@@ -24,57 +24,88 @@ const client = new RecallClient({ walletClient });
 ////////// CREATING THE BUCKET MANAGER ////////
 const bucketManager = client.bucketManager();
 
-////////// RETRIEVING THE OBJECT FROM THE BUCKET ////////
-const bucketAddress = "0xff00000000000000000000000000000000007327";
-const key = "tool/get_crypto_price";
+////////// FUNCTION TO RECONSTRUCT THE ZOD SCHEMA FROM ARGS STRING ////////
+function reconstructZodSchema(serializedSchema) {
+  const schema = {};
 
-const { result: object } = await bucketManager.get(bucketAddress, key);
-const decodedObject = new TextDecoder().decode(object);
+  for (const [key, value] of Object.entries(serializedSchema)) {
+    if (value._def) {
+      switch (value._def.typeName) {
+        case "ZodString":
+          schema[key] = z.string();
 
-const decryptedBytes = CryptoJS.AES.decrypt(
-  decodedObject,
-  process.env.ENCRYPTION_SECRET_KEY
-);
-const decryptedFunctionString = decryptedBytes.toString(CryptoJS.enc.Utf8);
+          if (value._def.description) {
+            schema[key] = schema[key].describe(value._def.description);
+          }
 
-const recoveredFunction = new Function("return " + decryptedFunctionString)();
-////////// RETRIEVING THE OBJECT FROM THE BUCKET ////////
+          if (value._def.checks && value._def.checks.length > 0) {
+            for (const check of value._def.checks) {
+              switch (check.kind) {
+                case "min":
+                  schema[key] = schema[key].min(check.value, check.message);
+                  break;
+                case "max":
+                  schema[key] = schema[key].max(check.value, check.message);
+                  break;
+                case "regex":
+                  schema[key] = schema[key].regex(check.regex, check.message);
+                  break;
+              }
+            }
+          }
+          break;
+      }
+    }
+  }
 
-////////// RETRIEVING THE OBJECT FROM THE BUCKET ////////
-const key2 = "tool/get_zip_code_details";
+  return schema;
+}
 
-const { result: object2 } = await bucketManager.get(bucketAddress, key2);
-const decodedObject2 = new TextDecoder().decode(object2);
-
-const decryptedBytes2 = CryptoJS.AES.decrypt(
-  decodedObject2,
-  process.env.ENCRYPTION_SECRET_KEY
-);
-const decryptedFunctionString2 = decryptedBytes2.toString(CryptoJS.enc.Utf8);
-
-const recoveredFunction2 = new Function("return " + decryptedFunctionString2)();
-////////// RETRIEVING THE OBJECT FROM THE BUCKET ////////
+const bucketAddress = "0xFf0000000000000000000000000000000000951f";
 
 const server = new McpServer({
   name: "test",
   version: "0.0.1",
 });
 
-server.tool(
-  "get_crypto_price",
-  {
-    coinName: z
-      .string()
-      .describe("The name of the token, all in lower case letters."),
-  },
-  recoveredFunction
-);
+/////////////////////////////////////////////////////////////////////////////////////
+///////// LOOPING THROUGH THE TOOL IN THE BUCKET AND ADDING THEM TO THE MCP SERVER
+/////////////////////////////////////////////////////////////////////////////////////
+const prefix = "tool/";
+const {
+  result: { objects },
+} = await bucketManager.query(bucketAddress, { prefix });
 
-server.tool(
-  "get_zip_code_details",
-  { zipCode: z.string().describe("The ZIP code of the location.") },
-  recoveredFunction2
-);
+for (const object of objects) {
+  const key = object.key;
+
+  const { result: retrievedObject } = await bucketManager.get(bucketAddress, key);
+  const decodedObject = new TextDecoder().decode(retrievedObject);
+
+  const encryptedParams = JSON.parse(decodedObject).params;
+  const encryptedFunction = JSON.parse(decodedObject).function;
+
+  const decryptedArgsBytes = CryptoJS.AES.decrypt(
+    encryptedParams,
+    process.env.ENCRYPTION_SECRET_KEY
+  );
+  const decryptedArgsString = decryptedArgsBytes.toString(CryptoJS.enc.Utf8);
+
+  const decryptedFunctionBytes = CryptoJS.AES.decrypt(
+    encryptedFunction,
+    process.env.ENCRYPTION_SECRET_KEY
+  );
+  const decryptedFunctionString = decryptedFunctionBytes.toString(
+    CryptoJS.enc.Utf8
+  );
+
+  const recoveredArgs = JSON.parse(decryptedArgsString);
+  const recoveredFunction = new Function("return " + decryptedFunctionString)();
+
+  const reconstructedSchema = reconstructZodSchema(recoveredArgs);
+
+  server.tool(`${object.key.split("/")[1]}`, reconstructedSchema, recoveredFunction);
+}
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
