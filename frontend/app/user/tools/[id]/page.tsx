@@ -204,23 +204,6 @@ export default function ToolDetailsPage() {
                   <ArrowDown className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="flex gap-2">
-                <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500">
-                  <Play className="mr-2 h-4 w-4" /> Try Tool
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-blue-700 text-blue-300 hover:bg-gray-700"
-                >
-                  <Bookmark className="mr-2 h-4 w-4" /> Save
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-blue-700 text-blue-300 hover:bg-gray-700"
-                >
-                  <Share className="mr-2 h-4 w-4" /> Share
-                </Button>
-              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-blue-800/30">
@@ -273,16 +256,6 @@ export default function ToolDetailsPage() {
               onClick={() => setActiveTab("code")}
             >
               Code
-            </button>
-            <button
-              className={`py-3 px-4 font-medium text-sm ${
-                activeTab === "examples"
-                  ? "text-cyan-400 border-b-2 border-cyan-500"
-                  : "text-gray-400 hover:text-blue-300"
-              }`}
-              onClick={() => setActiveTab("examples")}
-            >
-              Examples
             </button>
             <button
               className={`py-3 px-4 font-medium text-sm ${
@@ -447,38 +420,6 @@ export default function ToolDetailsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Examples Tab */}
-            {activeTab === "examples" && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium text-cyan-400">
-                  Usage Examples
-                </h3>
-                {tool.examples.map((example, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-900 p-4 rounded-lg border border-blue-800/30"
-                  >
-                    <h4 className="text-sm font-medium text-cyan-400 mb-2">
-                      {example.title}
-                    </h4>
-                    <div className="relative">
-                      <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto text-blue-300 text-sm">
-                        <code>{example.code}</code>
-                      </pre>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 h-8 w-8 p-0 text-blue-300 hover:text-cyan-400 hover:bg-gray-700"
-                        onClick={() => copyToClipboard(example.code)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
 

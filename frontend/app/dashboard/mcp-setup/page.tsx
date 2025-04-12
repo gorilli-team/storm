@@ -215,62 +215,6 @@ export default function MCPSetupPage() {
             </div>
           </div>
 
-          {/* Available Tools Section */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-            <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
-              <Code className="mr-2 h-5 w-5 text-blue-400" /> Available Tools
-            </h2>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-blue-800">
-                    <th className="text-left py-3 px-4 text-blue-300">
-                      Tool Name
-                    </th>
-                    <th className="text-left py-3 px-4 text-blue-300">
-                      Description
-                    </th>
-                    <th className="text-left py-3 px-4 text-blue-300">
-                      Version
-                    </th>
-                    <th className="text-left py-3 px-4 text-blue-300">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tools.map((tool) => (
-                    <tr
-                      key={tool.id}
-                      className="border-b border-blue-800/50 hover:bg-gray-700/30"
-                    >
-                      <td className="py-3 px-4 text-cyan-400 font-medium">
-                        {tool.name}
-                      </td>
-                      <td className="py-3 px-4 text-blue-300">
-                        {tool.description}
-                      </td>
-                      <td className="py-3 px-4 text-blue-300">
-                        {tool.version}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button
-                          onClick={() => handleCopy(`"${tool.name}"`)}
-                          className="h-8 px-3 bg-gray-700 text-blue-300 hover:bg-gray-600"
-                          size="sm"
-                        >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Copy Name
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           {/* Documentation Link */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">

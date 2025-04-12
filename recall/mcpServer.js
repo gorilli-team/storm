@@ -113,7 +113,7 @@ for (const address of bucketAddress) {
     const reconstructedSchema = reconstructZodSchema(recoveredArgs);
 
     server.tool(
-      `${object.key.split("/")[1]} by luduvigo (cost: 0.02 recallnet tokens)`,
+      `${object.key.split("/")[1]}`,
       reconstructedSchema,
       recoveredFunction
     );
