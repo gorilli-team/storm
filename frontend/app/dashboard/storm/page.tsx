@@ -17,13 +17,8 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
-// Recall imports
-import { testnet } from "@recallnet/chains";
-import { RecallClient } from "@recallnet/sdk/client";
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+
 import { BaseLayout } from "../../components/layout/base-layout";
-import CryptoJS from "crypto-js";
 import axios from "axios";
 import { usePrivy } from "@privy-io/react-auth";
 import { z } from "zod";
@@ -136,7 +131,6 @@ const StormToolManager: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [params, setParams] = useState<string>("");
   const [toolName, setToolName] = useState<string>("");
-  const [recallClient, setRecallClient] = useState<RecallClient | null>(null);
   const [bucket, setBucket] = useState<any>(null);
   const [isCreatingBucket, setIsCreatingBucket] = useState<boolean>(false);
   const [bucketCreationError, setBucketCreationError] = useState<string | null>(null);
@@ -260,38 +254,28 @@ const StormToolManager: React.FC = () => {
   }, [selectedBucket]);
 
   const validateZodSchema = (schemaCode: string) => {
-    // Se lo schema è vuoto o è il placeholder, considera valido
     if (!schemaCode.trim() || schemaCode === defaultParamsPlaceholder) {
       return { valid: true };
     }
   
     try {
-      // Prova a valutare il codice come una funzione
       const tempFunc = new Function(`
         return ${schemaCode};
       `);
       
       const schema = tempFunc();
       
-      // Se è un oggetto o null, considera valido
       if (typeof schema === 'object' || schema === null) {
         return { valid: true };
       }
       
       return { valid: false, error: "Invalid schema structure" };
     } catch (error: any) {
-      // Se c'è un errore, ma l'utente vuole comunque salvare, permettilo
       return { valid: true };
     }
   };
-  
+
   const addTool = async () => {
-    if (!recallClient) {
-      console.error("RecallClient not initialized");
-      setAddToolError("RecallClient not initialized");
-      return false;
-    }
-  
     if (!toolName.trim()) {
       setAddToolError("Tool name is required");
       return false;
@@ -323,77 +307,30 @@ const StormToolManager: React.FC = () => {
     setToolSaveError(null);
   
     try {
-      const bucketManager = recallClient.bucketManager();
-      const bucketAddress = selectedBucket.bucketId;
-      const key = `tool/${toolName.replace(/\s+/g, '_')}`;
-      
-      const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY || "temp-encryption-key";
-      
-      // Preparazione dei parametri
-      const paramsObject = params.trim() && params !== defaultParamsPlaceholder 
-        ? { 
-            coinName: z
-              .string()
-              .describe("The name of the token, all in lower case letters.")
-          }
-        : {};
-  
-      const paramsString = JSON.stringify(paramsObject);
-      const encryptedParamsString = CryptoJS.AES.encrypt(
-        paramsString,
-        encryptionKey
-      ).toString();
-  
-      const functionString = code.toString();
-      const encryptedFunctionString = CryptoJS.AES.encrypt(
-        functionString,
-        encryptionKey
-      ).toString();
-  
-      const encryptedData = JSON.stringify({
-        params: encryptedParamsString,
-        function: encryptedFunctionString,
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      const response = await axios.post(`${API_URL}/tools`, {
+        bucketId: selectedBucket.bucketId,
+        toolName: toolName,
+        code: code,
+        params: params.trim() && params !== defaultParamsPlaceholder ? params : null
       });
       
-      const file = new File([encryptedData], `${toolName.replace(/\s+/g, '_')}.json`, {
-        type: "application/json",
-      });
+      console.log("Tool added successfully:", response.data);
+      setToolAdded(true);
+      setToolSaveSuccess(true);
       
-      const { meta: addMeta } = await bucketManager.add(bucketAddress, key, file);
+      const tools = await fetchToolsForBucket(selectedBucket.bucketId);
+      setBucketTools(tools);
+
+      // Reset form
+      setToolName("");
+      setCode("");
+      setParams("");
       
-      console.log("Tool added successfully to Recall:", addMeta?.tx?.transactionHash);
-      
-      // Save tool to backend database
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
-        await axios.post(`${API_URL}/tools`, {
-          bucketId: selectedBucket.bucketId,
-          toolName: toolName,
-          hasParams: !!params.trim() && params !== defaultParamsPlaceholder
-        });
-        
-        console.log("Tool saved to backend database");
-        setToolAdded(true);
-        setToolSaveSuccess(true);
-        
-        // Refresh tools list
-        const tools = await fetchToolsForBucket(selectedBucket.bucketId);
-        setBucketTools(tools);
-  
-        // Reset form
-        setToolName("");
-        setCode("");
-        setParams("");
-        
-        return true;
-      } catch (error: any) {
-        console.error("Error saving tool to backend:", error);
-        setToolSaveError(`Tool added to Recall but failed to save to backend: ${error.response?.data?.message || error.message || "Unknown error"}`);
-        return false;
-      }
+      return true;
     } catch (error: any) {
       console.error("Error adding tool:", error);
-      setAddToolError(`Failed to add tool: ${error.message || "Unknown error"}`);
+      setAddToolError(`Failed to add tool: ${error.response?.data?.message || error.message || "Unknown error"}`);
       return false;
     } finally {
       setIsAddingTool(false);
@@ -401,9 +338,8 @@ const StormToolManager: React.FC = () => {
   };
 
   const createBucket = async () => {
-    if (!recallClient) {
-      console.error("RecallClient not initialized");
-      setBucketCreationError("RecallClient not initialized");
+    if (!walletAddress) {
+      setBucketCreationError("Wallet address is required");
       return null;
     }
 
@@ -413,72 +349,28 @@ const StormToolManager: React.FC = () => {
     setBackendSaveError(null);
 
     try {
-      const bucketManager = recallClient.bucketManager();
-      const { result: { bucket: newBucket } } = await bucketManager.create();
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      const response = await axios.post(`${API_URL}/buckets`, {
+        walletAddress: walletAddress
+      });
       
-      console.log("Bucket created:", newBucket);
+      console.log("Bucket created:", response.data);
+      const newBucket = response.data.data.bucketId;
       setBucket(newBucket);
+      setBackendSaveSuccess(true);
       
-      if (walletAddress && newBucket) {
-        try {
-          setIsSavingToBackend(true);
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
-          await axios.post(`${API_URL}/buckets`, {
-            bucketId: newBucket,
-            walletAddress: walletAddress
-          });
-          setBackendSaveSuccess(true);
-          const updatedBuckets = await fetchBucketsByWallet(walletAddress);
-          setBuckets(updatedBuckets);
-        } catch (error: any) {
-          console.error('Error saving to backend:', error);
-          setBackendSaveError(
-            error.response?.data?.message || 
-            error.message ||
-            'Error saving bucket to backend'
-          );
-        } finally {
-          setIsSavingToBackend(false);
-        }
-      }
+      const updatedBuckets = await fetchBucketsByWallet(walletAddress);
+      setBuckets(updatedBuckets);
       
       return newBucket;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating bucket:", error);
-      setBucketCreationError("Failed to create bucket. Please try again.");
+      setBucketCreationError(error.response?.data?.message || "Failed to create bucket. Please try again.");
       return null;
     } finally {
       setIsCreatingBucket(false);
     }
   };
-
-  useEffect(() => {
-    const initializeRecallClient = async () => {
-      try {
-        const privateKeyEnv = process.env.NEXT_PUBLIC_RECALL_PRIVATE_KEY || "";
-
-        if (!privateKeyEnv || privateKeyEnv === "0x") {
-          console.error("Missing private key for Recall");
-          return;
-        }
-
-        const privateKey = privateKeyEnv as `0x${string}`;
-        const walletClient = createWalletClient({
-          account: privateKeyToAccount(privateKey),
-          chain: testnet,
-          transport: http(),
-        });
-
-        const client = new RecallClient({ walletClient });
-        setRecallClient(client);
-        console.log("Recall client initialized successfully", client);
-      } catch (error) {
-        console.error("Failed to initialize Recall client:", error);
-      }
-    };
-
-    initializeRecallClient();
-  }, []);
 
   return (
     <BaseLayout>
@@ -529,9 +421,9 @@ const StormToolManager: React.FC = () => {
               {authenticated ? (
                 <Button
                   onClick={!isCreatingBucket ? createBucket : undefined}
-                  disabled={isCreatingBucket || !recallClient}
+                  disabled={isCreatingBucket}
                   className={`flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 ${
-                    isCreatingBucket || !recallClient ? "opacity-50 cursor-not-allowed" : ""
+                    isCreatingBucket ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   size="sm"
                 >
@@ -793,8 +685,8 @@ const StormToolManager: React.FC = () => {
 
                   <button
                     onClick={addTool}
-                    disabled={isAddingTool || !recallClient || !authenticated}
-                    className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !recallClient || !authenticated) ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={isAddingTool || !authenticated}
+                    className={`bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-5 rounded-md hover:from-blue-500 hover:to-cyan-500 focus:outline-none shadow-lg shadow-blue-900/30 flex items-center ${(isAddingTool || !authenticated) ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {isAddingTool ? (
                       <>
@@ -882,9 +774,6 @@ const StormToolManager: React.FC = () => {
                             </div>
                             <div>
                               <span className="text-blue-400">Bucket ID:</span> {tool.bucketId}
-                            </div>
-                            <div>
-                              <span className="text-blue-400">Has Parameters:</span> {tool.hasParams ? 'Yes' : 'No'}
                             </div>
                           </div>
                         </div>

@@ -1,24 +1,54 @@
 import Bucket from '../models/BucketModel.js';
+import { testnet } from "@recallnet/chains";
+import { RecallClient } from "@recallnet/sdk/client";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+let recallClient = null;
+
+const initializeRecallClient = async () => {
+  if (recallClient) return recallClient;
+  
+  try {
+    const privateKey = process.env.RECALL_PRIVATE_KEY;
+    if (!privateKey) {
+      throw new Error("Missing Recall private key in environment variables");
+    }
+    
+    const walletClient = createWalletClient({
+      account: privateKeyToAccount(privateKey),
+      chain: testnet,
+      transport: http(),
+    });
+    
+    recallClient = new RecallClient({ walletClient });
+    console.log("Recall client initialized successfully");
+    return recallClient;
+  } catch (error) {
+    console.error("Failed to initialize Recall client:", error);
+    throw error;
+  }
+};
 
 export const createBucket = async (req, res) => {
   try {
-    const { bucketId, walletAddress } = req.body;
+    const { walletAddress } = req.body;
     
-    if (!bucketId || !walletAddress) {
+    if (!walletAddress) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Bucket ID and wallet address are required' 
+        message: 'Wallet address is required' 
       });
     }
 
-    const existingBucket = await Bucket.findOne({ bucketId });
-    if (existingBucket) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'A bucket with this ID already exists' 
-      });
-    }
-
+    const client = await initializeRecallClient();
+    const bucketManager = client.bucketManager();
+    
+    const { result: { bucket: bucketId } } = await bucketManager.create();
+    
     const newBucket = new Bucket({
       bucketId,
       walletAddress
