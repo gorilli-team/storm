@@ -1,7 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { createBucket, getBucketsByWallet } from '../controllers/BucketController.js';
-import { createTool, getToolsByBucket } from '../controllers/ToolController.js';
+import { createTool, getToolsByBucket, getAllTools } from '../controllers/ToolController.js';
+
 
 const router = express.Router();
 
@@ -25,5 +26,6 @@ router.get('/api/buckets/wallet/:walletAddress', getBucketsByWallet);
 // Tool routes
 router.post('/api/tools', createTool);
 router.get('/api/tools/bucket/:bucketId', getToolsByBucket);
+router.get('/api/tools', getAllTools);
 
 export default router;
