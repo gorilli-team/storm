@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { createBucket, getBucketsByWallet, getAllBuckets } from '../controllers/BucketController.js';
 import { createTool, getToolsByBucket, getAllTools } from '../controllers/ToolController.js';
+import { createUserIfNotExists, getUserByWallet, getAllUsers, updateUser } from '../controllers/UserController.js';
 
 
 const router = express.Router();
@@ -28,5 +29,11 @@ router.get('/api/buckets', getAllBuckets);
 router.post('/api/tools', createTool);
 router.get('/api/tools/bucket/:bucketId', getToolsByBucket);
 router.get('/api/tools', getAllTools);
+
+// User routes
+router.post('/api/users', createUserIfNotExists);
+router.get('/api/users/wallet/:walletAddress', getUserByWallet);
+router.get('/api/users', getAllUsers);
+router.patch('/api/users/:walletAddress', updateUser);
 
 export default router;
