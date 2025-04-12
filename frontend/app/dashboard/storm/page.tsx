@@ -260,27 +260,23 @@ const StormToolManager: React.FC = () => {
   }, [selectedBucket]);
 
   const validateZodSchema = (schemaCode: string) => {
-    // Se lo schema è vuoto o è il placeholder, considera valido
     if (!schemaCode.trim() || schemaCode === defaultParamsPlaceholder) {
       return { valid: true };
     }
   
     try {
-      // Prova a valutare il codice come una funzione
       const tempFunc = new Function(`
         return ${schemaCode};
       `);
       
       const schema = tempFunc();
       
-      // Se è un oggetto o null, considera valido
       if (typeof schema === 'object' || schema === null) {
         return { valid: true };
       }
       
       return { valid: false, error: "Invalid schema structure" };
     } catch (error: any) {
-      // Se c'è un errore, ma l'utente vuole comunque salvare, permettilo
       return { valid: true };
     }
   };
@@ -329,7 +325,6 @@ const StormToolManager: React.FC = () => {
       
       const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY || "temp-encryption-key";
       
-      // Preparazione dei parametri
       const paramsObject = params.trim() && params !== defaultParamsPlaceholder 
         ? { 
             coinName: z
@@ -369,6 +364,7 @@ const StormToolManager: React.FC = () => {
         await axios.post(`${API_URL}/tools`, {
           bucketId: selectedBucket.bucketId,
           toolName: toolName,
+          walletAddress: walletAddress,
           hasParams: !!params.trim() && params !== defaultParamsPlaceholder
         });
         
@@ -882,9 +878,6 @@ const StormToolManager: React.FC = () => {
                             </div>
                             <div>
                               <span className="text-blue-400">Bucket ID:</span> {tool.bucketId}
-                            </div>
-                            <div>
-                              <span className="text-blue-400">Has Parameters:</span> {tool.hasParams ? 'Yes' : 'No'}
                             </div>
                           </div>
                         </div>
