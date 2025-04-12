@@ -6,16 +6,10 @@ import { Button } from "../../components/ui/button";
 import axios from "axios";
 import {
   Search,
-  ArrowUp,
-  ArrowDown,
   Code,
   User,
   Zap,
-  Star,
-  TrendingUp,
-  Filter,
   ExternalLink,
-  Coins,
   Loader,
   Database,
 } from "lucide-react";
@@ -49,8 +43,6 @@ interface Tool {
 
 export default function StormMarketplacePage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("popular");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tools, setTools] = useState<Tool[]>([]);
@@ -78,40 +70,10 @@ export default function StormMarketplacePage() {
     fetchAllTools();
   }, []);
 
-  // Get unique categories from tools
-  const categories = [
-    "All",
-    ...Array.from(new Set(tools.map((tool) => "API"))),
-  ];
-
-  // // Filter tools based on search term and category
-  // const filteredTools = tools.filter((tool) => {
-  //   const matchesSearch =
-  //     tool.toolName.toLowerCase().includes(searchTerm.toLowerCase());
-
-  //   const matchesCategory =
-  //     selectedCategory === "All" || "API" === selectedCategory;
-
-  //   return matchesSearch && matchesCategory;
-  // });
-
-  // // Sort tools based on selected criteria
-  // const sortedTools = [...filteredTools].sort((a, b) => {
-  //   switch (sortBy) {
-  //     case "popular":
-  //       return 0; // No upvotes/downvotes in the API data
-  //     case "newest":
-  //       return (
-  //         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  //       );
-  //     default:
-  //       return 0;
-  //   }
-  // });
-
-  const handleVote = (id: string, isUpvote: boolean) => {
-    // Implement if needed with actual API data
-  };
+  // Filter tools based on search term
+  const filteredTools = tools.filter((tool) =>
+    tool.toolName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -142,7 +104,7 @@ export default function StormMarketplacePage() {
           </p>
         </div>
 
-        {/* Search and Filter Section */}
+        {/* Search Section */}
         <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
@@ -154,27 +116,6 @@ export default function StormMarketplacePage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </div>
-            <div className="flex gap-2">
-              <select
-                className="px-4 py-2 bg-gray-900 border border-blue-700 rounded-md text-cyan-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="px-4 py-2 bg-gray-900 border border-blue-700 rounded-md text-cyan-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="popular">Most Popular</option>
-                <option value="newest">Newest</option>
-              </select>
             </div>
           </div>
         </div>
@@ -202,9 +143,18 @@ export default function StormMarketplacePage() {
           </div>
         )}
 
+        {/* No results state */}
+        {!isLoading && !error && tools.length > 0 && filteredTools.length === 0 && (
+          <div className="text-center py-12 bg-gray-800 rounded-lg border border-blue-700 border-opacity-30">
+            <Search className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
+            <h3 className="text-xl font-medium text-cyan-400 mb-2">No results found</h3>
+            <p className="text-blue-300">No tools match your search criteria. Try a different search term.</p>
+          </div>
+        )}
+
         {/* Tools List */}
         <div className="grid gap-4">
-          {tools.map((tool) => (
+          {filteredTools.map((tool) => (
             <div
               key={tool._id}
               className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50 hover:border-blue-400 transition-colors"
