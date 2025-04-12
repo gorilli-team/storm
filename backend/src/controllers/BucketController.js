@@ -71,3 +71,24 @@ export const getBucketsByWallet = async (req, res) => {
     });
   }
 };
+
+// Get all buckets
+export const getAllBuckets = async (req, res) => {
+  try {
+    const buckets = await Bucket.find().sort({ createdAt: -1 });
+    
+    return res.status(200).json({
+      success: true,
+      count: buckets.length,
+      data: buckets
+    });
+    
+  } catch (error) {
+    console.error('Error fetching all buckets:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error while fetching all buckets',
+      error: error.message
+    });
+  }
+};

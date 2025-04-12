@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { createBucket, getBucketsByWallet } from '../controllers/BucketController.js';
+import { createBucket, getBucketsByWallet, getAllBuckets } from '../controllers/BucketController.js';
 import { createTool, getToolsByBucket, getAllTools } from '../controllers/ToolController.js';
 
 
@@ -22,6 +22,7 @@ router.get('/db-status', (req, res) => {
 // Bucket routes
 router.post('/api/buckets', createBucket);
 router.get('/api/buckets/wallet/:walletAddress', getBucketsByWallet);
+router.get('/api/buckets', getAllBuckets);
 
 // Tool routes
 router.post('/api/tools', createTool);
