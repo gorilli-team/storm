@@ -59,12 +59,12 @@ const navItems: NavItem[] = [
         href: "/dashboard/storm",
         icon: <Code className="h-4 w-4" />,
       },
-      // {
-      //   title: "Marketplace",
-      //   href: "/user/tools",
-      //   icon: <Cloud className="h-4 w-4" />,
-      //   variant: "outline",
-      // },
+      {
+        title: "Marketplace",
+        href: "/user/tools",
+        icon: <Cloud className="h-4 w-4" />,
+        variant: "outline",
+      },
     ],
   },
   // {
@@ -72,11 +72,11 @@ const navItems: NavItem[] = [
   //   href: "/dashboard/profile",
   //   icon: <Settings className="h-5 w-5" />,
   // },
-  // {
-  //   title: "MCP Setup",
-  //   href: "/dashboard/mcp-setup",
-  //   icon: <Terminal className="h-5 w-5" />,
-  // },
+  {
+    title: "MCP Setup",
+    href: "/dashboard/mcp-setup",
+    icon: <Terminal className="h-5 w-5" />,
+  },
 ];
 
 export function AppSidebar() {
@@ -133,7 +133,7 @@ export function AppSidebar() {
           ))}
         </nav>
       </div>
-      {/* <div className="mt-auto p-4 border-t border-blue-800/30">
+      <div className="mt-auto p-4 border-t border-blue-800/30">
         <div className="rounded-lg bg-gray-800 p-4 border border-blue-700/30">
           <h3 className="text-sm font-medium text-cyan-400 mb-2 flex items-center">
             <Cpu className="h-4 w-4 mr-2 text-blue-400" />
@@ -148,7 +148,7 @@ export function AppSidebar() {
             </Button>
           </Link>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

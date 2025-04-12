@@ -61,7 +61,10 @@ function reconstructZodSchema(serializedSchema) {
   return schema;
 }
 
-const bucketAddress = "0xFf0000000000000000000000000000000000951f";
+const bucketAddress = [
+  "0xFf0000000000000000000000000000000000951f",
+  "0xff0000000000000000000000000000000000D114",
+];
 
 const server = new McpServer({
   name: "test",
@@ -72,39 +75,49 @@ const server = new McpServer({
 ///////// LOOPING THROUGH THE TOOL IN THE BUCKET AND ADDING THEM TO THE MCP SERVER
 /////////////////////////////////////////////////////////////////////////////////////
 const prefix = "tool/";
-const {
-  result: { objects },
-} = await bucketManager.query(bucketAddress, { prefix });
 
-for (const object of objects) {
-  const key = object.key;
+// Loop through each bucket address
+for (const address of bucketAddress) {
+  const {
+    result: { objects },
+  } = await bucketManager.query(address, { prefix });
 
-  const { result: retrievedObject } = await bucketManager.get(bucketAddress, key);
-  const decodedObject = new TextDecoder().decode(retrievedObject);
+  for (const object of objects) {
+    const key = object.key;
 
-  const encryptedParams = JSON.parse(decodedObject).params;
-  const encryptedFunction = JSON.parse(decodedObject).function;
+    const { result: retrievedObject } = await bucketManager.get(address, key);
+    const decodedObject = new TextDecoder().decode(retrievedObject);
 
-  const decryptedArgsBytes = CryptoJS.AES.decrypt(
-    encryptedParams,
-    process.env.ENCRYPTION_SECRET_KEY
-  );
-  const decryptedArgsString = decryptedArgsBytes.toString(CryptoJS.enc.Utf8);
+    const encryptedParams = JSON.parse(decodedObject).params;
+    const encryptedFunction = JSON.parse(decodedObject).function;
 
-  const decryptedFunctionBytes = CryptoJS.AES.decrypt(
-    encryptedFunction,
-    process.env.ENCRYPTION_SECRET_KEY
-  );
-  const decryptedFunctionString = decryptedFunctionBytes.toString(
-    CryptoJS.enc.Utf8
-  );
+    const decryptedArgsBytes = CryptoJS.AES.decrypt(
+      encryptedParams,
+      process.env.ENCRYPTION_SECRET_KEY
+    );
+    const decryptedArgsString = decryptedArgsBytes.toString(CryptoJS.enc.Utf8);
 
-  const recoveredArgs = JSON.parse(decryptedArgsString);
-  const recoveredFunction = new Function("return " + decryptedFunctionString)();
+    const decryptedFunctionBytes = CryptoJS.AES.decrypt(
+      encryptedFunction,
+      process.env.ENCRYPTION_SECRET_KEY
+    );
+    const decryptedFunctionString = decryptedFunctionBytes.toString(
+      CryptoJS.enc.Utf8
+    );
 
-  const reconstructedSchema = reconstructZodSchema(recoveredArgs);
+    const recoveredArgs = JSON.parse(decryptedArgsString);
+    const recoveredFunction = new Function(
+      "return " + decryptedFunctionString
+    )();
 
-  server.tool(`${object.key.split("/")[1]}`, reconstructedSchema, recoveredFunction);
+    const reconstructedSchema = reconstructZodSchema(recoveredArgs);
+
+    server.tool(
+      `${object.key.split("/")[1]} by luduvigo (cost: 0.02 recallnet tokens)`,
+      reconstructedSchema,
+      recoveredFunction
+    );
+  }
 }
 
 const transport = new StdioServerTransport();

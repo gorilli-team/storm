@@ -1,9 +1,9 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "engines": {
-    "node": "20.x"
+    "node": ">=20.x <=23.x"
   },
   "scripts": {
     "start": "node src/server.js",

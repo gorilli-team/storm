@@ -55,6 +55,21 @@ export default function MCPSetupPage() {
     alert("API key regenerated successfully!");
   };
 
+  const mcpSetup = `{
+    "mcpServers": {
+        "demo": {
+            "command": "node",
+            "args": [
+                "/PATH/storm/recall/mcpServer.js"
+            ],
+            "env": {
+                "PRIVATE_KEY": "RECALL_WALLET_PRIVATE_KEY",
+                "ENCRYPTION_SECRET_KEY": "AES_ENCRYPTION_SECRET_KEY"
+            }
+        }
+    }
+}`;
+
   // MCP Tool Definition
   const mcpToolDefinition = `{
   "name": "getWeather",
@@ -100,101 +115,51 @@ export default function MCPSetupPage() {
             </p>
           </div>
 
-          {/* API Key Section */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold flex items-center text-cyan-400">
-                <Key className="mr-2 h-5 w-5 text-blue-400" /> API Credentials
-              </h2>
-              <Button
-                onClick={handleRegenerateKey}
-                className="flex items-center gap-2 bg-gray-700 text-blue-300 hover:bg-gray-600"
-                size="sm"
-              >
-                <RefreshCw className="mr-1 h-4 w-4" />
-                Regenerate Key
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-900 p-4 rounded-md border border-blue-800">
-                <div className="text-sm text-gray-400 mb-1">API Key</div>
-                <div className="flex items-center">
-                  <code className="text-cyan-400 flex-1 font-mono text-sm">
-                    {apiKey}
-                  </code>
-                  <Button
-                    onClick={() => handleCopy(apiKey)}
-                    className="ml-2 h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
-                    size="sm"
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4 text-green-400" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="bg-gray-900 p-4 rounded-md border border-blue-800">
-                <div className="text-sm text-gray-400 mb-1">Endpoint URL</div>
-                <div className="flex items-center">
-                  <code className="text-cyan-400 flex-1 font-mono text-sm">
-                    {endpoint}
-                  </code>
-                  <Button
-                    onClick={() => handleCopy(endpoint)}
-                    className="ml-2 h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
-                    size="sm"
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4 text-green-400" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="bg-gray-900 p-4 rounded-md border border-blue-800">
-                <div className="text-sm text-gray-400 mb-1">Client ID</div>
-                <div className="flex items-center">
-                  <code className="text-cyan-400 flex-1 font-mono text-sm">
-                    {clientId}
-                  </code>
-                  <Button
-                    onClick={() => handleCopy(clientId)}
-                    className="ml-2 h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
-                    size="sm"
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4 text-green-400" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700 rounded-md flex items-start">
-              <AlertCircle className="h-5 w-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-300">
-                <strong className="text-cyan-400">Security Note:</strong> Keep
-                your API key secure and never share it publicly. If you suspect
-                your key has been compromised, regenerate it immediately.
-              </div>
-            </div>
-          </div>
-
           {/* MCP Protocol Section */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <FileJson className="mr-2 h-5 w-5 text-blue-400" /> MCP Protocol
             </h2>
 
+            {/* //make a section adding this, use the same style as the commented out boxes
+{
+    "mcpServers": {
+        "demo": {
+            "command": "node",
+            "args": [
+                "/PATH/storm/recall/mcpServer.js"
+            ],
+            "env": {
+                "PRIVATE_KEY": "RECALL_WALLET_PRIVATE_KEY",
+                "ENCRYPTION_SECRET_KEY": "AES_ENCRYPTION_SECRET_KEY"
+            }
+        }
+    }
+} */}
+
             <div className="mb-6">
+              <h3 className="text-lg font-medium text-cyan-400 mb-2">
+                MCP Setup
+              </h3>
+              <div className="bg-gray-900 p-4 rounded-md border border-blue-800 relative">
+                <Button
+                  onClick={() => handleCopy(mcpSetup)}
+                  className="absolute top-2 right-2 h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
+                  size="sm"
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-400" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+                <pre className="text-cyan-400 font-mono text-sm overflow-x-auto whitespace-pre">
+                  {mcpSetup}
+                </pre>
+              </div>
+            </div>
+
+            {/* <div className="mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2">
                 Tool Definition
               </h3>
@@ -236,7 +201,7 @@ export default function MCPSetupPage() {
                   {mcpResponseFormat}
                 </pre>
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700 rounded-md flex items-start">
               <AlertCircle className="h-5 w-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
