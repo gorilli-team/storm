@@ -10,6 +10,10 @@ const toolSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  walletAddress: {
+    type: String,
+    required: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -17,6 +21,7 @@ const toolSchema = new mongoose.Schema({
 });
 
 toolSchema.index({ bucketId: 1, toolName: 1 });
+toolSchema.index({ walletAddress: 1 });
 
 const Tool = mongoose.model('Tool', toolSchema);
 
