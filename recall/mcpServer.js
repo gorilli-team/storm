@@ -13,8 +13,13 @@ config();
 
 ///////// SETTING UP THE RECALL CLIENT ////////
 const privateKey = process.env.PRIVATE_KEY;
+
+const formattedPrivateKey = privateKey.startsWith("0x")
+  ? privateKey
+  : `0x${privateKey}`;
+
 const walletClient = createWalletClient({
-  account: privateKeyToAccount(privateKey),
+  account: privateKeyToAccount(formattedPrivateKey),
   chain: testnet,
   transport: http(),
 });
