@@ -61,10 +61,20 @@ function reconstructZodSchema(serializedSchema) {
   return schema;
 }
 
+// const results = await fetch(
+//   "https://storm-backend-75cc8a347510.herokuapp.com/api/buckets"
+// ).then((res) => res.json());
+
+// const bucketAddress = results.data.map((bucket) => bucket.bucketId);
+
+// console.log(bucketAddress);
+
 const bucketAddress = [
   "0xFf0000000000000000000000000000000000951f",
   "0xff0000000000000000000000000000000000D114",
 ];
+
+// const bucketAddress = ["0xFf0000000000000000000000000000000000951f"];
 
 const server = new McpServer({
   name: "test",
@@ -78,45 +88,79 @@ const prefix = "tool/";
 
 // Loop through each bucket address
 for (const address of bucketAddress) {
-  const {
-    result: { objects },
-  } = await bucketManager.query(address, { prefix });
+  try {
+    const queryResult = await bucketManager.query(address, { prefix });
 
-  for (const object of objects) {
-    const key = object.key;
+    const {
+      result: { objects },
+    } = queryResult;
 
-    const { result: retrievedObject } = await bucketManager.get(address, key);
-    const decodedObject = new TextDecoder().decode(retrievedObject);
+    for (const object of objects) {
+      try {
+        const key = object.key;
 
-    const encryptedParams = JSON.parse(decodedObject).params;
-    const encryptedFunction = JSON.parse(decodedObject).function;
+        const getResult = await bucketManager.get(address, key);
 
-    const decryptedArgsBytes = CryptoJS.AES.decrypt(
-      encryptedParams,
-      process.env.ENCRYPTION_SECRET_KEY
-    );
-    const decryptedArgsString = decryptedArgsBytes.toString(CryptoJS.enc.Utf8);
+        if (!getResult || !getResult.result) {
+          continue;
+        }
 
-    const decryptedFunctionBytes = CryptoJS.AES.decrypt(
-      encryptedFunction,
-      process.env.ENCRYPTION_SECRET_KEY
-    );
-    const decryptedFunctionString = decryptedFunctionBytes.toString(
-      CryptoJS.enc.Utf8
-    );
+        const retrievedObject = getResult.result;
 
-    const recoveredArgs = JSON.parse(decryptedArgsString);
-    const recoveredFunction = new Function(
-      "return " + decryptedFunctionString
-    )();
+        const decodedObject = new TextDecoder().decode(retrievedObject);
 
-    const reconstructedSchema = reconstructZodSchema(recoveredArgs);
+        const parsedObject = JSON.parse(decodedObject);
 
-    server.tool(
-      `${object.key.split("/")[1]}`,
-      reconstructedSchema,
-      recoveredFunction
-    );
+        if (!parsedObject.params || !parsedObject.function) {
+          continue;
+        }
+
+        const encryptedParams = parsedObject.params;
+        const encryptedFunction = parsedObject.function;
+
+        // Get the encryption key
+        const secretKey = process.env.ENCRYPTION_SECRET_KEY;
+
+        try {
+          // Decrypt the parameters
+          const decryptedArgsBytes = CryptoJS.AES.decrypt(
+            encryptedParams,
+            secretKey
+          );
+          const decryptedArgsString = decryptedArgsBytes.toString(
+            CryptoJS.enc.Utf8
+          );
+
+          // Decrypt the function
+          const decryptedFunctionBytes = CryptoJS.AES.decrypt(
+            encryptedFunction,
+            secretKey
+          );
+          const decryptedFunctionString = decryptedFunctionBytes.toString(
+            CryptoJS.enc.Utf8
+          );
+
+          const recoveredArgs = JSON.parse(decryptedArgsString);
+          const recoveredFunction = new Function(
+            "return " + decryptedFunctionString
+          )();
+
+          const reconstructedSchema = reconstructZodSchema(recoveredArgs);
+
+          server.tool(
+            `${object.key.split("/")[1]}`,
+            reconstructedSchema,
+            recoveredFunction
+          );
+        } catch (error) {
+          console.log("error", error);
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    }
+  } catch (error) {
+    console.log("error", error);
   }
 }
 
