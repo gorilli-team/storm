@@ -11,19 +11,7 @@ export function Providers({ children }: { children: ReactNode }) {
               theme: 'light',
               accentColor: '#3B82F6',
             },
-            embeddedWallets: {
-              createOnLogin: 'users-without-wallets',
-            },
-            loginMethods: ['email', 'google', 'apple', 'discord', 'twitter', 'wallet'],
-            fundingMethodConfig: {
-              moonpay: {
-                paymentMethod: 'credit_debit_card',
-                uiConfig: {
-                  accentColor: '#696FFD',
-                  theme: 'light'
-                },
-              },
-            },
+            loginMethods: ['wallet'],
           }}
         >
           {children}
