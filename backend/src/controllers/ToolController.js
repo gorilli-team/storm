@@ -3,12 +3,12 @@ import Bucket from '../models/BucketModel.js';
 
 export const createTool = async (req, res) => {
   try {
-    const { bucketId, toolName} = req.body;
+    const { bucketId, toolName, walletAddress } = req.body;
     
-    if (!bucketId || !toolName) {
+    if (!bucketId || !toolName || !walletAddress) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Bucket ID, tool name, and tool code are required' 
+        message: 'Bucket ID, tool name, and wallet address are required' 
       });
     }
 
@@ -23,6 +23,7 @@ export const createTool = async (req, res) => {
     const newTool = new Tool({
       bucketId,
       toolName,
+      walletAddress
     });
     
     await newTool.save();
@@ -71,4 +72,25 @@ export const getToolsByBucket = async (req, res) => {
       error: error.message
     });
   }
+};
+
+// Get all tools
+export const getAllTools = async (req, res) => {
+    try {
+      const tools = await Tool.find().sort({ createdAt: -1 });
+      
+      return res.status(200).json({
+        success: true,
+        count: tools.length,
+        data: tools
+      });
+      
+    } catch (error) {
+      console.error('Error fetching all tools:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error while fetching all tools',
+        error: error.message
+      });
+    }
 };
