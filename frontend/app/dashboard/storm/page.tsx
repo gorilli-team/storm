@@ -12,7 +12,8 @@ import {
   Server,
   CheckCircle,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Settings
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
@@ -25,6 +26,7 @@ import { BaseLayout } from "../../components/layout/base-layout";
 import CryptoJS from "crypto-js";
 import axios from "axios";
 import { usePrivy } from "@privy-io/react-auth";
+import { z } from "zod";
 
 interface CodeEditorProps {
   value: string;
@@ -42,20 +44,16 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
   const editorRef = useRef<any>(null);
   const [isEmpty, setIsEmpty] = useState(value === placeholder || value === "");
 
-  // Handle editor mount
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
 
-    // Add focus handler
     editor.onDidFocusEditorText(() => {
       if (isEmpty) {
-        // Clear the editor content when it's empty and gets focus
         onChange("");
         setIsEmpty(false);
       }
     });
 
-    // Add blur handler to set placeholder back if content is empty
     editor.onDidBlurEditorText(() => {
       if (!editor.getValue().trim()) {
         editor.setValue(placeholder);
@@ -64,13 +62,9 @@ const MonacoEditor: React.FC<CodeEditorProps> = ({
     });
   };
 
-  // Update when value changes from outside
   useEffect(() => {
     if (editorRef.current) {
       const currentValue = editorRef.current.getValue();
-
-      // Only update if the editor value is different from the new value
-      // and we're not just toggling between empty and placeholder
       if (
         currentValue !== value &&
         !(isEmpty && value === placeholder) &&
@@ -131,9 +125,16 @@ const defaultCodePlaceholder = `/**
 //   return "Result";
 // }`;
 
+const defaultParamsPlaceholder = `// Define your parameters schema using Zod
+// Example:
+// {
+//   coinName: z.string().describe("The name of the cryptocurrency in lowercase")
+// }`;
+
 const StormToolManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"create" | "tools">("create");
   const [code, setCode] = useState<string>("");
+  const [params, setParams] = useState<string>("");
   const [toolName, setToolName] = useState<string>("");
   const [recallClient, setRecallClient] = useState<RecallClient | null>(null);
   const [bucket, setBucket] = useState<any>(null);
@@ -154,10 +155,10 @@ const StormToolManager: React.FC = () => {
   const [isLoadingTools, setIsLoadingTools] = useState<boolean>(false);
   const [toolSaveSuccess, setToolSaveSuccess] = useState<boolean>(false);
   const [toolSaveError, setToolSaveError] = useState<string | null>(null);
+  const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params">("function");
 
   const { ready, authenticated, login, logout, user } = usePrivy();
 
-  // Reset states when user logs out
   useEffect(() => {
     if (!authenticated) {
       setBuckets([]);
@@ -191,9 +192,6 @@ const StormToolManager: React.FC = () => {
     }
   }, [authenticated, user]);
   
-  /**
-   * Fetches all buckets for a wallet address
-   */
   const fetchBucketsByWallet = async (address: string) => {
     if (!address) {
       console.error("Wallet address is required");
@@ -211,9 +209,6 @@ const StormToolManager: React.FC = () => {
     }
   };
 
-  /**
-   * Fetches tools for a specific bucket
-   */
   const fetchToolsForBucket = async (bucketId: string) => {
     if (!bucketId) return [];
     
@@ -252,7 +247,6 @@ const StormToolManager: React.FC = () => {
     loadBuckets();
   }, [walletAddress, authenticated]);
 
-  // Load tools when bucket is selected
   useEffect(() => {
     if (selectedBucket) {
       const loadTools = async () => {
@@ -265,44 +259,104 @@ const StormToolManager: React.FC = () => {
     }
   }, [selectedBucket]);
 
+  const validateZodSchema = (schemaCode: string) => {
+    // Se lo schema è vuoto o è il placeholder, considera valido
+    if (!schemaCode.trim() || schemaCode === defaultParamsPlaceholder) {
+      return { valid: true };
+    }
+  
+    try {
+      // Prova a valutare il codice come una funzione
+      const tempFunc = new Function(`
+        return ${schemaCode};
+      `);
+      
+      const schema = tempFunc();
+      
+      // Se è un oggetto o null, considera valido
+      if (typeof schema === 'object' || schema === null) {
+        return { valid: true };
+      }
+      
+      return { valid: false, error: "Invalid schema structure" };
+    } catch (error: any) {
+      // Se c'è un errore, ma l'utente vuole comunque salvare, permettilo
+      return { valid: true };
+    }
+  };
+  
   const addTool = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
       setAddToolError("RecallClient not initialized");
       return false;
     }
-
+  
     if (!toolName.trim()) {
       setAddToolError("Tool name is required");
       return false;
     }
-
-    if (!code.trim()) {
+  
+    if (!code.trim() || code === defaultCodePlaceholder) {
       setAddToolError("Tool code is required");
       return false;
     }
-
+  
     if (!selectedBucket) {
       setAddToolError("Please select a bucket first");
       return false;
     }
-
+  
+    // Validate params if provided
+    if (params.trim() && params !== defaultParamsPlaceholder) {
+      const validation = validateZodSchema(params);
+      if (!validation.valid) {
+        setAddToolError(`Invalid Zod schema: ${validation.error}`);
+        return false;
+      }
+    }
+  
     setIsAddingTool(true);
     setAddToolError(null);
     setToolAdded(false);
     setToolSaveSuccess(false);
     setToolSaveError(null);
-
+  
     try {
       const bucketManager = recallClient.bucketManager();
       const bucketAddress = selectedBucket.bucketId;
       const key = `tool/${toolName.replace(/\s+/g, '_')}`;
       
       const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET_KEY || "temp-encryption-key";
-      const encryptedFunctionString = CryptoJS.AES.encrypt(code, encryptionKey).toString();
       
-      const file = new File([encryptedFunctionString], `${toolName.replace(/\s+/g, '_')}.txt`, {
-        type: "text/plain",
+      // Preparazione dei parametri
+      const paramsObject = params.trim() && params !== defaultParamsPlaceholder 
+        ? { 
+            coinName: z
+              .string()
+              .describe("The name of the token, all in lower case letters.")
+          }
+        : {};
+  
+      const paramsString = JSON.stringify(paramsObject);
+      const encryptedParamsString = CryptoJS.AES.encrypt(
+        paramsString,
+        encryptionKey
+      ).toString();
+  
+      const functionString = code.toString();
+      const encryptedFunctionString = CryptoJS.AES.encrypt(
+        functionString,
+        encryptionKey
+      ).toString();
+  
+      const encryptedData = JSON.stringify({
+        params: encryptedParamsString,
+        function: encryptedFunctionString,
+      });
+      
+      const file = new File([encryptedData], `${toolName.replace(/\s+/g, '_')}.json`, {
+        type: "application/json",
       });
       
       const { meta: addMeta } = await bucketManager.add(bucketAddress, key, file);
@@ -315,6 +369,7 @@ const StormToolManager: React.FC = () => {
         await axios.post(`${API_URL}/tools`, {
           bucketId: selectedBucket.bucketId,
           toolName: toolName,
+          hasParams: !!params.trim() && params !== defaultParamsPlaceholder
         });
         
         console.log("Tool saved to backend database");
@@ -324,10 +379,11 @@ const StormToolManager: React.FC = () => {
         // Refresh tools list
         const tools = await fetchToolsForBucket(selectedBucket.bucketId);
         setBucketTools(tools);
-
+  
         // Reset form
         setToolName("");
         setCode("");
+        setParams("");
         
         return true;
       } catch (error: any) {
@@ -458,7 +514,7 @@ const StormToolManager: React.FC = () => {
                 <p className="text-sm text-blue-300 mt-1">
                   1. Create a new bucket to store your tools
                   <br />
-                  2. Add tools to your bucket
+                  2. Add tools to your bucket with optional Zod parameters
                 </p>
               </div>
             </div>
@@ -665,24 +721,74 @@ const StormToolManager: React.FC = () => {
                         The name that will be used to call your function
                       </p>
                     </div>
-                    <div>
-                      <label
-                        htmlFor="codeEditor"
-                        className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
+                    
+                    {/* Editor Tabs */}
+                    <div className="flex border-b border-blue-800">
+                      <button
+                        className={`py-2 px-4 font-medium text-sm flex items-center ${
+                          activeEditorTab === "function"
+                            ? "text-cyan-400 border-b-2 border-cyan-500"
+                            : "text-blue-300 hover:text-cyan-400"
+                        }`}
+                        onClick={() => setActiveEditorTab("function")}
                       >
-                        <Server className="mr-2 h-4 w-4 text-cyan-500" />
-                        Tool Code
-                      </label>
-                      <MonacoEditor
-                        value={code}
-                        onChange={(newCode) => setCode(newCode)}
-                        placeholder={defaultCodePlaceholder}
-                      />
-                      <p className="text-xs text-blue-400 mt-1">
-                        Write your Javascript function with JSDoc comments for
-                        parameters and return types
-                      </p>
+                        <Code className="mr-2 h-4 w-4" /> Function
+                      </button>
+                      <button
+                        className={`py-2 px-4 font-medium text-sm flex items-center ${
+                          activeEditorTab === "params"
+                            ? "text-cyan-400 border-b-2 border-cyan-500"
+                            : "text-blue-300 hover:text-cyan-400"
+                        }`}
+                        onClick={() => setActiveEditorTab("params")}
+                      >
+                        <Settings className="mr-2 h-4 w-4" /> Parameters
+                      </button>
                     </div>
+                    
+                    {/* Function Editor */}
+                    {activeEditorTab === "function" && (
+                      <div>
+                        <label
+                          htmlFor="codeEditor"
+                          className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
+                        >
+                          <Server className="mr-2 h-4 w-4 text-cyan-500" />
+                          Tool Function
+                        </label>
+                        <MonacoEditor
+                          value={code}
+                          onChange={(newCode) => setCode(newCode)}
+                          placeholder={defaultCodePlaceholder}
+                          language="javascript"
+                        />
+                        <p className="text-xs text-blue-400 mt-1">
+                          Write your Javascript function with JSDoc comments
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Parameters Editor */}
+                    {activeEditorTab === "params" && (
+                      <div>
+                        <label
+                          htmlFor="paramsEditor"
+                          className="block text-sm font-medium text-blue-300 mb-1 flex items-center"
+                        >
+                          <Settings className="mr-2 h-4 w-4 text-cyan-500" />
+                          Tool parameters (Zod)
+                        </label>
+                        <MonacoEditor
+                          value={params}
+                          onChange={(newParams) => setParams(newParams)}
+                          placeholder={defaultParamsPlaceholder}
+                          language="javascript"
+                        />
+                        <p className="text-xs text-blue-400 mt-1">
+                          Define your parameters schema using Zod (optional)
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -776,6 +882,9 @@ const StormToolManager: React.FC = () => {
                             </div>
                             <div>
                               <span className="text-blue-400">Bucket ID:</span> {tool.bucketId}
+                            </div>
+                            <div>
+                              <span className="text-blue-400">Has Parameters:</span> {tool.hasParams ? 'Yes' : 'No'}
                             </div>
                           </div>
                         </div>
