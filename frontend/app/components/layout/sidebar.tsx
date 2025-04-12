@@ -51,7 +51,7 @@ const navItems: NavItem[] = [
   // },
   {
     title: "Storm Tools",
-    href: "/dashboard/storm",
+    href: "/dashboard",
     icon: <Zap className="h-5 w-5" />,
     buttons: [
       {
