@@ -16,7 +16,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const { t } = useI18n();
-  
+
   const { ready, authenticated, login, logout, user } = usePrivy();
 
   useEffect(() => {
@@ -27,12 +27,12 @@ export function BaseLayout({ children }: BaseLayoutProps) {
       }
     }
   }, [authenticated, user]);
-  
+
   const formatAddress = (address: string) => {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Mobile menu button */}
@@ -61,16 +61,16 @@ export function BaseLayout({ children }: BaseLayoutProps) {
         <header className="sticky top-0 z-30 border-b border-blue-800/30 bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-gray-900/80">
           <div className="container flex h-16 items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="font-semibold text-cyan-400">
+              {/* <Link href="/dashboard" className="font-semibold text-cyan-400">
                 Developer
-              </Link>
+              </Link> */}
               <nav className="flex gap-4">
-                <Link
+                {/* <Link
                   href="/dashboard/widgets"
                   className="font-semibold text-cyan-400"
                 >
                   User
-                </Link>
+                </Link> */}
               </nav>
             </div>
             <div className="flex items-center gap-4">
@@ -78,7 +78,9 @@ export function BaseLayout({ children }: BaseLayoutProps) {
                 <>
                   {walletAddress && (
                     <div className="px-3 py-2 rounded-md bg-gray-800/70 border border-blue-700/30 text-cyan-400">
-                      <span className="text-sm font-mono">{formatAddress(walletAddress)}</span>
+                      <span className="text-sm font-mono">
+                        {formatAddress(walletAddress)}
+                      </span>
                     </div>
                   )}
                   <Button

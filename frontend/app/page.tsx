@@ -73,7 +73,7 @@ export default function Home() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/user/tools">
+                <Link href="/dashboard/storm">
                   <Button
                     variant="outline"
                     className="border-blue-700 text-blue-300 hover:bg-gray-800 px-8 py-6 text-lg"
