@@ -107,7 +107,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
                 </Button>
               )}
 
-              <Link href="/dashboard/profile">
+              {/* <Link href="/dashboard/profile">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -115,7 +115,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
                 >
                   <User className="h-8 w-8" />
                 </Button>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </header>
