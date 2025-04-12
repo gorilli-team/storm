@@ -13,6 +13,7 @@ import {
   Cpu,
   Network,
   Terminal,
+  User
 } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -67,6 +68,12 @@ const navItems: NavItem[] = [
       },
     ],
   },
+  {
+    title: "User",
+    href: "/dashboard/user",
+    icon: <Settings className="h-5 w-5" />,
+  },
+
   // {
   //   title: "Profile",
   //   href: "/dashboard/profile",

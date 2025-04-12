@@ -20,13 +20,35 @@ export function BaseLayout({ children }: BaseLayoutProps) {
   const { ready, authenticated, login, logout, user } = usePrivy();
 
   useEffect(() => {
-    if (authenticated && user && user.wallet) {
-      const address = user.wallet.address;
-      if (address) {
-        setWalletAddress(address);
+    const syncUser = async (address: string) => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        const res = await fetch(`${API_URL}/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ walletAddress: address }),
+        });
+    
+        const data = await res.json();
+        if (!res.ok) {
+          console.error("Failed to create or fetch user:", data.message);
+        } else {
+          console.log("User synced:", data);
+        }
+      } catch (err) {
+        console.error("Error during user sync:", err);
       }
+    };    
+  
+    if (authenticated && user?.wallet?.address) {
+      const address = user.wallet.address;
+      setWalletAddress(address);
+      syncUser(address);
     }
   }, [authenticated, user]);
+  
 
   const formatAddress = (address: string) => {
     if (!address) return "";
@@ -124,3 +146,4 @@ export function BaseLayout({ children }: BaseLayoutProps) {
     </div>
   );
 }
+
