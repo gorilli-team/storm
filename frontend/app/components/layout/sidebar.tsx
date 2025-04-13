@@ -52,12 +52,12 @@ const navItems: NavItem[] = [
   // },
   {
     title: "Tool manager",
-    href: "/dashboard/storm",
+    href: "/dashboard/tool-manager",
     icon: <Code className="h-4 w-4" />,
   },
   {
     title: "Marketplace",
-    href: "/user/tools",
+    href: "/dashboard/marketplace",
     icon: <Cloud className="h-4 w-4" />,
   },
   {

@@ -169,7 +169,7 @@ export default function ToolDetailsPage() {
       <BaseLayout>
         <div className="p-6">
           <Link
-            href="/user/tools"
+            href="/dashboard/marketplace"
             className="inline-flex items-center text-blue-300 hover:text-cyan-400 mb-4"
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketplace
@@ -187,7 +187,7 @@ export default function ToolDetailsPage() {
       <div className="space-y-8 w-full px-6 text-gray-100">
         {/* Back button */}
         <Link
-          href="/user/tools"
+          href="/dashboard/marketplace"
           className="inline-flex items-center text-blue-300 hover:text-cyan-400"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketplace

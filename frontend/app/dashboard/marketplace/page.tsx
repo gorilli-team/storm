@@ -174,7 +174,7 @@ export default function StormMarketplacePage() {
                   <p className="text-blue-300 mt-1">Tool for {tool.toolName} function</p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <Link href={`/user/tools/${tool._id}`}>
+                  <Link href={`/dashboard/marketplace/${tool._id}`}>
                     <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500">
                       <ExternalLink className="mr-2 h-4 w-4" /> View Details
                     </Button>
