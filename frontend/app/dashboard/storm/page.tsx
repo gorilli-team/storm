@@ -13,7 +13,8 @@ import {
   CheckCircle,
   Loader2,
   AlertTriangle,
-  Settings
+  Settings,
+  Info
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
@@ -135,6 +136,8 @@ const StormToolManager: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [params, setParams] = useState<string>("");
   const [toolName, setToolName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [hashtags, setHashtags] = useState<string>("");
   const [recallClient, setRecallClient] = useState<RecallClient | null>(null);
   const [bucket, setBucket] = useState<any>(null);
   const [isCreatingBucket, setIsCreatingBucket] = useState<boolean>(false);
@@ -154,7 +157,7 @@ const StormToolManager: React.FC = () => {
   const [isLoadingTools, setIsLoadingTools] = useState<boolean>(false);
   const [toolSaveSuccess, setToolSaveSuccess] = useState<boolean>(false);
   const [toolSaveError, setToolSaveError] = useState<string | null>(null);
-  const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params">("function");
+  const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params" | "info">("function");
 
   const { ready, authenticated, login, logout, user } = usePrivy();
 
@@ -376,8 +379,11 @@ const StormToolManager: React.FC = () => {
         await axios.post(`${API_URL}/tools`, {
           bucketId: selectedBucket.bucketId,
           toolName: toolName,
+          description: description,
+          hashtags: hashtags.split(',').map(tag => tag.trim()).filter(tag => tag),
           walletAddress: walletAddress,
-          hasParams: !!params.trim() && params !== defaultParamsPlaceholder
+          code: code,
+          params: params
         });
         
         console.log("Tool saved to backend database");
@@ -390,6 +396,8 @@ const StormToolManager: React.FC = () => {
   
         // Reset form
         setToolName("");
+        setDescription("");
+        setHashtags("");
         setCode("");
         setParams("");
         
@@ -502,7 +510,7 @@ const StormToolManager: React.FC = () => {
               manage your function tools
             </p>
           </div>
-  
+
           {authenticated && walletAddress && (
             <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
               <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
@@ -511,7 +519,7 @@ const StormToolManager: React.FC = () => {
               </div>
             </div>
           )}
-  
+
           {/* Info Card */}
           <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
             <div className="flex">
@@ -527,7 +535,7 @@ const StormToolManager: React.FC = () => {
               </div>
             </div>
           </div>
-  
+
           {/* Bucket Selection */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
@@ -556,7 +564,7 @@ const StormToolManager: React.FC = () => {
                 </Button>
               ) : null}
             </div>
-  
+
             {bucketCreationError && (
               <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-3 mb-4 flex items-center">
                 <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
@@ -572,7 +580,7 @@ const StormToolManager: React.FC = () => {
                 </p>
               </div>
             )}
-  
+
             {authenticated && bucket && (
               <div className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 mb-4">
                 <div className="flex items-center mb-2">
@@ -591,7 +599,7 @@ const StormToolManager: React.FC = () => {
                 )}
               </div>
             )}
-  
+
             {/* Bucket Cards Display */}
             <div className="mt-4">
               {!authenticated ? (
@@ -652,7 +660,7 @@ const StormToolManager: React.FC = () => {
               )}
             </div>
           </div>
-  
+
           {selectedBucket && (
             <>
               {/* Tabs */}
@@ -682,7 +690,7 @@ const StormToolManager: React.FC = () => {
                   </div>
                 </button>
               </div>
-  
+
               {/* Content based on active tab */}
               {activeTab === "create" ? (
                 <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
@@ -705,7 +713,7 @@ const StormToolManager: React.FC = () => {
                       <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
                     </div>
                   </div>
-  
+
                   <div className="space-y-4 mb-4">
                     <div>
                       <label
@@ -748,6 +756,16 @@ const StormToolManager: React.FC = () => {
                         onClick={() => setActiveEditorTab("params")}
                       >
                         <Settings className="mr-2 h-4 w-4" /> Parameters
+                      </button>
+                      <button
+                        className={`py-2 px-4 font-medium text-sm flex items-center ${
+                          activeEditorTab === "info"
+                            ? "text-cyan-400 border-b-2 border-cyan-500"
+                            : "text-blue-300 hover:text-cyan-400"
+                        }`}
+                        onClick={() => setActiveEditorTab("info")}
+                      >
+                        <Info className="mr-2 h-4 w-4" /> Other Info
                       </button>
                     </div>
                     
@@ -794,8 +812,48 @@ const StormToolManager: React.FC = () => {
                         </p>
                       </div>
                     )}
+
+                    {/* Other Info Editor */}
+                    {activeEditorTab === "info" && (
+                      <div className="space-y-4">
+                        <div>
+                          <label
+                            htmlFor="description"
+                            className="block text-sm font-medium text-blue-300 mb-1"
+                          >
+                            Description
+                          </label>
+                          <textarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Describe what your tool does..."
+                            className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none min-h-[100px]"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="hashtags"
+                            className="block text-sm font-medium text-blue-300 mb-1"
+                          >
+                            Hashtags (comma separated)
+                          </label>
+                          <input
+                            id="hashtags"
+                            type="text"
+                            value={hashtags}
+                            onChange={(e) => setHashtags(e.target.value)}
+                            placeholder="crypto,price,api"
+                            className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          />
+                          <p className="text-xs text-blue-400 mt-1">
+                            Add relevant tags to help users discover your tool
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-  
+
                   <button
                     onClick={addTool}
                     disabled={isAddingTool || !recallClient || !authenticated}
@@ -847,7 +905,7 @@ const StormToolManager: React.FC = () => {
                       <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
                     </div>
                   </div>
-  
+
                   {isLoadingTools ? (
                     <div className="flex justify-center py-8">
                       <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
@@ -876,6 +934,18 @@ const StormToolManager: React.FC = () => {
                               })}
                             </span>
                           </div>
+                          {tool.description && (
+                            <p className="text-sm text-blue-300 mb-2">{tool.description}</p>
+                          )}
+                          {tool.hashtags?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {tool.hashtags.map((tag: string, i: number) => (
+                                <span key={i} className="text-xs bg-blue-900/30 text-blue-300 px-2 py-1 rounded">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
                             <div>
                               <span className="text-blue-400">Tool Name:</span> {tool.toolName}
