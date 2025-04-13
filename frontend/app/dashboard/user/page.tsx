@@ -16,7 +16,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { ready, authenticated, user } = usePrivy();
+  const { ready, authenticated, user, login } = usePrivy();
 
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -101,6 +101,29 @@ export default function ProfilePage() {
     return `${address.slice(0, 10)}...${address.slice(-10)}`;
   };  
 
+  if (!authenticated) {
+    return (
+      <BaseLayout>
+        <div className="flex flex-col items-center justify-center h-[70vh] space-y-6 text-center px-4">
+          <div className="bg-gray-800 p-8 rounded-lg border border-blue-500 border-opacity-20 max-w-md w-full">
+            <User className="h-12 w-12 mx-auto text-cyan-400 mb-4" />
+            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 mb-2">
+              Access Required
+            </h2>
+            <p className="text-blue-300 mb-6">
+              You need to login to view and manage your profile.
+            </p>
+            <Button
+              onClick={login}
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 py-6 text-lg"
+            >
+              Login
+            </Button>
+          </div>
+        </div>
+      </BaseLayout>
+    );
+  }
 
   if (isLoading && !userProfile) {
     return (
