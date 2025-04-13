@@ -1,30 +1,44 @@
-# Storm MCP Marketplace
+# 🌪️ Storm MCP Marketplace
 
-> A decentralized marketplace connecting developers and users through MCP tools, enabling monetization via Recall tokens and creating a seamless ecosystem for specialized AI capabilities.
+<div align="center">
 
-## Overview
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Decentralized-green.svg)](https://gorilli.ai)
+[![Security](https://img.shields.io/badge/security-AES%20Encryption-red.svg)]()
 
-Storm is a decentralized marketplace for AI tools where developers can publish and monetize their Model Control Protocol (MCP) tools directly. Consumers access these tools through token-based payments, creating an ecosystem that rewards developers while providing users with diverse AI capabilities.
+> A decentralized marketplace connecting developers and users through MCP tools, enabling publishing and discovery via Recall and creating a seamless ecosystem for specialized AI capabilities.
 
-The platform uses AES encryption for secure tool storage and transmission, and integrates with Recall tokens to enable micropayments between users and developers.
+</div>
 
-## Key Features
+## 📋 Overview
 
-- **Developer Monetization**: Publish your MCP tools and earn tokens when consumers use them
-- **Consumer Access**: Use a variety of specialized AI tools through a single unified interface
-- **Token Economy**: Powered by Recall tokens and wallet integration with account abstraction
-- **Transparent Source Code**: Option to showcase tool source code in the frontend
-- **Simple Integration**: Easy to install and use with platforms like Claude Desktop
-- **AES Encryption**: Industry-standard security for tool parameters and functions
-- **Tool Buckets**: Organized storage system for efficient tool management
+Storm is a decentralized marketplace for AI tools where developers can publish and monetize their Model Context Protocol (MCP) tools directly. Consumers access these tools through token-based payments, creating an ecosystem that rewards developers while providing users with diverse AI capabilities.
 
-## Technical Architecture
+The platform uses AES encryption for secure tool storage and transmission, and integrates with Recall.
+
+## ✨ Key Features
+
+<div align="center">
+
+| 🔒 **Developer Monetization**                                  | 🛍️ **Consumer Access**                                                   | 📝 **Transparent Source Code**                      |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------- |
+| Publish your MCP tools and earn tokens when consumers use them | Use a variety of specialized AI tools through a single unified interface | Option to showcase tool source code in the frontend |
+
+| 🔌 **Simple Integration**                                  | 🔐 **AES Encryption**                                        | 📦 **Tool Buckets**                                    |
+| ---------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| Easy to install and use with platforms like Claude Desktop | Industry-standard security for tool parameters and functions | Organized storage system for efficient tool management |
+
+</div>
+
+## 🏗️ Technical Architecture
 
 ### Tool Management Flow
 
-![Recall Integration](/assets/Overview.png)
+<div align="center">
+  <img src="assets/Overview.png" alt="Recall Integration" width="600"/>
+</div>
 
-The Storm platform uses a sophisticated workflow to securely store and retrieve tools:
+The Storm platform uses the following workflow to securely store and retrieve tools:
 
 1. **Create Bucket**: Initialize storage for new tools
 2. **Add Tool**: Encrypt tool parameters and functions with AES before storage
@@ -33,7 +47,9 @@ The Storm platform uses a sophisticated workflow to securely store and retrieve 
 
 ### Tool Bucket Structure
 
-![Tool Bucket](/assets/Tool%20bucket.png)
+<div align="center">
+  <img src="assets/Tool%20bucket.png" alt="Tool Bucket" width="600"/>
+</div>
 
 Tools in Storm are organized in buckets with detailed component information:
 
@@ -44,7 +60,9 @@ Tools in Storm are organized in buckets with detailed component information:
 
 ### Detailed Tool Processing Workflow
 
-![Detailed Workflow](</assets/Detailed%20workflow%20(pt.1).png>)
+<div align="center">
+  <img src="assets/Detailed%20workflow%20(pt.1).png" alt="Detailed Workflow" width="600"/>
+</div>
 
 When a developer adds a new tool to Storm:
 
@@ -56,7 +74,9 @@ When a developer adds a new tool to Storm:
 
 ### Tool Retrieval and Execution
 
-![Tool Retrieval](</assets/Detailed%20workflow%20(pt.2).png>)
+<div align="center">
+  <img src="assets/Detailed%20workflow%20(pt.2).png" alt="Tool Retrieval" width="600"/>
+</div>
 
 When a user requests a tool:
 
@@ -66,48 +86,156 @@ When a user requests a tool:
 4. Zod schema validation ensures security and correctness
 5. The tool is made available to the MCP server for execution
 
-## How It Works
+## 🚀 How It Works
 
 ### For Developers
 
-1. **Create Your Tool**: Develop your MCP-compatible tool using the Storm SDK
-2. **Configure Parameters**: Define the input parameters and validation rules
-3. **Implement Function**: Write the core functionality that your tool provides
-4. **Publish to Marketplace**: Submit your tool with pricing information
-5. **Monitor Usage**: Track usage statistics and token earnings
+<div align="center">
+
+| Step | Description                                                                  |
+| ---- | ---------------------------------------------------------------------------- |
+| 1️⃣   | **Create Your Tool**: Develop your MCP-compatible tool using the Storm SDK   |
+| 2️⃣   | **Configure Parameters**: Define the input parameters and validation rules   |
+| 3️⃣   | **Implement Function**: Write the core functionality that your tool provides |
+| 4️⃣   | **Publish to Marketplace**: Submit your tool with pricing information        |
+| 5️⃣   | **Monitor Usage**: Track usage statistics and token earnings                 |
+
+</div>
 
 ### For Consumers
 
-1. **Install Storm**: Set up the Storm MCP server on your system
-2. **Fund Your Wallet**: Ensure your wallet has sufficient Recall tokens
-3. **Browse Tools**: Explore available tools in the marketplace
-4. **Use Tools via AI**: Make queries to your AI assistant that leverage Storm tools
-5. **Automatic Payments**: Micropayments are processed automatically to tool developers
+<div align="center">
 
-## Current Tool Types
+| Step | Description                                                                          |
+| ---- | ------------------------------------------------------------------------------------ |
+| 1️⃣   | **Install Storm**: Set up the Storm MCP server on your system                        |
+| 2️⃣   | **Fund Your Wallet**: Ensure your wallet has sufficient Recall tokens                |
+| 3️⃣   | **Browse Tools**: Explore available tools in the marketplace                         |
+| 4️⃣   | **Use Tools via AI**: Make queries to your AI assistant that leverage Storm tools    |
+| 5️⃣   | **Automatic Payments**: Micropayments are processed automatically to tool developers |
 
-Storm currently supports a variety of tools that don't require authentication from consumers:
+</div>
 
-- **Cryptocurrency Information**: Real-time pricing and market data
-- **Weather Information**: Current conditions and forecasts
-- **Geographic Data**: Location details and ZIP code information
-- **Train Schedules**: Status updates and timetables
-- **Financial Tools**: Currency conversion and stock data
-- **Research APIs**: Academic and scientific data access
+## 🔒 Security Features
 
-## Security Features
+<div align="center">
 
-- **AES Encryption**: All tool code and parameters are encrypted at rest and in transit
-- **Secure Key Management**: Advanced key rotation and storage
-- **Access Controls**: Granular permissions for tool access
-- **Audit Logging**: Comprehensive logging of all tool usage
-- **Parameter Validation**: Strict schema enforcement using Zod
+| 🔐 **AES Encryption**                                             | 🔑 **Secure Key Management**      | 🔒 **Access Controls**               |
+| ----------------------------------------------------------------- | --------------------------------- | ------------------------------------ |
+| All tool code and parameters are encrypted at rest and in transit | Advanced key rotation and storage | Granular permissions for tool access |
 
-## 🚀 Next Steps
+| 📝 **Audit Logging**                    | ✅ **Parameter Validation**         |
+| --------------------------------------- | ----------------------------------- |
+| Comprehensive logging of all tool usage | Strict schema enforcement using Zod |
+
+</div>
+
+## Filecoin Challenge - How Storm Fits the Challenge
+
+<div align="center">
+
+| Category                         | Implementation                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔍 **Verifiability**             | - Verifiable & Reproducible AI: Our architecture directly addresses provenance tracking by securely storing tool execution logs and results. The planned Recall integration will enable complete audit trails of AI model interactions.<br>- Decentralized Model Repositories: Storm's marketplace serves as a decentralized repository for MCP tools with cryptographic verification of tool authenticity and execution. |
+| 🔄 **Interoperability**          | - Universal Data Connector: Storm functions as a standardized interface between LLMs and specialized tools, enabling seamless access to various data sources through a unified protocol.<br>- Interoperable Toolkit: Our platform provides a comprehensive ecosystem for deploying and monetizing AI capabilities in a decentralized environment.                                                                         |
+| 🛡️ **Data Management & Privacy** | - Data Accuracy: Our quality-based selection mechanism ensures tools with higher accuracy receive proportionally more usage, creating an organic quality-driven environment.<br>- Privacy-Preserving AI: Storm's encryption system protects sensitive tool implementations while still allowing their functionality to be accessed.                                                                                       |
+| 🌐 **Decentralized Computation** | - Decentralized AI Infrastructure: By decentralizing tool access and execution, Storm distributes AI computation across the ecosystem rather than centralizing it.                                                                                                                                                                                                                                                        |
+
+</div>
+
+Our project is particularly strong in the Verifiability and Interoperability categories, with our planned Recall integration strengthening our position in the Data Management space. The quality-based tool selection system directly addresses the incentive structures needed for optimizing AI capabilities in a decentralized environment.
+
+## 🔄 Recall Integration
+
+### Decentralized AI Data Management
+
+<div align="center">
+
+| Component                         | Description                                                                                                                                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📦 **Decentralized Tool Storage** | We create dedicated buckets on Recall Network where all MCP tools are securely stored and retrieved                                                                                                |
+| 🔐 **Encrypted Storage**          | Before storing tools on Recall, we separate parameter schemas and function implementations, apply AES encryption to both components, and store the encrypted tools as objects in the Recall bucket |
+| 🔄 **Tool Retrieval System**      | Our MCP server connects to Recall to query available tools, retrieve encrypted tool objects, and decrypt and reconstruct tools for execution                                                       |
+
+</div>
+
+### Complete Integration Workflow
+
+<div align="center">
+
+| File                | Purpose                                           |
+| ------------------- | ------------------------------------------------- |
+| `createBucket.js`   | Establishes storage location on Recall Network    |
+| `addObject.js`      | Uploads encrypted MCP tools to Recall             |
+| `retrieveObject.js` | Retrieves and decrypts tools from Recall          |
+| `queryBucket.js`    | Lists all available tools in the Recall bucket    |
+| `mcpServer.js`      | Connects Claude Desktop to tools stored on Recall |
+
+</div>
+
+This implementation creates a fully decentralized marketplace where MCP tools are securely stored and accessed through Recall Network's infrastructure.
+
+### Planned Tokenomics
+
+Our roadmap includes expanding our Recall integration to implement a token-based economy:
+
+- Quality-based probabilistic tool selection
+- Fair attribution and compensation for tool developers
+- Usage tracking for appropriate token distribution
+
+By leveraging Recall Network's decentralized storage and planned token integration, Storm creates verifiable, secure, and fair infrastructure for AI tool distribution and monetization.
+
+Storm marketplace seamlessly integrates with Recall to provide a decentralized intelligence layer for MCP tools, enabling:
+
+<div align="center">
+
+| Feature                                | Description                                                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 🔍 **Verifiable Knowledge Provenance** | Every tool execution and result is stored with cryptographic proof of its origin and execution path        |
+| 💰 **Token-Based Monetization**        | Developers earn Recall tokens when their tools are used, with payments handled through account abstraction |
+| 🤝 **Trustless Collaboration**         | Tools can build upon each other's intelligence while maintaining verifiable data lineage                   |
+
+</div>
+
+### Future Architecture Integration
+
+The Storm platform leverages Recall decentralized storage can integrate easily:
+
+<div align="center">
+
+| Integration                          | Description                                                                  |
+| ------------------------------------ | ---------------------------------------------------------------------------- |
+| 🧠 **Tool Intelligence Persistence** | Storing execution logs, performance metrics, and usage patterns              |
+| 👥 **Fair Attribution**              | Recording which tools contributed to complex queries for proper compensation |
+| ⭐ **Quality-Based Selection**       | Using verified performance data to inform probabilistic tool routing         |
+
+</div>
+
+### Implementation Benefits
+
+<div align="center">
+
+| Benefit                               | Description                                                                              |
+| ------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 💰 **Developer Earnings**             | Tool creators receive Recall tokens based on both usage frequency and quality scores     |
+| ✅ **Verifiable Performance**         | All quality metrics used for tool selection are stored on Recall's decentralized network |
+| 🤖 **Autonomous Intelligence Market** | Tools can autonomously generate, store, and monetize intelligence                        |
+
+</div>
+
+### Future Development
+
+Our roadmap includes deeper Recall integration for:
+
+- Storing Chain-of-Thought logs that other tools can access under predefined terms
+- Enabling tools to buy/sell vectorized intelligence or specialized datasets
+- Implementing a comprehensive knowledge marketplace where tools autonomously monetize their stored insights
+
+By combining Storm's secure tool management with Recall's decentralized intelligence layer, we're building essential infrastructure for the AI economy—where tools can be discovered, executed, verified, and monetized in a trustless environment.
+
+## 🎯 Next Steps
 
 ### Intelligent Tool Selection System
-
-- **Quality-Based Probabilistic Routing**: Implementing a sophisticated selection algorithm where similar tools are chosen based on their quality scores. For example, if Tool A has a score of 60 and Tool B has a score of 40, Tool A will be selected approximately 60% of the time and Tool B about 40% of the time.
 
 ```javascript
 // Pseudocode for quality-based tool selection
@@ -153,9 +281,7 @@ function selectTool(category, parameters) {
 }
 ```
 
-Function Wrapping & Execution System
-
-Transparent Function Wrapping: Automatically enhancing developer-provided functions with tracking, monitoring, and monetization capabilities.
+### Function Wrapping & Execution System
 
 ```javascript
 // Pseudocode for wrapping developer functions with tracking and monetization
@@ -239,7 +365,8 @@ function wrapDeveloperFunction(toolId, developerFunction) {
 }
 ```
 
-Execution Monitoring: Real-time tracking of tool performance, reliability, and usage patterns.
+### Execution Monitoring
+
 
 ```javascript
 // Pseudocode for execution monitoring system
@@ -304,9 +431,7 @@ class ExecutionMonitor {
 }
 ```
 
-Fair Attribution & Monetization
-
-Proportional Revenue Distribution: Allocating Recall tokens based on both usage frequency and quality scores
+### Fair Attribution & Monetization
 
 ```javascript
 // Pseudocode for token distribution (runs daily)
@@ -353,14 +478,20 @@ function distributeTokensToToolDevelopers(period) {
 }
 ```
 
-Security & Validation Framework
+### Security & Validation Framework
 
-Pre-Selection Validation: Verifying tool integrity before including it in the selection pool
-Post-Execution Verification: Confirming output quality and consistency
+<div align="center">
 
-🔑 Advanced Authentication
+| Component                          | Description                                                        |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| 🔍 **Pre-Selection Validation**    | Verifying tool integrity before including it in the selection pool |
+| ✅ **Post-Execution Verification** | Confirming output quality and consistency                          |
 
-Credential Proxy System: Allowing tools to access authenticated services without exposing user credentials
+</div>
+
+### 🔑 Advanced Authentication
+
+**Credential Proxy System**: Allowing tools to access authenticated services without exposing user credentials
 
 ---
 
