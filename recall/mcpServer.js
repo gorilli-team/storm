@@ -6,15 +6,22 @@ import { createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { config } from "dotenv";
 import { http } from "viem";
-import CryptoJS from "crypto-js";
-import { z } from "zod";
+import { processToolObject, retryOperation } from "./utils.js";
 
 config();
 
+// Set to track registered tool names to avoid duplicates
+const registeredToolNames = new Set();
+
 ///////// SETTING UP THE RECALL CLIENT ////////
 const privateKey = process.env.PRIVATE_KEY;
+
+const formattedPrivateKey = privateKey.startsWith("0x")
+  ? privateKey
+  : `0x${privateKey}`;
+
 const walletClient = createWalletClient({
-  account: privateKeyToAccount(privateKey),
+  account: privateKeyToAccount(formattedPrivateKey),
   chain: testnet,
   transport: http(),
 });
@@ -24,47 +31,25 @@ const client = new RecallClient({ walletClient });
 ////////// CREATING THE BUCKET MANAGER ////////
 const bucketManager = client.bucketManager();
 
-////////// FUNCTION TO RECONSTRUCT THE ZOD SCHEMA FROM ARGS STRING ////////
-function reconstructZodSchema(serializedSchema) {
-  const schema = {};
+const results = await fetch(
+  "https://storm-backend-75cc8a347510.herokuapp.com/api/buckets"
+).then((res) => res.json());
 
-  for (const [key, value] of Object.entries(serializedSchema)) {
-    if (value._def) {
-      switch (value._def.typeName) {
-        case "ZodString":
-          schema[key] = z.string();
+let bucketAddress = results.data.map((bucket) => bucket.bucketId);
 
-          if (value._def.description) {
-            schema[key] = schema[key].describe(value._def.description);
-          }
+// console.log(bucketAddress);
 
-          if (value._def.checks && value._def.checks.length > 0) {
-            for (const check of value._def.checks) {
-              switch (check.kind) {
-                case "min":
-                  schema[key] = schema[key].min(check.value, check.message);
-                  break;
-                case "max":
-                  schema[key] = schema[key].max(check.value, check.message);
-                  break;
-                case "regex":
-                  schema[key] = schema[key].regex(check.regex, check.message);
-                  break;
-              }
-            }
-          }
-          break;
-      }
-    }
-  }
-
-  return schema;
-}
-
-const bucketAddress = [
+// Add additional bucket addresses
+bucketAddress = [
+  ...bucketAddress,
   "0xFf0000000000000000000000000000000000951f",
   "0xff0000000000000000000000000000000000D114",
+  "0xfF0000000000000000000000000000000000D4e9",
+  "0xFf0000000000000000000000000000000000D494",
+  "0xFF0000000000000000000000000000000000d388",
 ];
+
+// const bucketAddress = ["0xFf0000000000000000000000000000000000951f"];
 
 const server = new McpServer({
   name: "test",
@@ -78,45 +63,55 @@ const prefix = "tool/";
 
 // Loop through each bucket address
 for (const address of bucketAddress) {
-  const {
-    result: { objects },
-  } = await bucketManager.query(address, { prefix });
+  try {
+    // console.log(`Processing bucket: ${address}`);
 
-  for (const object of objects) {
-    const key = object.key;
+    // Retry querying the bucket
+    const queryResult = await retryOperation(async () => {
+      return await bucketManager.query(address, { prefix });
+    });
 
-    const { result: retrievedObject } = await bucketManager.get(address, key);
-    const decodedObject = new TextDecoder().decode(retrievedObject);
+    if (!queryResult || !queryResult.result || !queryResult.result.objects) {
+      // console.log(`No valid query result for bucket ${address}`);
+      continue;
+    }
 
-    const encryptedParams = JSON.parse(decodedObject).params;
-    const encryptedFunction = JSON.parse(decodedObject).function;
+    const { objects } = queryResult.result;
+    if (!Array.isArray(objects) || objects.length === 0) {
+      // console.log(`No objects found in bucket ${address}`);
+      continue;
+    }
 
-    const decryptedArgsBytes = CryptoJS.AES.decrypt(
-      encryptedParams,
-      process.env.ENCRYPTION_SECRET_KEY
-    );
-    const decryptedArgsString = decryptedArgsBytes.toString(CryptoJS.enc.Utf8);
+    for (const object of objects) {
+      // Process each tool object
+      const toolData = await processToolObject(
+        address,
+        object,
+        bucketManager,
+        registeredToolNames
+      );
 
-    const decryptedFunctionBytes = CryptoJS.AES.decrypt(
-      encryptedFunction,
-      process.env.ENCRYPTION_SECRET_KEY
-    );
-    const decryptedFunctionString = decryptedFunctionBytes.toString(
-      CryptoJS.enc.Utf8
-    );
+      // Only register valid tools
+      if (toolData) {
+        try {
+          server.tool(toolData.name, toolData.schema, toolData.function);
 
-    const recoveredArgs = JSON.parse(decryptedArgsString);
-    const recoveredFunction = new Function(
-      "return " + decryptedFunctionString
-    )();
-
-    const reconstructedSchema = reconstructZodSchema(recoveredArgs);
-
-    server.tool(
-      `${object.key.split("/")[1]}`,
-      reconstructedSchema,
-      recoveredFunction
-    );
+          registeredToolNames.add(toolData.name);
+          // console.log(
+          //   `Successfully registered tool: ${toolData.name} ${JSON.stringify(
+          //     toolData.schema
+          //   )} ${toolData.function}`
+          // );
+        } catch (error) {
+          // console.log(
+          //   `Error registering tool ${toolData.name}:`,
+          //   error.message
+          // );
+        }
+      }
+    }
+  } catch (error) {
+    // console.log(`Error processing bucket ${address}:`, error.message);
   }
 }
 
