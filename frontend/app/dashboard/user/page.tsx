@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BaseLayout } from "../../components/layout/base-layout";
 import { Button } from "../../components/ui/button";
 import { User, Edit, Github, Code, ExternalLink, Loader } from "lucide-react";
-import Link from "next/link";
+import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
+import Link from "next/link";
 
 interface UserProfile {
   walletAddress: string;
@@ -15,83 +16,84 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
+  const { ready, authenticated, user } = usePrivy();
+
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
   const [editDescription, setEditDescription] = useState("");
   const [editGithubUsername, setEditGithubUsername] = useState("");
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api";
+
+  useEffect(() => {
+    if (authenticated && user?.wallet?.address) {
+      setWalletAddress(user.wallet.address);
+    }
+  }, [authenticated, user]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      if (!walletAddress) return;
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        // In un'implementazione reale, sostituire con la chiamata API
-        // const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
-        // const response = await axios.get(`${API_URL}/users/wallet/${walletAddress}`);
-        
-        const mockProfile = {
-          walletAddress: "0x86fd0D762B53f21011e531fa57629D294d576A36",
-          githubUsername: "cryptoDev",
-          description: "Full Stack Blockchain Developer passionate about Web3 technologies and decentralized systems.",
-          createdAt: new Date().toISOString()
-        };
-        
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        setUserProfile(mockProfile);
-        setEditDescription(mockProfile.description);
-        setEditGithubUsername(mockProfile.githubUsername);
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        setError('Failed to load user profile. Please try again later.');
+        const response = await axios.get(`${API_URL}/users/wallet/${walletAddress}`);
+        const userData = response.data.data;
+        setUserProfile(userData);
+        setEditDescription(userData.description || "");
+        setEditGithubUsername(userData.githubUsername || "");
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+        setError("Failed to load user profile. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [walletAddress]);
 
   const handleSaveProfile = async () => {
-    if (!userProfile) return;
-    
+    if (!walletAddress) return;
+
     setIsLoading(true);
     try {
-      // Simuliamo un salvataggio con ritardo
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // In implementazione reale:
-      // await axios.patch(`${API_URL}/users/${userProfile.walletAddress}`, {
-      //   githubUsername: editGithubUsername,
-      //   description: editDescription
-      // });
-      
-      setUserProfile({
-        ...userProfile,
+      await axios.patch(`${API_URL}/users/${walletAddress}`, {
         githubUsername: editGithubUsername,
-        description: editDescription
+        description: editDescription,
       });
-      
+
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              githubUsername: editGithubUsername,
+              description: editDescription,
+            }
+          : null
+      );
+
       setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      setError('Failed to update profile. Please try again later.');
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setError("Failed to update profile.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   if (isLoading && !userProfile) {
@@ -117,21 +119,16 @@ export default function ProfilePage() {
   return (
     <BaseLayout>
       <div className="space-y-8 w-full px-6 text-gray-100">
-        {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
             Profile
           </h1>
           {isEditing ? (
             <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditing(false)}
-                disabled={isLoading}
-              >
+              <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>
                 Cancel
               </Button>
-              <Button 
+              <Button
                 className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
                 onClick={handleSaveProfile}
                 disabled={isLoading}
@@ -149,7 +146,6 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Main content */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="md:col-span-1">
             <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-20">
@@ -171,14 +167,12 @@ export default function ProfilePage() {
                     />
                   </div>
                 ) : (
-                  <>
-                    {userProfile?.githubUsername && (
-                      <div className="flex items-center gap-1 text-cyan-400 font-medium">
-                        <Github className="h-4 w-4" />
-                        <span>{userProfile.githubUsername}</span>
-                      </div>
-                    )}
-                  </>
+                  userProfile?.githubUsername && (
+                    <div className="flex items-center gap-1 text-cyan-400 font-medium">
+                      <Github className="h-4 w-4" />
+                      <span>{userProfile.githubUsername}</span>
+                    </div>
+                  )
                 )}
               </div>
 
@@ -189,7 +183,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="mt-1 text-sm font-mono bg-gray-900 p-2 rounded border border-gray-700 flex items-center justify-between">
                   <span className="text-cyan-400 overflow-auto">
-                    {userProfile?.walletAddress || ""}
+                    {userProfile?.walletAddress}
                   </span>
                   <Button
                     variant="ghost"
@@ -207,30 +201,24 @@ export default function ProfilePage() {
               </div>
 
               <div className="py-2 border-t border-gray-700">
-                <div className="text-sm text-blue-300 mt-2">
-                  <span>Member since:</span>
-                </div>
+                <div className="text-sm text-blue-300 mt-2">Member since:</div>
                 <div className="text-sm text-cyan-400 mt-1">
-                  {userProfile ? formatDate(userProfile.createdAt) : ""}
+                  {userProfile?.createdAt ? formatDate(userProfile.createdAt) : ""}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right column - Bio */}
           <div className="md:col-span-3">
             <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-20">
               <h3 className="text-lg font-medium text-cyan-400 mb-4">About</h3>
-              
               {isEditing ? (
-                <div className="w-full">
-                  <textarea
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    className="w-full p-3 border border-blue-700 rounded-md bg-gray-900 text-blue-300 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none min-h-[150px]"
-                    placeholder="Tell us about yourself..."
-                  />
-                </div>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full p-3 border border-blue-700 rounded-md bg-gray-900 text-blue-300 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none min-h-[150px]"
+                  placeholder="Tell us about yourself..."
+                />
               ) : (
                 <div className="text-blue-300 whitespace-pre-wrap">
                   {userProfile?.description || "No description provided."}
@@ -238,13 +226,12 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* GitHub repository section */}
             {userProfile?.githubUsername && !isEditing && (
               <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-20 mt-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-cyan-400">GitHub Profile</h3>
-                  <Link 
-                    href={`https://github.com/${userProfile.githubUsername}`} 
+                  <Link
+                    href={`https://github.com/${userProfile.githubUsername}`}
                     target="_blank"
                     className="flex items-center text-sm text-blue-300 hover:text-cyan-400"
                   >
@@ -255,7 +242,9 @@ export default function ProfilePage() {
                   <Github className="h-10 w-10 text-cyan-400" />
                   <div>
                     <div className="text-cyan-400 font-medium">{userProfile.githubUsername}</div>
-                    <div className="text-sm text-blue-300">github.com/{userProfile.githubUsername}</div>
+                    <div className="text-sm text-blue-300">
+                      github.com/{userProfile.githubUsername}
+                    </div>
                   </div>
                 </div>
               </div>

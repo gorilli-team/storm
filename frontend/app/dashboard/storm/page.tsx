@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
-// Recall imports
 import { testnet } from "@recallnet/chains";
 import { RecallClient } from "@recallnet/sdk/client";
 import { createWalletClient, http } from "viem";
@@ -159,6 +158,39 @@ const StormToolManager: React.FC = () => {
 
   const { ready, authenticated, login, logout, user } = usePrivy();
 
+  // Sync user with backend when authentication state changes
+  useEffect(() => {
+    const syncUser = async (address: string) => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        const res = await fetch(`${API_URL}/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ walletAddress: address }),
+        });
+    
+        const data = await res.json();
+        if (!res.ok) {
+          console.error("Failed to create or fetch user:", data.message);
+        } else {
+          console.log("User synced:", data);
+        }
+      } catch (err) {
+        console.error("Error during user sync:", err);
+      }
+    };    
+  
+    if (authenticated && user?.wallet?.address) {
+      const address = user.wallet.address;
+      setWalletAddress(address);
+      syncUser(address);
+    } else {
+      setWalletAddress(null);
+    }
+  }, [authenticated, user]);
+
   useEffect(() => {
     if (!authenticated) {
       setBuckets([]);
@@ -172,26 +204,6 @@ const StormToolManager: React.FC = () => {
     }
   }, [authenticated]);
 
-  useEffect(() => {
-    console.log("Checking wallet connection:", { authenticated, user });
-    
-    if (authenticated && user && user.wallet) {
-      const address = user.wallet.address;
-      console.log("Found wallet with address:", address);
-      
-      if (address) {
-        setWalletAddress(address);
-        console.log("Wallet address set to:", address);
-      }
-    } else {
-      console.log("No wallet available:", { 
-        authenticated, 
-        hasUser: !!user, 
-        hasWallet: user ? !!user.wallet : false 
-      });
-    }
-  }, [authenticated, user]);
-  
   const fetchBucketsByWallet = async (address: string) => {
     if (!address) {
       console.error("Wallet address is required");
@@ -594,6 +606,12 @@ const StormToolManager: React.FC = () => {
               {!authenticated ? (
                 <div className="text-center py-8 text-blue-300">
                   <p>Please login to view and manage your buckets.</p>
+                  <Button
+                    onClick={() => login()}
+                    className="mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                  >
+                    Login
+                  </Button>
                 </div>
               ) : isLoadingBuckets ? (
                 <div className="flex justify-center py-6">
