@@ -76,7 +76,7 @@ export default function Home() {
                 <Link href="/dashboard/storm">
                   <Button
                     variant="outline"
-                    className="border-blue-700 text-blue-300 hover:bg-gray-800 px-8 py-6 text-lg"
+                    className="border-blue-700 text-blue-600 hover:bg-gray-800 px-8 py-6 text-lg"
                   >
                     Explore Tools
                   </Button>
@@ -248,14 +248,14 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/dashboard">
                 <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 px-6 py-6 text-lg">
-                  Sign Up Now
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/user/tools">
                 <Button
                   variant="outline"
-                  className="border-blue-700 text-blue-300 hover:bg-gray-800 px-6 py-6 text-lg"
+                  className="border-blue-700 text-blue-600 hover:bg-gray-800 px-6 py-6 text-lg"
                 >
                   Browse Tools
                 </Button>
@@ -290,8 +290,25 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="mt-8 text-center text-blue-300 text-sm">
-            © {new Date().getFullYear()} Storm. All rights reserved.
+          <div className="flex justify-between items-center mt-8">
+            <div className="text-blue-300 text-sm flex items-center gap-2">
+              Created by{" "}
+              <Link
+                href="https://gorillionai.re"
+                className="text-cyan-400 hover:text-cyan-300 inline-flex items-center"
+              >
+                <Image
+                  src="https://gorillionai.re/external/vector%202-1500w.png"
+                  alt="Gorilli"
+                  width={60}
+                  height={20}
+                  className="h-5 w-auto"
+                />
+              </Link>
+            </div>
+            <div className="text-blue-300 text-sm">
+              © {new Date().getFullYear()} Storm. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>
