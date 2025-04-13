@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Storm",
   description:
     "Storm: A decentralized marketplace connecting developers and users through MCP tools, enabling monetization via Recall tokens and creating a seamless ecosystem for specialized AI capabilities.",
+  icons: {
+    icon: "/fav.svg",
+  },
 };
 
 export default function RootLayout({
