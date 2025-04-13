@@ -37,7 +37,7 @@ The Storm platform uses a sophisticated workflow to securely store and retrieve 
 
 Tools in Storm are organized in buckets with detailed component information:
 
-- Tool name and icon
+- Tool name
 - Parameter schemas with validation rules
 - Function implementations
 - Secure access controls
@@ -165,8 +165,6 @@ const myTool = {
 
 await storm.publishTool(myTool);
 ```
-
-
 
 ## Contributing
 
