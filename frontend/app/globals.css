@@ -48,6 +48,11 @@
     --ring: 240 4.9% 83.9%;
   }
 }
+
+.password-mask {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
  
 @layer base {
   * {
