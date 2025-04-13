@@ -24,6 +24,8 @@ import {
   Bookmark,
   AlertCircle,
   Loader,
+  X,
+  CheckCircle
 } from "lucide-react";
 import Link from "next/link";
 import Editor from "@monaco-editor/react";
@@ -31,6 +33,14 @@ import Editor from "@monaco-editor/react";
 interface User {
   githubUsername?: string;
   description?: string;
+}
+
+interface Review {
+  walletAddress: string;
+  githubUsername?: string;
+  text: string;
+  createdAt: string;
+  user?: User;
 }
 
 interface Tool {
@@ -47,6 +57,7 @@ interface Tool {
   lastUsed?: string;
   createdAt: string;
   user?: User;
+  reviews?: Review[];
   votes: {
     walletAddress: string;
     vote: "up" | "down";
@@ -61,6 +72,14 @@ export default function ToolDetailsPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   const { ready, authenticated, user } = usePrivy();
 
@@ -69,12 +88,16 @@ export default function ToolDetailsPage() {
       setIsLoading(true);
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
-        console.log('Calling:', `${API_URL}/tools/${params.id}`);
-        const response = await axios.get(`${API_URL}/tools/${params.id}`);
+        const toolId = Array.isArray(params.id) ? params.id[0] : params.id; // Gestione caso array
+        
+        console.log('Calling:', `${API_URL}/tools/${toolId}`);
+        const response = await axios.get(`${API_URL}/tools/${toolId}`);
         console.log('Tool details received:', response.data);
         
-        // Set the tool data from the API response
         setTool(response.data.data);
+        
+        // Carica anche le recensioni
+        fetchReviews(toolId);
       } catch (error) {
         console.error('Error fetching tool details:', error);
         setError('Failed to fetch tool details. Please try again later.');
@@ -89,7 +112,24 @@ export default function ToolDetailsPage() {
     }
   }, [params.id]);
 
-  // Format date to a more readable format
+  const fetchReviews = async (toolId: string) => {
+    setIsLoadingReviews(true);
+    setReviewError(null);
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      const response = await axios.get(`${API_URL}/tools/${toolId}/reviews`);
+      console.log('Reviews loaded:', response.data);
+      
+      setReviews(response.data.data || []);
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+      setReviewError('Failed to load reviews');
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
+
   const formatDate = (dateString: string): string => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -97,6 +137,20 @@ export default function ToolDetailsPage() {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
+    });
+  };
+
+  const formatDateComplete = (dateString: string): string => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
     });
   };
 
@@ -129,7 +183,6 @@ export default function ToolDetailsPage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  // Fix the vote filtering logic
   const getUpvotes = (): number => {
     if (!tool || !tool.votes) return 0;
     return tool.votes.filter(vote => vote.vote === "up").length;
@@ -140,7 +193,6 @@ export default function ToolDetailsPage() {
     return tool.votes.filter(vote => vote.vote === "down").length;
   };
 
-  // Calculate rating percentage
   const getRatingPercentage = () => {
     const upvotes = getUpvotes();
     const totalVotes = tool?.votes?.length || 0;
@@ -149,13 +201,61 @@ export default function ToolDetailsPage() {
     return (upvotes / totalVotes) * 100;
   };
 
-  // Shorten wallet address for display
   const shortenAddress = (address: string): string => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Loading state
+  const handleOpenReviewModal = () => {
+    setIsReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setReviewText("");
+  };
+
+  const handlePublishReview = async () => {
+    if (!reviewText.trim() || !tool) {
+      return;
+    }
+    
+    setIsSubmittingReview(true);
+    setReviewSuccess(false);
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      
+      const reviewData = {
+        walletAddress: user?.wallet?.address,
+        githubUsername: user?.github?.username || '',
+        text: reviewText
+      };
+
+      console.log('Submitting review:', reviewData);
+      
+      const response = await axios.post(`${API_URL}/tools/${tool._id}/reviews`, reviewData);
+      
+      console.log('Review published successfully:', response.data);
+
+      fetchReviews(tool._id);
+      
+      setReviewText("");
+      setIsReviewModalOpen(false);
+      setReviewSuccess(true);
+      
+      setTimeout(() => {
+        setReviewSuccess(false);
+      }, 5000);
+      
+    } catch (error) {
+      console.error('Error publishing review:', error);
+      setReviewError('Failed to publish review. Please try again.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <BaseLayout>
@@ -166,7 +266,6 @@ export default function ToolDetailsPage() {
     );
   }
 
-  // Error state
   if (error || !tool) {
     return (
       <BaseLayout>
@@ -188,13 +287,19 @@ export default function ToolDetailsPage() {
   return (
     <BaseLayout>
       <div className="space-y-8 w-full px-6 text-gray-100">
-        {/* Back button */}
         <Link
           href="/dashboard/marketplace"
           className="inline-flex items-center text-blue-300 hover:text-cyan-400"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketplace
         </Link>
+        
+        {reviewSuccess && (
+          <div className="fixed bottom-4 right-4 bg-green-900 bg-opacity-70 border border-green-700 rounded-md p-3 text-green-400 flex items-center shadow-lg z-50">
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Review published successfully!
+          </div>
+        )}
         
         {/* Tool Header */}
         <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
@@ -433,7 +538,6 @@ export default function ToolDetailsPage() {
             {/* Code Tab */}
             {activeTab === "code" && (
               <div className="space-y-6">
-                {/* Function Code Section */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium text-cyan-400">
@@ -465,7 +569,6 @@ export default function ToolDetailsPage() {
                   </div>
                 </div>
 
-                {/* Parameters Section */}
                 {tool.params && (
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
@@ -499,7 +602,6 @@ export default function ToolDetailsPage() {
                   </div>
                 )}
 
-                {/* Usage Guidelines */}
                 <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-800/30">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5" />
@@ -525,21 +627,109 @@ export default function ToolDetailsPage() {
                     User Reviews
                   </h3>
                   {authenticated && user?.wallet?.address && user.wallet.address.toLowerCase() !== tool.walletAddress.toLowerCase() && (
-                    <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500">
-                      <MessageSquare className="mr-2 h-4 w-4" /> Write a Review
-                    </Button>
+                    <>
+                      <Button 
+                        className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                        onClick={handleOpenReviewModal}
+                      >
+                        <MessageSquare className="mr-2 h-4 w-4" /> Write a Review
+                      </Button>
+
+                      {isReviewModalOpen && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-blue-800/30">
+                            <div className="flex justify-between items-center mb-4">
+                              <h3 className="text-lg font-medium text-cyan-400">Write a Review</h3>
+                              <button 
+                                onClick={handleCloseReviewModal}
+                                className="text-gray-400 hover:text-blue-300"
+                              >
+                                <X className="h-5 w-5" />
+                              </button>
+                            </div>
+                            
+                            <textarea
+                              className="w-full h-32 p-3 bg-gray-700 text-blue-300 rounded-lg border border-blue-800/30 focus:border-cyan-500 focus:outline-none"
+                              placeholder="Share your experience with this tool..."
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
+                            />
+                            
+                            <div className="flex justify-end gap-3 mt-4">
+                              <Button
+                                className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                                onClick={handlePublishReview}
+                                disabled={!reviewText.trim() || isSubmittingReview}
+                              >
+                                {isSubmittingReview ? (
+                                  <>
+                                    <Loader className="mr-2 h-4 w-4 animate-spin" /> 
+                                    Publishing...
+                                  </>
+                                ) : (
+                                  "Publish Review"
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
-                <div className="text-center py-8 bg-gray-900 rounded-lg border border-blue-800/30">
-                  <MessageSquare className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
-                  <h3 className="text-xl font-medium text-cyan-400 mb-2">No reviews yet</h3>
-                  <p className="text-blue-300">Be the first to review this tool!</p>
-                </div>
+                
+                {reviewError && (
+                  <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-3 text-red-400 flex items-center mb-4">
+                    <AlertCircle className="h-5 w-5 mr-2" /> 
+                    {reviewError}
+                  </div>
+                )}
+                
+                {isLoadingReviews ? (
+                  <div className="flex justify-center py-6">
+                    <Loader className="h-6 w-6 animate-spin text-cyan-500" />
+                  </div>
+                ) : reviews && reviews.length > 0 ? (
+                  <div className="space-y-4">
+                    {reviews.map((review, index) => (
+                      <div key={index} className="bg-gray-900 p-4 rounded-lg border border-blue-800/30">
+                        <div className="flex justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold">
+                              {review.walletAddress.charAt(2).toUpperCase()}
+                            </div>
+                            <div>
+                              {review.user?.githubUsername ? (
+                                <span className="font-medium text-cyan-400">{review.user.githubUsername}</span>
+                              ) : review.githubUsername ? (
+                                <span className="font-medium text-cyan-400">{review.githubUsername}</span>
+                              ) : (
+                                <span className="text-cyan-400">{shortenAddress(review.walletAddress)}</span>
+                              )}
+                              {(review.user?.githubUsername || review.githubUsername) && (
+                                <p className="text-xs text-blue-300">{shortenAddress(review.walletAddress)}</p>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-blue-300 text-sm">
+                            {formatDateComplete(review.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-blue-300">{review.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-gray-900 rounded-lg border border-blue-800/30">
+                    <MessageSquare className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
+                    <h3 className="text-xl font-medium text-cyan-400 mb-2">No reviews yet</h3>
+                    <p className="text-blue-300">Be the first to review this tool!</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
     </BaseLayout>
-  );
-}
+  )};

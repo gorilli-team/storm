@@ -190,14 +190,14 @@ export const addReview = async (req, res) => {
         githubUsername = '', 
         text 
       } = req.body;
-
+  
       if (!toolId || !walletAddress || !text) {
         return res.status(400).json({ 
           success: false, 
           message: 'Tool ID, wallet address, and review text are required' 
         });
       }
-
+  
       const tool = await Tool.findById(toolId);
       if (!tool) {
         return res.status(404).json({ 
@@ -216,10 +216,20 @@ export const addReview = async (req, res) => {
       tool.reviews.push(newReview);
       await tool.save();
   
+      const user = await User.findOne({ walletAddress });
+      
+      const enrichedReview = {
+        ...newReview,
+        user: user ? {
+          githubUsername: user.githubUsername || githubUsername,
+          description: user.description
+        } : null
+      };
+  
       return res.status(201).json({
         success: true,
         message: 'Review added successfully',
-        data: newReview
+        data: enrichedReview
       });
       
     } catch (error) {
@@ -251,10 +261,24 @@ export const addReview = async (req, res) => {
         });
       }
   
+      const enrichedReviews = [];
+      
+      for (const review of tool.reviews) {
+        const user = await User.findOne({ walletAddress: review.walletAddress });
+        
+        enrichedReviews.push({
+            ...(typeof review.toObject === 'function' ? review.toObject() : review),
+            user: user ? {
+            githubUsername: user.githubUsername,
+            description: user.description
+            } : null
+        });
+      }
+  
       return res.status(200).json({
         success: true,
-        count: tool.reviews.length,
-        data: tool.reviews
+        count: enrichedReviews.length,
+        data: enrichedReviews
       });
       
     } catch (error) {

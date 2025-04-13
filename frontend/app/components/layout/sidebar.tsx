@@ -7,13 +7,11 @@ import { cn } from "@/lib/utils";
 import {
   Cloud,
   Zap,
-  Settings,
   Code,
-  Database,
   Cpu,
-  Network,
   Terminal,
-  User
+  User,
+  BookOpen
 } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -32,24 +30,6 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  // {
-  //   title: "Dashboard",
-  //   href: "/dashboard",
-  //   icon: <Cloud className="h-5 w-5" />,
-  //   buttons: [
-  //     {
-  //       title: "Overview",
-  //       href: "/dashboard",
-  //       icon: <Cloud className="h-4 w-4" />,
-  //     },
-  //     {
-  //       title: "Analytics",
-  //       href: "/dashboard/analytics",
-  //       icon: <Database className="h-4 w-4" />,
-  //       variant: "outline",
-  //     },
-  //   ],
-  // },
   {
     title: "Tool manager",
     href: "/dashboard/tool-manager",
@@ -61,20 +41,14 @@ const navItems: NavItem[] = [
     icon: <Cloud className="h-4 w-4" />,
   },
   {
-    title: "User",
+    title: "Profile",
     href: "/dashboard/user",
     icon: <User className="h-5 w-5" />,
   },
-
-  // {
-  //   title: "Profile",
-  //   href: "/dashboard/profile",
-  //   icon: <Settings className="h-5 w-5" />,
-  // },
   {
-    title: "MCP Setup",
-    href: "/dashboard/mcp-setup",
-    icon: <Terminal className="h-5 w-5" />,
+    title: "Documentation",
+    href: "/dashboard/documentation",
+    icon: <BookOpen className="h-4 w-4" />,
   },
 ];
 
