@@ -3,7 +3,15 @@ import Bucket from '../models/BucketModel.js';
 
 export const createTool = async (req, res) => {
   try {
-    const { bucketId, toolName, walletAddress } = req.body;
+    const { 
+      bucketId, 
+      toolName, 
+      walletAddress,
+      description = "",
+      hashtags = [],
+      code = "",
+      params = ""
+    } = req.body;
     
     if (!bucketId || !toolName || !walletAddress) {
       return res.status(400).json({ 
@@ -20,10 +28,26 @@ export const createTool = async (req, res) => {
       });
     }
 
+
+    let normalizedHashtags = [];
+    if (Array.isArray(hashtags)) {
+      normalizedHashtags = hashtags.map(tag => String(tag).trim()).filter(tag => tag.length > 0);
+    } else if (typeof hashtags === 'string') {
+      normalizedHashtags = hashtags.split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+    }
+
     const newTool = new Tool({
       bucketId,
       toolName,
-      walletAddress
+      walletAddress,
+      description,
+      hashtags: normalizedHashtags,
+      code,
+      params,
+      usages: 0,
+      totalEarnings: 0
     });
     
     await newTool.save();
