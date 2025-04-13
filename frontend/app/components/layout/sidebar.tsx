@@ -122,6 +122,10 @@ export function AppSidebar() {
           </Link>
         </div>
       </div>
+      {/* Footer */}
+      <div className="text-center text-gray-400 text-sm mb-2">
+            <p>Powered by <a href="https://www.gorilli.io/en" target="_blank" rel="noopener" className="text-cyan-400 hover:text-cyan-300">Gorilli</a></p>
+      </div>
     </div>
   );
 }

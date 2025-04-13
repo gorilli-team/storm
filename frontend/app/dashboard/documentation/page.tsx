@@ -33,6 +33,13 @@ import {
   Rocket
 } from "lucide-react";
 
+// Import your images (adjust paths as needed)
+import ToolManagementFlowImage from "../../../../assets/Overview.png";
+import ToolBucketImage from "../../../../assets/Tool bucket.png";
+import ToolProcessingImage from "../../../../assets/Detailed workflow (pt.1).png";
+import ToolRetrievalImage from "../../../../assets/Detailed workflow (pt.2).png";
+import Image from "next/image";
+
 export default function MCPDocumentationPage() {
   const [copied, setCopied] = useState(false);
 
@@ -135,6 +142,7 @@ await storm.publishTool(myTool);`;
               <Layers className="mr-2 h-5 w-5 text-blue-400" /> Technical Architecture
             </h2>
             
+            {/* Tool Management Flow */}
             <div className="mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
                 <Workflow className="mr-2 h-5 w-5 text-blue-400" /> Tool Management Flow
@@ -143,15 +151,23 @@ await storm.publishTool(myTool);`;
                 <div className="text-gray-400 text-sm mb-2">
                   The Storm platform uses a sophisticated workflow to securely store and retrieve tools:
                 </div>
-                <ul className="list-disc list-inside text-gray-300 space-y-1 ml-4">
+                <ul className="list-disc list-inside text-gray-300 space-y-1 ml-4 mb-4">
                   <li><strong>Create Bucket</strong>: Initialize storage for new tools</li>
                   <li><strong>Add Tool</strong>: Encrypt tool parameters and functions with AES before storage</li>
                   <li><strong>Retrieve Tool</strong>: Securely retrieve and decrypt tools when needed</li>
                   <li><strong>MCP Server Integration</strong>: Seamlessly connect with MCP servers for tool execution</li>
                 </ul>
+                <div className="mt-4 rounded-lg overflow-hidden border border-gray-700">
+                  <Image
+                    src={ToolManagementFlowImage}
+                    alt="Tool Management Flow Diagram"
+                    className="w-full h-auto"
+                  />
+                </div>
               </div>
             </div>
 
+            {/* Tool Bucket Structure */}
             <div className="mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
                 <Box className="mr-2 h-5 w-5 text-blue-400" /> Tool Bucket Structure
@@ -160,7 +176,7 @@ await storm.publishTool(myTool);`;
                 <div className="text-gray-400 text-sm mb-2">
                   Tools in Storm are organized in buckets with detailed component information:
                 </div>
-                <ul className="list-disc list-inside text-gray-300 space-y-1 ml-4">
+                <ul className="list-disc list-inside text-gray-300 space-y-1 ml-4 mb-4">
                   <li>Tool name</li>
                   <li>Parameter schemas with validation rules</li>
                   <li>Function implementations</li>
@@ -168,6 +184,65 @@ await storm.publishTool(myTool);`;
                   <li>Version history</li>
                   <li>Usage statistics</li>
                 </ul>
+                <div className="mt-4 rounded-lg overflow-hidden border border-gray-700">
+                  <Image
+                    src={ToolBucketImage}
+                    alt="Tool Bucket Structure Diagram"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Tool Processing Workflow */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
+                <Workflow className="mr-2 h-5 w-5 text-blue-400" /> Detailed Tool Processing Workflow
+              </h3>
+              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800">
+                <div className="text-gray-400 text-sm mb-2">
+                  When a developer adds a new tool to Storm:
+                </div>
+                <ul className="list-disc list-inside text-gray-300 space-y-1 ml-4 mb-4">
+                  <li>Parameters and function bodies are separated</li>
+                  <li>Each component is serialized to JSON/string format</li>
+                  <li>AES encryption is applied to both components</li>
+                  <li>The encrypted components are combined into a single object</li>
+                  <li>The tool is stored in the appropriate bucket</li>
+                </ul>
+                <div className="mt-4 rounded-lg overflow-hidden border border-gray-700">
+                  <Image
+                    src={ToolProcessingImage}
+                    alt="Detailed Tool Processing Workflow Diagram"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tool Retrieval and Execution */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
+                <Workflow className="mr-2 h-5 w-5 text-blue-400" /> Tool Retrieval and Execution
+              </h3>
+              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800">
+                <div className="text-gray-400 text-sm mb-2">
+                  When a user requests a tool:
+                </div>
+                <ul className="list-disc list-inside text-gray-300 space-y-1 ml-4 mb-4">
+                  <li>The encrypted tool is retrieved from the bucket</li>
+                  <li>Decryption is performed using the appropriate keys</li>
+                  <li>Parameters and functions are reconstructed</li>
+                  <li>Zod schema validation ensures security and correctness</li>
+                  <li>The tool is made available to the MCP server for execution</li>
+                </ul>
+                <div className="mt-4 rounded-lg overflow-hidden border border-gray-700">
+                  <Image
+                    src={ToolRetrievalImage}
+                    alt="Tool Retrieval and Execution Diagram"
+                    className="w-full h-auto"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -282,7 +357,7 @@ await storm.publishTool(myTool);`;
             </div>
           </div>
 
-          {/* Getting Started */}
+          {/* Getting Started
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Download className="mr-2 h-5 w-5 text-blue-400" /> Getting Started
@@ -307,7 +382,7 @@ await storm.publishTool(myTool);`;
                 npm start
               </pre>
             </div>
-          </div>
+          </div> */}
 
           {/* API Example */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
@@ -330,11 +405,6 @@ await storm.publishTool(myTool);`;
                 {toolExample}
               </pre>
             </div>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center text-gray-400 text-sm mt-12">
-            <p>Powered by <a href="https://gorilli.ai" target="_blank" rel="noopener" className="text-cyan-400 hover:text-cyan-300">Gorilli</a></p>
           </div>
         </div>
       </div>
