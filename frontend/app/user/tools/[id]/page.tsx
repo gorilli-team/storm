@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { BaseLayout } from "../../../components/layout/base-layout";
 import { Button } from "../../../components/ui/button";
+import axios from "axios";
 import {
   ArrowLeft,
   ArrowUp,
@@ -25,7 +26,7 @@ import {
 import Link from "next/link";
 import Editor from "@monaco-editor/react";
 
-// Mock data for a single tool - replace with actual data fetching in production
+// Mock data for a single tool -
 const mockToolDetails = {
   id: "1",
   name: "getWeather",
@@ -119,6 +120,22 @@ export default function ToolDetailsPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isCopied, setIsCopied] = useState(false);
 
+  useEffect(() => {
+    const fetchToolDetails = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        const response = await axios.get(`${API_URL}/tools/${params.id}`);
+        
+      } catch (error) {
+        console.error('Error fetching tool details:', error);
+      }
+    };
+
+    if (params.id) {
+      fetchToolDetails();
+    }
+  }, [params.id]);
+
   // Format date to a more readable format
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -155,6 +172,15 @@ export default function ToolDetailsPage() {
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketplace
         </Link>
+        
+        <div className="bg-gray-900 p-4 rounded-lg border border-blue-500 border-opacity-50">
+          <p className="text-cyan-400">
+            Viewing tool details with ID: <span className="font-bold">{params.id}</span>
+          </p>
+          <p className="text-blue-300 text-sm mt-1">
+            Check the browser console to see API data
+          </p>
+        </div>
 
         {/* Tool Header */}
         <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
@@ -172,7 +198,7 @@ export default function ToolDetailsPage() {
               </div>
               <p className="text-blue-300 mt-2">{tool.description}</p>
               <div className="flex flex-wrap gap-2 mt-3">
-                {tool.tags.map((tag) => (
+                {tool.tags && tool.tags.map((tag) => (
                   <span
                     key={tag}
                     className="px-2 py-0.5 bg-gray-700 text-blue-300 text-xs rounded-full"
@@ -216,19 +242,19 @@ export default function ToolDetailsPage() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-400" />
               <span className="text-blue-300">
-                {tool.totalUsages.toLocaleString()} uses
+                {tool.totalUsages ? tool.totalUsages.toLocaleString() : '0'} uses
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Coins className="h-4 w-4 text-blue-400" />
               <span className="text-blue-300">
-                {tool.totalEarnings.toFixed(2)} STORM earned
+                {tool.totalEarnings ? tool.totalEarnings.toFixed(2) : '0.00'} STORM earned
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-blue-400" />
               <span className="text-blue-300">
-                Updated {formatDate(tool.lastUpdated)}
+                Updated {formatDate(tool.lastUpdated || tool.createdAt)}
               </span>
             </div>
           </div>
@@ -278,7 +304,7 @@ export default function ToolDetailsPage() {
                   <h3 className="text-lg font-medium text-cyan-400 mb-2">
                     About this tool
                   </h3>
-                  <p className="text-blue-300">{tool.longDescription}</p>
+                  <p className="text-blue-300">{tool.longDescription || tool.description}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -289,16 +315,16 @@ export default function ToolDetailsPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-blue-300">Category:</span>
-                        <span className="text-cyan-400">{tool.category}</span>
+                        <span className="text-cyan-400">{tool.category || 'Non specificata'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-blue-300">Version:</span>
-                        <span className="text-cyan-400">{tool.version}</span>
+                        <span className="text-cyan-400">{tool.version || '1.0.0'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-blue-300">Cost per call:</span>
                         <span className="text-cyan-400">
-                          {tool.costPerCall} STORM
+                          {tool.costPerCall || '0.00'} STORM
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -310,7 +336,7 @@ export default function ToolDetailsPage() {
                       <div className="flex justify-between">
                         <span className="text-blue-300">Last updated:</span>
                         <span className="text-cyan-400">
-                          {formatDate(tool.lastUpdated)}
+                          {formatDate(tool.lastUpdated || tool.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -322,18 +348,18 @@ export default function ToolDetailsPage() {
                     </h4>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold">
-                        {tool.developer.charAt(0).toUpperCase()}
+                        {(tool.developer || 'U').charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <div className="font-medium text-cyan-400">
-                          {tool.developer}
+                          {tool.developer || 'Unknown Developer'}
                         </div>
                         <div className="text-xs text-blue-300">
                           Tool Creator
                         </div>
                       </div>
                     </div>
-                    <p className="text-blue-300 text-sm">{tool.developerBio}</p>
+                    <p className="text-blue-300 text-sm">{tool.developerBio || 'No developer bio available.'}</p>
                   </div>
                 </div>
 
@@ -344,25 +370,25 @@ export default function ToolDetailsPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center p-3 bg-gray-800 rounded-lg">
                       <div className="text-2xl font-bold text-cyan-400">
-                        {tool.totalUsages.toLocaleString()}
+                        {(tool.totalUsages || 0).toLocaleString()}
                       </div>
                       <div className="text-xs text-blue-300">Total Uses</div>
                     </div>
                     <div className="text-center p-3 bg-gray-800 rounded-lg">
                       <div className="text-2xl font-bold text-cyan-400">
-                        {tool.totalEarnings.toFixed(2)}
+                        {(tool.totalEarnings || 0).toFixed(2)}
                       </div>
                       <div className="text-xs text-blue-300">STORM Earned</div>
                     </div>
                     <div className="text-center p-3 bg-gray-800 rounded-lg">
                       <div className="text-2xl font-bold text-cyan-400">
-                        {ratingPercentage.toFixed(0)}%
+                        {ratingPercentage ? ratingPercentage.toFixed(0) : '0'}%
                       </div>
                       <div className="text-xs text-blue-300">Rating</div>
                     </div>
                     <div className="text-center p-3 bg-gray-800 rounded-lg">
                       <div className="text-2xl font-bold text-cyan-400">
-                        {tool.upvotes + tool.downvotes}
+                        {(tool.upvotes || 0) + (tool.downvotes || 0)}
                       </div>
                       <div className="text-xs text-blue-300">Total Votes</div>
                     </div>
@@ -382,7 +408,7 @@ export default function ToolDetailsPage() {
                     variant="outline"
                     size="sm"
                     className="border-blue-700 text-blue-300 hover:bg-gray-700"
-                    onClick={() => copyToClipboard(tool.code)}
+                    onClick={() => copyToClipboard(tool.code || '')}
                   >
                     {isCopied ? "Copied!" : "Copy Code"}
                     <Copy className="ml-2 h-4 w-4" />
@@ -392,7 +418,7 @@ export default function ToolDetailsPage() {
                   <Editor
                     height="400px"
                     defaultLanguage="javascript"
-                    value={tool.code}
+                    value={tool.code || '// No code available'}
                     theme="vs-dark"
                     options={{
                       readOnly: true,
@@ -411,11 +437,8 @@ export default function ToolDetailsPage() {
                         Usage Guidelines
                       </h4>
                       <p className="text-blue-300 text-sm">
-                        This tool requires an API key for the weather service.
-                        Make sure to set up your environment variables
-                        correctly. The tool is designed to be used in a
-                        server-side environment due to API key security
-                        concerns.
+                      This tool can be used through the Storm Marketplace. 
+                      See the documentation for details on the integration.
                       </p>
                     </div>
                   </div>
@@ -434,41 +457,49 @@ export default function ToolDetailsPage() {
                     <MessageSquare className="mr-2 h-4 w-4" /> Write a Review
                   </Button>
                 </div>
-                {tool.reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="bg-gray-900 p-4 rounded-lg border border-blue-800/30"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
-                          {review.user.charAt(0).toUpperCase()}
+                {tool.reviews && tool.reviews.length > 0 ? (
+                  tool.reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="bg-gray-900 p-4 rounded-lg border border-blue-800/30"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
+                            {review.user.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="font-medium text-cyan-400">
+                              {review.user}
+                            </div>
+                            <div className="text-xs text-blue-300">
+                              {formatDate(review.date)}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-medium text-cyan-400">
-                            {review.user}
-                          </div>
-                          <div className="text-xs text-blue-300">
-                            {formatDate(review.date)}
-                          </div>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? "text-yellow-400 fill-yellow-400"
+                                  : "text-gray-600"
+                              }`}
+                            />
+                          ))}
                         </div>
                       </div>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < review.rating
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-gray-600"
-                            }`}
-                          />
-                        ))}
-                      </div>
+                      <p className="text-blue-300">{review.comment}</p>
                     </div>
-                    <p className="text-blue-300">{review.comment}</p>
+                  ))
+                ) : (
+                  <div className="text-center py-8 bg-gray-900 rounded-lg border border-blue-800/30">
+                    <MessageSquare className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
+                    <h3 className="text-xl font-medium text-cyan-400 mb-2">No reviews yet</h3>
+                    <p className="text-blue-300">Be the first to review this tool!</p>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

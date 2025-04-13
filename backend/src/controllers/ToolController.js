@@ -118,3 +118,40 @@ export const getAllTools = async (req, res) => {
       });
     }
 };
+
+// Get a tool by its ID
+export const getToolById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      if (!id) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Tool ID is required' 
+        });
+      }
+      
+      const tool = await Tool.findById(id);
+      
+      if (!tool) {
+        return res.status(404).json({
+          success: false,
+          message: 'Tool not found'
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        data: tool
+      });
+      
+    } catch (error) {
+      console.error('Error fetching tool:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error while fetching tool details',
+        error: error.message
+      });
+    }
+};
+
