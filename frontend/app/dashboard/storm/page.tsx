@@ -506,35 +506,53 @@ const StormToolManager: React.FC = () => {
               Storm Tool Manager
             </h1>
             <p className="text-blue-300 mt-2 flex items-center">
-              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" /> Create and
-              manage your function tools
+              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" /> Welcome to
+              your Storm dashboard. Create and manage your function tools
             </p>
           </div>
 
           {authenticated && walletAddress && (
-            <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
-              <div className="bg-gray-900 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
-                {walletAddress}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+                <h2 className="text-xl font-bold text-cyan-400 mb-4">
+                  Quick Stats
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-300">Total Buckets</span>
+                    <span className="text-cyan-400 font-medium">{buckets.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-300">Total Tools</span>
+                    <span className="text-cyan-400 font-medium">{bucketTools.length}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+                  <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
+                  <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                    {walletAddress}
+                  </div>
+              </div>
+
+              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+                <h2 className="text-xl font-bold text-cyan-400 mb-4">
+                  Getting Started
+                </h2>
+                <ul className="space-y-2 text-blue-300">
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></span>
+                      Create a new bucket to store your tools
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></span>
+                      Add tools to your bucket
+                  </li>
+                </ul>
               </div>
             </div>
           )}
-
-          {/* Info Card */}
-          <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
-            <div className="flex">
-              <div>
-                <h3 className="text-sm font-medium text-cyan-400 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-yellow-500" /> Getting Started
-                </h3>
-                <p className="text-sm text-blue-300 mt-1">
-                  1. Create a new bucket to store your tools
-                  <br />
-                  2. Add tools to your bucket with optional Zod parameters
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Bucket Selection */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
