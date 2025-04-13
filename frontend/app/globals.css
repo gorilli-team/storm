@@ -53,6 +53,10 @@
   -webkit-text-security: disc;
   text-security: disc;
 }
+
+.logo-div{
+  height: 4.1rem;
+}
  
 @layer base {
   * {

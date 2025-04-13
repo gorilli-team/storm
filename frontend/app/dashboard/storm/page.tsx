@@ -161,7 +161,7 @@ const StormToolManager: React.FC = () => {
   const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params" | "info">("function");
   const [apiKey, setApiKey] = useState<string>("");
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
-
+  
   const { ready, authenticated, login, logout, user } = usePrivy();
 
   const initializeRecallClient = async (privateKey: string) => {
@@ -565,7 +565,7 @@ const StormToolManager: React.FC = () => {
             </div>
           )}
 
-          <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
+          <div className="bg-gray-800 border border-blue-500 border-opacity-50 rounded-lg p-4 mb-6">
             <h3 className="text-sm font-medium text-cyan-400 mb-2 flex items-center">
               <Key className="w-4 h-4 mr-2 text-yellow-400" /> Wallet Private Key for RECALL
             </h3>
