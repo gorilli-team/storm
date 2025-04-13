@@ -13,6 +13,7 @@ import {
   Download,
   Server,
   Key,
+  Lock,
 } from "lucide-react";
 
 export default function MCPSetupPage() {
@@ -60,73 +61,61 @@ export default function MCPSetupPage() {
               <Download className="mr-2 h-5 w-5 text-blue-400" /> Local Setup Instructions
             </h2>
 
-            <div className="mb-4">
-              <p className="text-gray-300 mb-4">
+            <div className="mb-6">
+              <p className="text-gray-300 mb-6">
                 Currently, Storm needs to be installed locally. Cloud deployment is a work in progress.
               </p>
               
-              <div className="flex items-center mb-4 p-3 bg-gray-700 rounded-md">
-                <Github className="h-5 w-5 text-gray-300 mr-3" />
+              <div className="flex items-center justify-between mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600 hover:border-blue-500 transition-colors">
+                <div className="flex items-center">
+                  <Github className="h-6 w-6 text-gray-300 mr-3" />
+                  <span className="text-gray-200">GitHub Repository:</span>
+                </div>
                 <a 
                   href="https://github.com/gorilli-team/storm" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline"
+                  className="text-cyan-400 hover:text-cyan-300 font-medium underline flex items-center"
                 >
-                  https://github.com/gorilli-team/storm
+                  gorilli-team/storm
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
                 </a>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-gray-900 p-4 rounded-md border border-gray-700">
-                <h3 className="font-medium text-cyan-400 mb-2 flex items-center">
-                  <Server className="mr-2 h-4 w-4 text-blue-400" /> 1. Install Dependencies
+            <div className="space-y-6">
+              <div className="bg-gray-900 p-5 rounded-lg border border-gray-700">
+                <h3 className="font-medium text-cyan-400 mb-3 flex items-center">
+                  <Server className="mr-2 h-5 w-5 text-blue-400" /> Install Dependencies
                 </h3>
-                <div className="bg-gray-800 p-3 rounded font-mono text-sm text-cyan-400">
+                <div className="bg-gray-800 p-4 rounded-lg font-mono text-sm text-cyan-400">
                   cd storm<br />
                   npm install
                 </div>
-              </div>
-
-              <div className="bg-gray-900 p-4 rounded-md border border-gray-700">
-                <h3 className="font-medium text-cyan-400 mb-2 flex items-center">
-                  <Key className="mr-2 h-4 w-4 text-blue-400" /> 2. Configure Environment
-                </h3>
-                <p className="text-gray-300 mb-2 text-sm">
-                  Rename <code className="bg-gray-800 px-1 py-0.5 rounded">.env.example</code> to <code className="bg-gray-800 px-1 py-0.5 rounded">.env</code> and fill in all required variables:
+                <p className="text-gray-400 mt-3 text-sm flex items-start">
+                  <span className="bg-blue-900/30 text-blue-400 text-xs px-2 py-1 rounded mr-2">Note</span>
+                  The MCP server logic is located in the <code className="bg-gray-700 px-1.5 py-0.5 rounded mx-1">recall</code> folder
                 </p>
-                <div className="bg-gray-800 p-3 rounded font-mono text-sm text-cyan-400">
-                  mv .env.example .env
-                </div>
-                <p className="text-gray-400 mt-2 text-xs">
-                  Note: The MCP server logic is located in the <code className="bg-gray-700 px-1 py-0.5 rounded">recall</code> folder
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700 rounded-md flex items-start">
-              <AlertCircle className="h-5 w-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-300">
-                <strong className="text-cyan-400">Wallet Requirements:</strong> Your wallet must contain RECALL tokens and credits (available on <a href="https://portal.recall.network/" target="_blank" rel="noopener" className="text-cyan-400 hover:underline">Recall Portal</a>).
               </div>
             </div>
           </div>
 
           {/* MCP Protocol Section */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
-            <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
+            <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-6">
               <FileJson className="mr-2 h-5 w-5 text-blue-400" /> MCP Protocol Configuration
             </h2>
 
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-cyan-400 mb-2">
+              <h3 className="text-lg font-medium text-cyan-400 mb-3">
                 MCP Server Setup
               </h3>
-              <div className="bg-gray-900 p-4 rounded-md border border-blue-800 relative">
+              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800 relative">
                 <Button
                   onClick={() => handleCopy(mcpSetup)}
-                  className="absolute top-2 right-2 h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
+                  className="absolute top-3 right-3 h-9 w-9 p-0 bg-gray-800 hover:bg-gray-700"
                   size="sm"
                 >
                   {copied ? (
@@ -142,26 +131,60 @@ export default function MCPSetupPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="p-3 bg-blue-900/20 border border-blue-700 rounded-md">
-                <h4 className="font-medium text-cyan-400 mb-2">Connection Steps:</h4>
-                <ol className="list-decimal list-inside text-blue-300 text-sm space-y-2">
-                  <li>Open Claude Desktop</li>
-                  <li>Go to Claude/Settings...</li>
-                  <li>Click on "Developers", then "Change Configuration"</li>
-                  <li>Open "claude_desktop_config.json" in your editor</li>
-                  <li>Add the MCP server configuration above</li>
-                  <li>Save the file and restart Claude Desktop</li>
+              <div className="bg-gray-900/50 p-5 rounded-lg border border-blue-800/50">
+                <h4 className="font-medium text-cyan-400 mb-3 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Connection Steps
+                </h4>
+                <ol className="space-y-3">
+                  {[
+                    "Open Claude Desktop",
+                    "Go to Claude/Settings...",
+                    "Click on 'Developers', then 'Change Configuration'",
+                    "Open 'claude_desktop_config.json' in your editor",
+                    "Add the MCP server configuration above",
+                    "Save the file and restart Claude Desktop"
+                  ].map((step, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="flex items-center justify-center bg-blue-900/30 text-blue-400 text-xs font-bold rounded-full h-5 w-5 mr-3 mt-0.5 flex-shrink-0">
+                        {index + 1}
+                      </span>
+                      <span className="text-blue-300">{step}</span>
+                    </li>
+                  ))}
                 </ol>
               </div>
 
-              <div className="p-3 bg-blue-900/20 border border-blue-700 rounded-md flex items-start">
-                <AlertCircle className="h-5 w-5 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+              <div className="p-4 bg-blue-900/20 border border-blue-700 rounded-lg flex items-start">
+                <AlertCircle className="h-5 w-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-blue-300">
                   <strong className="text-cyan-400">Path Configuration:</strong> Replace 
-                  <code className="bg-blue-900/50 px-1 rounded mx-1">/PATH/storm/recall/mcpServer.js</code> 
+                  <code className="bg-blue-900/50 px-1.5 py-0.5 rounded mx-1">/PATH/storm/recall/mcpServer.js</code> 
                   with the absolute path to your installation.
                 </div>
               </div>
+              <div className="mt-6 space-y-4">
+              <div className="p-4 bg-blue-900/20 border border-blue-700 rounded-lg flex items-start">
+                <AlertCircle className="h-5 w-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-300">
+                  <strong className="text-cyan-400">Wallet Requirements:</strong> Your wallet must have RECALL tokens and credits (available on <a href="https://portal.recall.network/" target="_blank" rel="noopener" className="text-cyan-400 hover:text-cyan-300 underline">Recall Portal</a>).
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-900/20 border border-blue-700 rounded-lg flex items-start">
+                <Lock className="h-5 w-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-300">
+                  <strong className="text-cyan-400">Encryption Key Sync:</strong> The <code className="bg-blue-900/50 px-1.5 py-0.5 rounded">ENCRYPTION_SECRET_KEY</code> must be identical in:
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                    <li>Frontend environment (for encrypting tools when uploaded)</li>
+                    <li>MCP server configuration (for decrypting tools when used)</li>
+                  </ul>
+                  <p className="mt-2">This key secures all tool functions and parameters in transit between Claude Desktop and Recall Network.</p>
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         </div>
