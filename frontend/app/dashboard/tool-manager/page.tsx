@@ -15,7 +15,9 @@ import {
   AlertTriangle,
   Settings,
   Info,
-  Key
+  Key,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
@@ -161,6 +163,7 @@ const StormToolManager: React.FC = () => {
   const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params" | "info">("function");
   const [apiKey, setApiKey] = useState<string>("");
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   
   const { ready, authenticated, login, logout, user } = usePrivy();
 
@@ -570,13 +573,26 @@ const StormToolManager: React.FC = () => {
               <Key className="w-4 h-4 mr-2 text-yellow-400" /> Wallet Private Key for RECALL
             </h3>
             <div className="flex items-center gap-2 mb-2">
-              <input
-                type="text"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your Wallet Private Key for RECALL"
-                className="flex-1 p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none password-mask"
-              />
+              <div className="flex-1 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your Wallet Private Key for RECALL"
+                  className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400 focus:outline-none"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               <Button
                 onClick={handleApiKeySubmit}
                 className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"

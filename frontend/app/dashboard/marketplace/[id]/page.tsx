@@ -440,9 +440,8 @@ export default function ToolDetailsPage() {
                       Function Code
                     </h3>
                     <Button
-                      variant="outline"
                       size="sm"
-                      className="border-blue-700 text-blue-300 hover:bg-gray-700"
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
                       onClick={() => copyToClipboard(tool.code || '')}
                     >
                       {isCopied ? "Copied!" : "Copy Code"}
@@ -474,9 +473,8 @@ export default function ToolDetailsPage() {
                         Parameters
                       </h3>
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="border-blue-700 text-blue-300 hover:bg-gray-700"
+                        className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
                         onClick={() => copyToClipboard(tool.params || '')}
                       >
                         {isCopied ? "Copied!" : "Copy Parameters"}
