@@ -13,11 +13,11 @@ import {
   CheckCircle,
   Loader2,
   AlertTriangle,
-  Settings
+  Settings,
+  Info
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
-// Recall imports
 import { testnet } from "@recallnet/chains";
 import { RecallClient } from "@recallnet/sdk/client";
 import { createWalletClient, http } from "viem";
@@ -136,6 +136,8 @@ const StormToolManager: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [params, setParams] = useState<string>("");
   const [toolName, setToolName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [hashtags, setHashtags] = useState<string>("");
   const [recallClient, setRecallClient] = useState<RecallClient | null>(null);
   const [bucket, setBucket] = useState<any>(null);
   const [isCreatingBucket, setIsCreatingBucket] = useState<boolean>(false);
@@ -155,9 +157,42 @@ const StormToolManager: React.FC = () => {
   const [isLoadingTools, setIsLoadingTools] = useState<boolean>(false);
   const [toolSaveSuccess, setToolSaveSuccess] = useState<boolean>(false);
   const [toolSaveError, setToolSaveError] = useState<string | null>(null);
-  const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params">("function");
+  const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params" | "info">("function");
 
   const { ready, authenticated, login, logout, user } = usePrivy();
+
+  // Sync user with backend when authentication state changes
+  useEffect(() => {
+    const syncUser = async (address: string) => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        const res = await fetch(`${API_URL}/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ walletAddress: address }),
+        });
+    
+        const data = await res.json();
+        if (!res.ok) {
+          console.error("Failed to create or fetch user:", data.message);
+        } else {
+          console.log("User synced:", data);
+        }
+      } catch (err) {
+        console.error("Error during user sync:", err);
+      }
+    };    
+  
+    if (authenticated && user?.wallet?.address) {
+      const address = user.wallet.address;
+      setWalletAddress(address);
+      syncUser(address);
+    } else {
+      setWalletAddress(null);
+    }
+  }, [authenticated, user]);
 
   useEffect(() => {
     if (!authenticated) {
@@ -172,26 +207,6 @@ const StormToolManager: React.FC = () => {
     }
   }, [authenticated]);
 
-  useEffect(() => {
-    console.log("Checking wallet connection:", { authenticated, user });
-    
-    if (authenticated && user && user.wallet) {
-      const address = user.wallet.address;
-      console.log("Found wallet with address:", address);
-      
-      if (address) {
-        setWalletAddress(address);
-        console.log("Wallet address set to:", address);
-      }
-    } else {
-      console.log("No wallet available:", { 
-        authenticated, 
-        hasUser: !!user, 
-        hasWallet: user ? !!user.wallet : false 
-      });
-    }
-  }, [authenticated, user]);
-  
   const fetchBucketsByWallet = async (address: string) => {
     if (!address) {
       console.error("Wallet address is required");
@@ -364,8 +379,11 @@ const StormToolManager: React.FC = () => {
         await axios.post(`${API_URL}/tools`, {
           bucketId: selectedBucket.bucketId,
           toolName: toolName,
+          description: description,
+          hashtags: hashtags.split(',').map(tag => tag.trim()).filter(tag => tag),
           walletAddress: walletAddress,
-          hasParams: !!params.trim() && params !== defaultParamsPlaceholder
+          code: code,
+          params: params
         });
         
         console.log("Tool saved to backend database");
@@ -378,6 +396,8 @@ const StormToolManager: React.FC = () => {
   
         // Reset form
         setToolName("");
+        setDescription("");
+        setHashtags("");
         setCode("");
         setParams("");
         
@@ -542,16 +562,7 @@ const StormToolManager: React.FC = () => {
                     </>
                   )}
                 </Button>
-              ) : (
-                <Button
-                  onClick={() => login()}
-                  className="flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
-                  size="sm"
-                >
-                  <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
-                  Login to Create
-                </Button>
-              )}
+              ) : null}
             </div>
 
             {bucketCreationError && (
@@ -594,6 +605,12 @@ const StormToolManager: React.FC = () => {
               {!authenticated ? (
                 <div className="text-center py-8 text-blue-300">
                   <p>Please login to view and manage your buckets.</p>
+                  <Button
+                    onClick={() => login()}
+                    className="mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                  >
+                    Login
+                  </Button>
                 </div>
               ) : isLoadingBuckets ? (
                 <div className="flex justify-center py-6">
@@ -740,6 +757,16 @@ const StormToolManager: React.FC = () => {
                       >
                         <Settings className="mr-2 h-4 w-4" /> Parameters
                       </button>
+                      <button
+                        className={`py-2 px-4 font-medium text-sm flex items-center ${
+                          activeEditorTab === "info"
+                            ? "text-cyan-400 border-b-2 border-cyan-500"
+                            : "text-blue-300 hover:text-cyan-400"
+                        }`}
+                        onClick={() => setActiveEditorTab("info")}
+                      >
+                        <Info className="mr-2 h-4 w-4" /> Other Info
+                      </button>
                     </div>
                     
                     {/* Function Editor */}
@@ -785,6 +812,46 @@ const StormToolManager: React.FC = () => {
                         </p>
                       </div>
                     )}
+
+                    {/* Other Info Editor */}
+                    {activeEditorTab === "info" && (
+                      <div className="space-y-4">
+                        <div>
+                          <label
+                            htmlFor="description"
+                            className="block text-sm font-medium text-blue-300 mb-1"
+                          >
+                            Description
+                          </label>
+                          <textarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Describe what your tool does..."
+                            className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none min-h-[100px]"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="hashtags"
+                            className="block text-sm font-medium text-blue-300 mb-1"
+                          >
+                            Hashtags (comma separated)
+                          </label>
+                          <input
+                            id="hashtags"
+                            type="text"
+                            value={hashtags}
+                            onChange={(e) => setHashtags(e.target.value)}
+                            placeholder="crypto,price,api"
+                            className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          />
+                          <p className="text-xs text-blue-400 mt-1">
+                            Add relevant tags to help users discover your tool
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <button
@@ -795,11 +862,6 @@ const StormToolManager: React.FC = () => {
                     {isAddingTool ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-                      </>
-                    ) : !authenticated ? (
-                      <>
-                        <FolderPlus className="mr-2 h-4 w-4" />
-                        Login to Save Tool
                       </>
                     ) : (
                       <>
@@ -872,6 +934,18 @@ const StormToolManager: React.FC = () => {
                               })}
                             </span>
                           </div>
+                          {tool.description && (
+                            <p className="text-sm text-blue-300 mb-2">{tool.description}</p>
+                          )}
+                          {tool.hashtags?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {tool.hashtags.map((tag: string, i: number) => (
+                                <span key={i} className="text-xs bg-blue-900/30 text-blue-300 px-2 py-1 rounded">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <div className="bg-gray-800 p-2 rounded text-xs font-mono text-blue-300 border border-gray-700 overflow-auto">
                             <div>
                               <span className="text-blue-400">Tool Name:</span> {tool.toolName}
