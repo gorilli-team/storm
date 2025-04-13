@@ -103,76 +103,264 @@ Storm currently supports a variety of tools that don't require authentication fr
 - **Audit Logging**: Comprehensive logging of all tool usage
 - **Parameter Validation**: Strict schema enforcement using Zod
 
-## Roadmap
+## 🚀 Next Steps
 
-### Q2 2025
+### Intelligent Tool Selection System
 
-- Enhanced developer dashboard with advanced analytics
-- Multi-chain support for token payments
-- Tool versioning and dependency management
-
-### Q3 2025
-
-- Advanced authentication integration (SSO, credential passing)
-- Tool composition framework for creating workflows
-- Expanded tool categories and capabilities
-
-### Q4 2025
-
-- AI-powered tool recommendations
-- Developer collaboration features
-- Enterprise deployment options
-
-## Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/storm-mcp.git
-
-# Install dependencies
-cd storm-mcp
-npm install
-
-# Configure your wallet
-cp .env.example .env
-# Edit .env with your wallet information
-
-# Start the Storm MCP server
-npm start
-```
-
-## API Reference
-
-### Tool Creation
+- **Quality-Based Probabilistic Routing**: Implementing a sophisticated selection algorithm where similar tools are chosen based on their quality scores. For example, if Tool A has a score of 60 and Tool B has a score of 40, Tool A will be selected approximately 60% of the time and Tool B about 40% of the time.
 
 ```javascript
-// Example of creating a new tool
-import { StormSDK } from "storm-sdk";
+// Pseudocode for quality-based tool selection
+function selectTool(category, parameters) {
+  // Get all compatible tools for this category
+  const compatibleTools = getToolsByCategory(category);
 
-const storm = new StormSDK({ apiKey: "your-api-key" });
+  // Filter for tools that can handle these parameters
+  const eligibleTools = compatibleTools.filter((tool) =>
+    canHandleParameters(tool, parameters)
+  );
 
-const myTool = {
-  name: "get_crypto_price",
-  params: {
-    coinName: z.string().min(1).max(50),
-  },
-  function: async ({ coinName }) => {
-    // Tool implementation
-    const price = await fetchCryptoPrice(coinName);
-    return { price, currency: "USD" };
-  },
-};
+  // If no eligible tools, return error
+  if (eligibleTools.length === 0) return null;
 
-await storm.publishTool(myTool);
+  // If only one tool, use it
+  if (eligibleTools.length === 1) return eligibleTools[0];
+
+  // Calculate total quality score for normalization
+  const totalQualityScore = eligibleTools.reduce(
+    (sum, tool) => sum + getQualityScore(tool),
+    0
+  );
+
+  // Assign selection probability based on normalized score
+  const toolsWithProbability = eligibleTools.map((tool) => ({
+    tool,
+    probability: getQualityScore(tool) / totalQualityScore,
+  }));
+
+  // Select tool based on weighted random selection
+  const randomValue = Math.random();
+  let cumulativeProbability = 0;
+
+  for (const { tool, probability } of toolsWithProbability) {
+    cumulativeProbability += probability;
+    if (randomValue <= cumulativeProbability) {
+      // Log selection for analytics
+      logToolSelection(tool, category, parameters);
+      return tool;
+    }
+  }
+}
 ```
 
-## Contributing
+Function Wrapping & Execution System
 
-We welcome contributions from the community! Please see our [Contributing Guide](./CONTRIBUTING.md) for details on how to get involved.
+Transparent Function Wrapping: Automatically enhancing developer-provided functions with tracking, monitoring, and monetization capabilities.
 
-## License
+```javascript
+// Pseudocode for wrapping developer functions with tracking and monetization
+function wrapDeveloperFunction(toolId, developerFunction) {
+  // Return a wrapped function with the same signature
+  return async function wrappedFunction(...args) {
+    const executionId = generateExecutionId();
+    const startTime = performance.now();
+    const tool = getToolById(toolId);
+    const userId = getCurrentUserId();
 
-[MIT](./LICENSE)
+    // Log execution start
+    await logExecutionStart({
+      executionId,
+      toolId,
+      userId,
+      timestamp: new Date(),
+      parameters: args,
+    });
+
+    try {
+      // Check if user has sufficient tokens (if tool requires payment)
+      if (tool.pricePerExecution > 0) {
+        const userBalance = await getUserTokenBalance(userId);
+
+        if (userBalance < tool.pricePerExecution) {
+          throw new Error("Insufficient tokens for tool execution");
+        }
+
+        // Reserve tokens (but don't transfer yet)
+        await reserveTokens(userId, tool.pricePerExecution, executionId);
+      }
+
+      // Execute the developer's original function
+      const result = await developerFunction(...args);
+
+      // Calculate execution time
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+
+      // Validate result format
+      validateResultFormat(result, tool.outputSchema);
+
+      // Process successful execution
+      await handleSuccessfulExecution({
+        executionId,
+        toolId,
+        userId,
+        result,
+        executionTime,
+        timestamp: new Date(),
+      });
+
+      // Transfer reserved tokens to developer if execution was successful
+      if (tool.pricePerExecution > 0) {
+        const developerAddress = getDeveloperWalletAddress(tool.developerId);
+        await transferReservedTokens(executionId, developerAddress);
+      }
+
+      // Return the original result
+      return result;
+    } catch (error) {
+      // Log execution error
+      await logExecutionError({
+        executionId,
+        toolId,
+        userId,
+        error: error.message,
+        timestamp: new Date(),
+      });
+
+      // Release reserved tokens back to user
+      if (tool.pricePerExecution > 0) {
+        await releaseReservedTokens(executionId);
+      }
+
+      // Rethrow for proper error handling
+      throw error;
+    }
+  };
+}
+```
+
+Execution Monitoring: Real-time tracking of tool performance, reliability, and usage patterns.
+
+```javascript
+// Pseudocode for execution monitoring system
+class ExecutionMonitor {
+  constructor() {
+    this.activeExecutions = new Map();
+    this.executionTimeouts = new Map();
+    this.alertThresholds = this.loadAlertThresholds();
+  }
+
+  // Register a new execution
+  trackExecution(executionId, toolId) {
+    const startTime = Date.now();
+    this.activeExecutions.set(executionId, {
+      toolId,
+      startTime,
+      status: "running",
+    });
+
+    // Set timeout for execution
+    const tool = getToolById(toolId);
+    const timeoutMs = tool.timeoutMs || 30000; // Default 30s timeout
+
+    const timeoutId = setTimeout(() => {
+      this.handleExecutionTimeout(executionId);
+    }, timeoutMs);
+
+    this.executionTimeouts.set(executionId, timeoutId);
+  }
+
+  // Mark execution as completed
+  completeExecution(executionId, status, metrics = {}) {
+    if (!this.activeExecutions.has(executionId)) return;
+
+    const execution = this.activeExecutions.get(executionId);
+    const endTime = Date.now();
+    const duration = endTime - execution.startTime;
+
+    // Clear timeout
+    if (this.executionTimeouts.has(executionId)) {
+      clearTimeout(this.executionTimeouts.get(executionId));
+      this.executionTimeouts.delete(executionId);
+    }
+
+    // Update execution status
+    execution.status = status;
+    execution.duration = duration;
+    execution.endTime = endTime;
+    Object.assign(execution, metrics);
+
+    // Archive execution data
+    this.archiveExecution(executionId, execution);
+    this.activeExecutions.delete(executionId);
+
+    // Update tool metrics
+    this.updateToolMetrics(execution.toolId, {
+      status,
+      duration,
+      ...metrics,
+    });
+  }
+}
+```
+
+Fair Attribution & Monetization
+
+Proportional Revenue Distribution: Allocating Recall tokens based on both usage frequency and quality scores
+
+```javascript
+// Pseudocode for token distribution (runs daily)
+function distributeTokensToToolDevelopers(period) {
+  // Get all tool usage for the period
+  const usageRecords = getToolUsageRecords(period);
+
+  // Calculate total token pool to distribute
+  const totalTokenPool = calculateTokenPoolForPeriod(period);
+
+  // Group usage by tool
+  const usageByTool = groupUsageByTool(usageRecords);
+
+  // Calculate base distribution amount by tool usage
+  let distributionByTool = {};
+  let totalWeightedUsage = 0;
+
+  for (const [toolId, records] of Object.entries(usageByTool)) {
+    const tool = getToolById(toolId);
+    const qualityMultiplier = getQualityMultiplier(tool);
+    const weightedUsage = records.length * qualityMultiplier;
+
+    distributionByTool[toolId] = {
+      usageCount: records.length,
+      qualityMultiplier,
+      weightedUsage,
+    };
+
+    totalWeightedUsage += weightedUsage;
+  }
+
+  // Calculate final token amounts and distribute
+  for (const [toolId, data] of Object.entries(distributionByTool)) {
+    const tokenAmount =
+      (data.weightedUsage / totalWeightedUsage) * totalTokenPool;
+    const developer = getDeveloperByToolId(toolId);
+
+    // Transfer tokens to developer
+    transferTokens(developer.walletAddress, tokenAmount);
+
+    // Log distribution for transparency
+    logTokenDistribution(period, toolId, tokenAmount, data);
+  }
+}
+```
+
+Security & Validation Framework
+
+Pre-Selection Validation: Verifying tool integrity before including it in the selection pool
+Post-Execution Verification: Confirming output quality and consistency
+
+🔑 Advanced Authentication
+
+Credential Proxy System: Allowing tools to access authenticated services without exposing user credentials
 
 ---
 
