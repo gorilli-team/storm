@@ -35,21 +35,7 @@ const results = await fetch(
   "https://storm-backend-75cc8a347510.herokuapp.com/api/buckets"
 ).then((res) => res.json());
 
-let bucketAddress = results.data.map((bucket) => bucket.bucketId);
-
-// console.log(bucketAddress);
-
-// Add additional bucket addresses
-bucketAddress = [
-  ...bucketAddress,
-  "0xFf0000000000000000000000000000000000951f",
-  "0xff0000000000000000000000000000000000D114",
-  "0xfF0000000000000000000000000000000000D4e9",
-  "0xFf0000000000000000000000000000000000D494",
-  "0xFF0000000000000000000000000000000000d388",
-];
-
-// const bucketAddress = ["0xFf0000000000000000000000000000000000951f"];
+let bucketAddresses = results.data.map((bucket) => bucket.bucketId);
 
 const server = new McpServer({
   name: "test",
@@ -62,7 +48,7 @@ const server = new McpServer({
 const prefix = "tool/";
 
 // Loop through each bucket address
-for (const address of bucketAddress) {
+for (const address of bucketAddresses) {
   try {
     // console.log(`Processing bucket: ${address}`);
 
