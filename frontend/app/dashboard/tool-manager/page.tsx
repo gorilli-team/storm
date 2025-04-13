@@ -171,7 +171,7 @@ const StormToolManager: React.FC = () => {
     try {
       if (!privateKey || privateKey === "0x") {
         console.error("Missing private key for Recall");
-        setApiKeyError("Please enter a valid API key");
+        setApiKeyError("Please enter a valid private key");
         return;
       }
 
@@ -191,13 +191,13 @@ const StormToolManager: React.FC = () => {
       console.log("Recall client initialized successfully", client);
     } catch (error) {
       console.error("Failed to initialize Recall client:", error);
-      setApiKeyError("Invalid API key. Please check and try again.");
+      setApiKeyError("Invalid private key. Please check and try again.");
     }
   };
 
   const handleApiKeySubmit = () => {
     if (!apiKey.trim()) {
-      setApiKeyError("Please enter your Wallet API key");
+      setApiKeyError("Please enter your Wallet private key");
       return;
     }
     initializeRecallClient(apiKey);
@@ -341,7 +341,7 @@ const StormToolManager: React.FC = () => {
   const addTool = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
-      setAddToolError("RecallClient not initialized. Please enter your API key.");
+      setAddToolError("RecallClient not initialized. Please enter your private key.");
       return false;
     }
   
@@ -461,7 +461,7 @@ const StormToolManager: React.FC = () => {
   const createBucket = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
-      setBucketCreationError("RecallClient not initialized. Please enter your API key.");
+      setBucketCreationError("RecallClient not initialized. Please enter your private key.");
       return null;
     }
 
@@ -608,11 +608,11 @@ const StormToolManager: React.FC = () => {
             )}
             {recallClient && (
               <div className="text-green-400 text-sm mt-1 flex items-center">
-                <CheckCircle className="h-4 w-4 mr-1" /> API key successfully configured
+                <CheckCircle className="h-4 w-4 mr-1" /> Private key successfully configured
               </div>
             )}
             <p className="text-xs text-blue-400 mt-2">
-              Your API key is the private key of the wallet that has Recall tokens and credits.
+              Your Private key is the private key of the wallet that has Recall tokens and credits.
               It will be prefixed with "0x" automatically if not included.
             </p>
           </div>
