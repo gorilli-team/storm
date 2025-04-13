@@ -67,7 +67,7 @@ router.get("/api/tools/:id", getToolById);
 router.post("/api/tools/:toolId/reviews", addReview);
 router.get("/api/tools/:toolId/reviews", getToolReviews);
 
-// Tool votes routes
+// Voting routes
 router.post("/api/tools/:toolId/votes", submitVote);
 router.get("/api/tools/:toolId/votes/:walletAddress", getUserVote);
 router.get("/api/tools/:toolId/votes", getToolVotes);

@@ -80,6 +80,11 @@ export default function ToolDetailsPage() {
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  
+  type VoteStatusType = 'none' | 'upvoted' | 'downvoted' | 'loading' | 'error';
+  const [voteStatus, setVoteStatus] = useState<VoteStatusType>('none');
+  const [voteError, setVoteError] = useState<string | null>(null);
+  const [voteSuccess, setVoteSuccess] = useState(false);
 
   const { ready, authenticated, user } = usePrivy();
 
@@ -88,7 +93,7 @@ export default function ToolDetailsPage() {
       setIsLoading(true);
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
-        const toolId = Array.isArray(params.id) ? params.id[0] : params.id; // Gestione caso array
+        const toolId = Array.isArray(params.id) ? params.id[0] : params.id;
         
         console.log('Calling:', `${API_URL}/tools/${toolId}`);
         const response = await axios.get(`${API_URL}/tools/${toolId}`);
@@ -96,7 +101,6 @@ export default function ToolDetailsPage() {
         
         setTool(response.data.data);
         
-        // Carica anche le recensioni
         fetchReviews(toolId);
       } catch (error) {
         console.error('Error fetching tool details:', error);
@@ -111,6 +115,35 @@ export default function ToolDetailsPage() {
       fetchToolDetails();
     }
   }, [params.id]);
+
+  useEffect(() => {
+    const fetchUserVote = async () => {
+      if (!ready || !authenticated || !user?.wallet?.address || !tool) return;
+      
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+        const response = await axios.get(`${API_URL}/tools/${tool._id}/votes/${user.wallet.address}`);
+        
+        console.log('User vote data:', response.data);
+        
+        if (response.data.data.vote) {
+          setVoteStatus(response.data.data.vote === 'up' ? 'upvoted' : 'downvoted');
+        }
+        
+      } catch (error) {
+        console.error('Error fetching user vote:', error);
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setVoteStatus('none');
+        } else {
+          setVoteStatus('error');
+        }
+      }
+    };
+
+    if (tool && user?.wallet?.address) {
+      fetchUserVote();
+    }
+  }, [tool, user?.wallet?.address, ready, authenticated]);
 
   const fetchReviews = async (toolId: string) => {
     setIsLoadingReviews(true);
@@ -154,26 +187,53 @@ export default function ToolDetailsPage() {
     });
   };
 
-  const handleVote = (isUpvote: boolean): void => {
-    console.log(`User ${isUpvote ? 'upvoted' : 'downvoted'} the tool`);
+  const handleVote = async (isUpvote: boolean): Promise<void> => {
+    if (!ready || !authenticated || !user?.wallet?.address || !tool) return;
     
-    const newVote: {
-      walletAddress: string;
-      vote: "up" | "down";
-      createdAt: string;
-    } = {
-      walletAddress: "temp-user",
-      vote: isUpvote ? "up" : "down",
-      createdAt: new Date().toISOString()
-    };
+    setVoteStatus('loading');
+    setVoteError(null);
     
-    if (tool) {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+      
+      const voteData = {
+        walletAddress: user.wallet.address,
+        vote: isUpvote ? 'up' : 'down'
+      };
+      
+      console.log('Submitting vote:', voteData);
+      
+      const response = await axios.post(`${API_URL}/tools/${tool._id}/votes`, voteData);
+      
+      console.log('Vote submitted successfully:', response.data);
+      
+      // Update the tool with the new vote data
       const updatedTool: Tool = {
         ...tool,
-        votes: [...(tool.votes || []), newVote]
+        votes: [...(tool.votes || []), {
+          walletAddress: user.wallet.address,
+          vote: isUpvote ? 'up' : 'down',
+          createdAt: new Date().toISOString()
+        }]
       };
       
       setTool(updatedTool);
+      setVoteStatus(isUpvote ? 'upvoted' : 'downvoted');
+      setVoteSuccess(true);
+      
+      setTimeout(() => {
+        setVoteSuccess(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      setVoteStatus('error');
+      
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        setVoteError(error.response.data.message);
+      } else {
+        setVoteError('Failed to submit vote. Please try again.');
+      }
     }
   };
 
@@ -266,6 +326,9 @@ export default function ToolDetailsPage() {
     );
   }
 
+  // Compute derived state
+  const isVoteLoading = voteStatus === 'loading';
+  
   if (error || !tool) {
     return (
       <BaseLayout>
@@ -301,6 +364,13 @@ export default function ToolDetailsPage() {
           </div>
         )}
         
+        {voteSuccess && (
+          <div className="fixed bottom-4 right-4 bg-green-900 bg-opacity-70 border border-green-700 rounded-md p-3 text-green-400 flex items-center shadow-lg z-50">
+            <CheckCircle className="h-5 w-5 mr-2" />
+            Vote submitted successfully!
+          </div>
+        )}
+        
         {/* Tool Header */}
         <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -326,25 +396,64 @@ export default function ToolDetailsPage() {
             {ready && authenticated && user?.wallet?.address && 
             user.wallet.address.toLowerCase() !== tool.walletAddress.toLowerCase() && (
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-blue-300 hover:text-cyan-400 hover:bg-gray-700"
-                  onClick={() => handleVote(true)}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <span className="text-cyan-400 font-medium">
-                  {getUpvotes() - getDownvotes()}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-blue-300 hover:text-red-400 hover:bg-gray-700"
-                  onClick={() => handleVote(false)}
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
+                {voteStatus === 'none' && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-blue-300 hover:text-cyan-400 hover:bg-gray-700"
+                      onClick={() => handleVote(true)}
+                      disabled={isVoteLoading}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <span className="text-cyan-400 font-medium">
+                      {getUpvotes() - getDownvotes()}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-blue-300 hover:text-red-400 hover:bg-gray-700"
+                      onClick={() => handleVote(false)}
+                      disabled={isVoteLoading}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
+                
+                {voteStatus === 'loading' && (
+                  <div className="flex flex-col items-center">
+                    <span className="text-cyan-400 font-medium">
+                      {getUpvotes() - getDownvotes()}
+                    </span>
+                    <Loader className="h-4 w-4 animate-spin text-cyan-500 mt-1" />
+                  </div>
+                )}
+
+                {(voteStatus === 'upvoted' || voteStatus === 'downvoted') && (
+                  <div className="flex flex-col items-center">
+                    <span className="text-cyan-400 font-medium">
+                      {getUpvotes() - getDownvotes()}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full mt-1 ${voteStatus === 'upvoted' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
+                      You {voteStatus === 'upvoted' ? 'liked' : 'disliked'} this
+                    </span>
+                  </div>
+                )}
+
+                {voteStatus === 'error' && (
+                  <div className="flex flex-col items-center">
+                    <span className="text-cyan-400 font-medium">
+                      {getUpvotes() - getDownvotes()}
+                    </span>
+                    {voteError && (
+                      <span className="text-xs px-2 py-1 rounded-full mt-1 bg-red-900 text-red-400">
+                        {voteError}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             {(!ready || !authenticated || !user?.wallet?.address) && (
