@@ -322,7 +322,9 @@ export default function ToolDetailsPage() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-2">
+            {ready && authenticated && user?.wallet?.address && 
+            user.wallet.address.toLowerCase() !== tool.walletAddress.toLowerCase() && (
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -344,7 +346,23 @@ export default function ToolDetailsPage() {
                   <ArrowDown className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            )}
+            {(!ready || !authenticated || !user?.wallet?.address) && (
+              <div className="flex items-center gap-2">
+                <span className="text-cyan-400 font-medium">
+                  {getUpvotes() - getDownvotes()}
+                </span>
+              </div>
+            )}
+            {ready && authenticated && user?.wallet?.address && 
+            user.wallet.address.toLowerCase() === tool.walletAddress.toLowerCase() && (
+              <div className="flex items-center gap-2">
+                <span className="text-cyan-400 font-medium">
+                  {getUpvotes() - getDownvotes()}
+                </span>
+              </div>
+            )}
+          </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-blue-800/30">
             <div className="flex items-center gap-2">

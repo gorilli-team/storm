@@ -242,7 +242,138 @@ export const addReview = async (req, res) => {
     }
   };
   
-  export const getToolReviews = async (req, res) => {
+export const getToolReviews = async (req, res) => {
+try {
+    const { toolId } = req.params;
+
+    if (!toolId) {
+    return res.status(400).json({ 
+        success: false, 
+        message: 'Tool ID is required' 
+    });
+    }
+
+    const tool = await Tool.findById(toolId);
+    if (!tool) {
+    return res.status(404).json({ 
+        success: false, 
+        message: 'Tool not found' 
+    });
+    }
+
+    const enrichedReviews = [];
+    
+    for (const review of tool.reviews) {
+    const user = await User.findOne({ walletAddress: review.walletAddress });
+    
+    enrichedReviews.push({
+        ...(typeof review.toObject === 'function' ? review.toObject() : review),
+        user: user ? {
+        githubUsername: user.githubUsername,
+        description: user.description
+        } : null
+    });
+    }
+
+    return res.status(200).json({
+    success: true,
+    count: enrichedReviews.length,
+    data: enrichedReviews
+    });
+    
+} catch (error) {
+    console.error('Error fetching tool reviews:', error);
+    return res.status(500).json({ 
+    success: false, 
+    message: 'Error while fetching tool reviews',
+    error: error.message
+    });
+}
+};
+
+// Submit a vote (up or down)
+export const submitVote = async (req, res) => {
+    try {
+        const { toolId } = req.params;
+        const { walletAddress, vote } = req.body;
+
+        const tool = await Tool.findById(toolId);
+        if (!tool) return res.status(404).json({ success: false, message: 'Tool not found' });
+
+        const alreadyVoted = tool.votes.some(
+        v => v.walletAddress.toLowerCase() === walletAddress.toLowerCase()
+        );
+
+        if (alreadyVoted) {
+        return res.status(400).json({
+            success: false,
+            message: 'You have already voted and cannot change your vote',
+        });
+        }
+
+        tool.votes.push({ walletAddress, vote, createdAt: new Date() });
+        await tool.save();
+
+        return res.status(200).json({
+        success: true,
+        message: 'Vote submitted successfully',
+        data: {
+            upvotes: tool.votes.filter(v => v.vote === 'up').length,
+            downvotes: tool.votes.filter(v => v.vote === 'down').length,
+            userVote: vote
+        }
+        });
+    } catch (error) {
+        console.error('Error submitting vote:', error);
+        return res.status(500).json({ success: false, message: 'Error while submitting vote' });
+    }
+};
+  
+// Get user's vote for a tool (if any)
+export const getUserVote = async (req, res) => {
+try {
+    const { toolId, walletAddress } = req.params;
+
+    if (!toolId || !walletAddress) {
+    return res.status(400).json({ 
+        success: false, 
+        message: 'Tool ID and wallet address are required' 
+    });
+    }
+
+    const tool = await Tool.findById(toolId);
+    if (!tool) {
+    return res.status(404).json({ 
+        success: false, 
+        message: 'Tool not found' 
+    });
+    }
+
+    const userVote = tool.votes.find(
+    v => v.walletAddress.toLowerCase() === walletAddress.toLowerCase()
+    );
+
+    return res.status(200).json({
+    success: true,
+    data: {
+        vote: userVote ? userVote.vote : null,
+        upvotes: tool.votes.filter(v => v.vote === 'up').length,
+        downvotes: tool.votes.filter(v => v.vote === 'down').length
+    }
+    });
+
+} catch (error) {
+    console.error('Error fetching user vote:', error);
+    return res.status(500).json({ 
+    success: false, 
+    message: 'Error while fetching user vote',
+    error: error.message
+    });
+}
+};
+
+// Get vote statistics for a tool
+export const getToolVotes = async (req, res) => {
     try {
       const { toolId } = req.params;
   
@@ -261,32 +392,26 @@ export const addReview = async (req, res) => {
         });
       }
   
-      const enrichedReviews = [];
-      
-      for (const review of tool.reviews) {
-        const user = await User.findOne({ walletAddress: review.walletAddress });
-        
-        enrichedReviews.push({
-            ...(typeof review.toObject === 'function' ? review.toObject() : review),
-            user: user ? {
-            githubUsername: user.githubUsername,
-            description: user.description
-            } : null
-        });
-      }
+      const upvotes = tool.votes.filter(v => v.vote === 'up').length;
+      const downvotes = tool.votes.filter(v => v.vote === 'down').length;
+      const totalVotes = tool.votes.length;
+      const ratingPercentage = totalVotes > 0 ? (upvotes / totalVotes) * 100 : 0;
   
       return res.status(200).json({
         success: true,
-        count: enrichedReviews.length,
-        data: enrichedReviews
+        data: {
+          upvotes,
+          downvotes,
+          totalVotes,
+          ratingPercentage
+        }
       });
-      
     } catch (error) {
-      console.error('Error fetching tool reviews:', error);
+      console.error('Error fetching tool votes:', error);
       return res.status(500).json({ 
         success: false, 
-        message: 'Error while fetching tool reviews',
+        message: 'Error while fetching tool votes',
         error: error.message
       });
     }
-  };
+};

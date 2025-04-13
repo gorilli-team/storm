@@ -11,7 +11,10 @@ import {
   getAllTools,
   getToolById, 
   getToolReviews,
-  addReview
+  addReview,
+  submitVote,
+  getUserVote,
+  getToolVotes
 } from "../controllers/ToolController.js";
 import {
   createUserIfNotExists,
@@ -60,9 +63,14 @@ router.get("/api/tools/bucket/:bucketId", getToolsByBucket);
 router.get("/api/tools", getAllTools);
 router.get("/api/tools/:id", getToolById);
 
-// Tool reviews
+// Tool reviews routes
 router.post("/api/tools/:toolId/reviews", addReview);
 router.get("/api/tools/:toolId/reviews", getToolReviews);
+
+// Tool votes routes
+router.post("/api/tools/:toolId/votes", submitVote);
+router.get("/api/tools/:toolId/votes/:walletAddress", getUserVote);
+router.get("/api/tools/:toolId/votes", getToolVotes);
 
 // User routes
 router.post("/api/users", createUserIfNotExists);
