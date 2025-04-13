@@ -33,12 +33,17 @@ import Link from "next/link";
 //   },
 // ];
 
+interface User {
+  githubUsername?: string;
+}
+
 interface Tool {
   toolName: string;
   bucketId: string;
   walletAddress: string;
   createdAt: string;
   _id: string;
+  user?: User;
 }
 
 export default function StormMarketplacePage() {
@@ -180,7 +185,7 @@ export default function StormMarketplacePage() {
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-blue-400" />
                   <span className="text-blue-300">
-                    by <span className="text-cyan-400" title={tool.walletAddress}>{shortenAddress(tool.walletAddress)}</span>
+                    by <span className="text-cyan-400" title={tool.walletAddress}>{(tool.user?.githubUsername) || shortenAddress(tool.walletAddress)}</span>
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

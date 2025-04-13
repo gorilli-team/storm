@@ -1,5 +1,6 @@
 import Tool from '../models/ToolModel.js';
 import Bucket from '../models/BucketModel.js';
+import User from '../models/UserModel.js';
 
 export const createTool = async (req, res) => {
   try {
@@ -103,10 +104,25 @@ export const getAllTools = async (req, res) => {
     try {
       const tools = await Tool.find().sort({ createdAt: -1 });
       
+      const enrichedTools = [];
+      
+      for (const tool of tools) {
+
+        const user = await User.findOne({ walletAddress: tool.walletAddress });
+
+        enrichedTools.push({
+          ...tool.toObject(),
+          user: user ? {
+            githubUsername: user.githubUsername,
+            description: user.description
+          } : null
+        });
+      }
+      
       return res.status(200).json({
         success: true,
         count: tools.length,
-        data: tools
+        data: enrichedTools
       });
       
     } catch (error) {
@@ -119,7 +135,6 @@ export const getAllTools = async (req, res) => {
     }
 };
 
-// Get a tool by its ID
 export const getToolById = async (req, res) => {
     try {
       const { id } = req.params;
@@ -140,9 +155,21 @@ export const getToolById = async (req, res) => {
         });
       }
       
+      // Fetch the user information
+      const user = await User.findOne({ walletAddress: tool.walletAddress });
+      
+      // Create response with user data
+      const response = {
+        ...tool.toObject(),
+        user: user ? {
+          githubUsername: user.githubUsername,
+          description: user.description
+        } : null
+      };
+      
       return res.status(200).json({
         success: true,
-        data: tool
+        data: response
       });
       
     } catch (error) {
@@ -154,4 +181,3 @@ export const getToolById = async (req, res) => {
       });
     }
 };
-

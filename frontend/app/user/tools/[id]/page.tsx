@@ -27,6 +27,11 @@ import {
 import Link from "next/link";
 import Editor from "@monaco-editor/react";
 
+interface User {
+  githubUsername?: string;
+  description?: string;
+}
+
 interface Tool {
   _id: string;
   toolName: string;
@@ -40,6 +45,7 @@ interface Tool {
   totalEarnings?: number;
   lastUsed?: string;
   createdAt: string;
+  user?: User;
   votes: {
     walletAddress: string;
     vote: "up" | "down";
@@ -233,14 +239,14 @@ export default function ToolDetailsPage() {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-blue-800/30">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-blue-400" />
-              <span className="text-blue-300">
-                by <span className="text-cyan-400" title={tool.walletAddress}>
-                  {shortenAddress(tool.walletAddress)}
-                </span>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-blue-400" />
+            <span className="text-blue-300">
+              by <span className="text-cyan-400" title={tool.walletAddress}>
+                {(tool.user?.githubUsername) || shortenAddress(tool.walletAddress)}
               </span>
-            </div>
+            </span>
+          </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-400" />
               <span className="text-blue-300" suppressHydrationWarning>
@@ -316,7 +322,7 @@ export default function ToolDetailsPage() {
                     </h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-blue-300">Bucket ID:</span>
+                        <span className="text-blue-300">RECALL Bucket ID:</span>
                         <span className="text-cyan-400" title={tool.bucketId}>{shortenAddress(tool.bucketId)}</span>
                       </div>
                       <div className="flex justify-between">
@@ -353,6 +359,7 @@ export default function ToolDetailsPage() {
                         {tool.walletAddress.charAt(2).toUpperCase()}
                       </div>
                       <div>
+                        
                         <div className="font-medium text-cyan-400" title={tool.walletAddress}>
                           {shortenAddress(tool.walletAddress)}
                         </div>
@@ -362,7 +369,7 @@ export default function ToolDetailsPage() {
                       </div>
                     </div>
                     <p className="text-blue-300 text-sm">
-                      Creator of the {tool.toolName} tool in the Storm Marketplace.
+                      {(tool.user?.description)}
                     </p>
                   </div>
                 </div>
