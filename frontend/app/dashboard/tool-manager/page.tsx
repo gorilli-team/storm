@@ -14,7 +14,10 @@ import {
   Loader2,
   AlertTriangle,
   Settings,
-  Info
+  Info,
+  Key,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Editor from "@monaco-editor/react";
@@ -158,8 +161,47 @@ const StormToolManager: React.FC = () => {
   const [toolSaveSuccess, setToolSaveSuccess] = useState<boolean>(false);
   const [toolSaveError, setToolSaveError] = useState<string | null>(null);
   const [activeEditorTab, setActiveEditorTab] = useState<"function" | "params" | "info">("function");
-
+  const [apiKey, setApiKey] = useState<string>("");
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  
   const { ready, authenticated, login, logout, user } = usePrivy();
+
+  const initializeRecallClient = async (privateKey: string) => {
+    try {
+      if (!privateKey || privateKey === "0x") {
+        console.error("Missing private key for Recall");
+        setApiKeyError("Please enter a valid API key");
+        return;
+      }
+
+      const formattedPrivateKey: `0x${string}` = privateKey.startsWith("0x") 
+        ? privateKey as `0x${string}` 
+        : `0x${privateKey}`;
+      
+      const walletClient = createWalletClient({
+        account: privateKeyToAccount(formattedPrivateKey),
+        chain: testnet,
+        transport: http(),
+      });
+
+      const client = new RecallClient({ walletClient });
+      setRecallClient(client);
+      setApiKeyError(null);
+      console.log("Recall client initialized successfully", client);
+    } catch (error) {
+      console.error("Failed to initialize Recall client:", error);
+      setApiKeyError("Invalid API key. Please check and try again.");
+    }
+  };
+
+  const handleApiKeySubmit = () => {
+    if (!apiKey.trim()) {
+      setApiKeyError("Please enter your Wallet API key");
+      return;
+    }
+    initializeRecallClient(apiKey);
+  };
 
   // Sync user with backend when authentication state changes
   useEffect(() => {
@@ -299,7 +341,7 @@ const StormToolManager: React.FC = () => {
   const addTool = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
-      setAddToolError("RecallClient not initialized");
+      setAddToolError("RecallClient not initialized. Please enter your API key.");
       return false;
     }
   
@@ -419,7 +461,7 @@ const StormToolManager: React.FC = () => {
   const createBucket = async () => {
     if (!recallClient) {
       console.error("RecallClient not initialized");
-      setBucketCreationError("RecallClient not initialized");
+      setBucketCreationError("RecallClient not initialized. Please enter your API key.");
       return null;
     }
 
@@ -468,34 +510,6 @@ const StormToolManager: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const initializeRecallClient = async () => {
-      try {
-        const privateKeyEnv = process.env.NEXT_PUBLIC_RECALL_PRIVATE_KEY || "";
-
-        if (!privateKeyEnv || privateKeyEnv === "0x") {
-          console.error("Missing private key for Recall");
-          return;
-        }
-
-        const privateKey = privateKeyEnv as `0x${string}`;
-        const walletClient = createWalletClient({
-          account: privateKeyToAccount(privateKey),
-          chain: testnet,
-          transport: http(),
-        });
-
-        const client = new RecallClient({ walletClient });
-        setRecallClient(client);
-        console.log("Recall client initialized successfully", client);
-      } catch (error) {
-        console.error("Failed to initialize Recall client:", error);
-      }
-    };
-
-    initializeRecallClient();
-  }, []);
-
   return (
     <BaseLayout>
       <div className="p-6 bg-gray-900 text-gray-100 min-h-screen">
@@ -506,34 +520,101 @@ const StormToolManager: React.FC = () => {
               Storm Tool Manager
             </h1>
             <p className="text-blue-300 mt-2 flex items-center">
-              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" /> Create and
-              manage your function tools
+              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" /> Welcome to
+              your Storm dashboard. Create and manage your function tools
             </p>
           </div>
 
           {authenticated && walletAddress && (
-            <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
-              <div className="bg-gray-900 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
-                {walletAddress}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+                <h2 className="text-xl font-bold text-cyan-400 mb-4">
+                  Quick Stats
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-300">Total Buckets</span>
+                    <span className="text-cyan-400 font-medium">{buckets.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-300">Total Tools</span>
+                    <span className="text-cyan-400 font-medium">{bucketTools.length}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+                  <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
+                  <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
+                    {walletAddress}
+                  </div>
+              </div>
+
+              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+                <h2 className="text-xl font-bold text-cyan-400 mb-4">
+                  Getting Started
+                </h2>
+                <ul className="space-y-2 text-blue-300">
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></span>
+                      Create a new bucket to store your tools
+                  </li>
+                  <li className="flex items-center">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></span>
+                      Add tools to your bucket
+                  </li>
+                </ul>
               </div>
             </div>
           )}
 
-          {/* Info Card */}
-          <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
-            <div className="flex">
-              <div>
-                <h3 className="text-sm font-medium text-cyan-400 flex items-center">
-                  <Zap className="w-4 h-4 mr-2 text-yellow-500" /> Getting Started
-                </h3>
-                <p className="text-sm text-blue-300 mt-1">
-                  1. Create a new bucket to store your tools
-                  <br />
-                  2. Add tools to your bucket with optional Zod parameters
-                </p>
+          <div className="bg-gray-800 border border-blue-500 border-opacity-50 rounded-lg p-4 mb-6">
+            <h3 className="text-sm font-medium text-cyan-400 mb-2 flex items-center">
+              <Key className="w-4 h-4 mr-2 text-yellow-400" /> Wallet Private Key for RECALL
+            </h3>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your Wallet Private Key for RECALL"
+                  className="w-full p-2 border border-blue-700 rounded-md shadow-md bg-gray-900 text-cyan-400 placeholder-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-400 focus:outline-none"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
+              <Button
+                onClick={handleApiKeySubmit}
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
+                size="sm"
+              >
+                {recallClient ? "Update Key" : "Submit"}
+              </Button>
             </div>
+            {apiKeyError && (
+              <div className="text-red-400 text-sm mt-1 flex items-center">
+                <AlertTriangle className="h-4 w-4 mr-1" /> {apiKeyError}
+              </div>
+            )}
+            {recallClient && (
+              <div className="text-green-400 text-sm mt-1 flex items-center">
+                <CheckCircle className="h-4 w-4 mr-1" /> API key successfully configured
+              </div>
+            )}
+            <p className="text-xs text-blue-400 mt-2">
+              Your API key is the private key of the wallet that has Recall tokens and credits.
+              It will be prefixed with "0x" automatically if not included.
+            </p>
           </div>
 
           {/* Bucket Selection */}

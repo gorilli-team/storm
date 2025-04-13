@@ -67,13 +67,13 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                <Link href="/dashboard">
+                <Link href="/dashboard/tool-manager">
                   <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 px-8 py-6 text-lg shadow-lg shadow-blue-500/30">
                     Get Started
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/dashboard/storm">
+                <Link href="/dashboard/marketplace">
                   <Button
                     variant="outline"
                     className="border-blue-700 text-blue-600 hover:bg-gray-800 px-8 py-6 text-lg"
@@ -246,13 +246,13 @@ export default function Home() {
               tools in our ecosystem.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard">
+              <Link href="/dashboard/tool-manager">
                 <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500 px-6 py-6 text-lg">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/user/tools">
+              <Link href="/dashboard/marketplace">
                 <Button
                   variant="outline"
                   className="border-blue-700 text-blue-600 hover:bg-gray-800 px-6 py-6 text-lg"

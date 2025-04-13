@@ -51,27 +51,19 @@ const navItems: NavItem[] = [
   //   ],
   // },
   {
-    title: "Storm Tools",
-    href: "/dashboard",
-    icon: <Zap className="h-5 w-5" />,
-    buttons: [
-      {
-        title: "My Tools",
-        href: "/dashboard/storm",
-        icon: <Code className="h-4 w-4" />,
-      },
-      {
-        title: "Marketplace",
-        href: "/user/tools",
-        icon: <Cloud className="h-4 w-4" />,
-        variant: "outline",
-      },
-    ],
+    title: "Tool manager",
+    href: "/dashboard/tool-manager",
+    icon: <Code className="h-4 w-4" />,
+  },
+  {
+    title: "Marketplace",
+    href: "/dashboard/marketplace",
+    icon: <Cloud className="h-4 w-4" />,
   },
   {
     title: "User",
     href: "/dashboard/user",
-    icon: <Settings className="h-5 w-5" />,
+    icon: <User className="h-5 w-5" />,
   },
 
   // {
@@ -91,7 +83,7 @@ export function AppSidebar() {
 
   return (
     <div className="flex h-full flex-col border-r border-blue-800/30 bg-gray-900">
-      <div className="flex h-14 items-center border-b border-blue-800/30 px-4">
+      <div className="flex logo-div items-center border-b border-blue-800/30 px-4">
         <div className="flex items-center gap-2">
           <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center">
             <Zap className="h-3.5 w-3.5 text-white" />
