@@ -96,6 +96,12 @@ export default function ProfilePage() {
     });
   };
 
+  const formatAddress = (address: string) => {
+    if (!address) return "";
+    return `${address.slice(0, 10)}...${address.slice(-10)}`;
+  };  
+
+
   if (isLoading && !userProfile) {
     return (
       <BaseLayout>
@@ -125,9 +131,15 @@ export default function ProfilePage() {
           </h1>
           {isEditing ? (
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>
-                Cancel
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(false)}
+                disabled={isLoading}
+                className="text-black hover:bg-gray-200"
+              >
+                Back
               </Button>
+
               <Button
                 className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
                 onClick={handleSaveProfile}
@@ -183,7 +195,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="mt-1 text-sm font-mono bg-gray-900 p-2 rounded border border-gray-700 flex items-center justify-between">
                   <span className="text-cyan-400 overflow-auto">
-                    {userProfile?.walletAddress}
+                    {formatAddress(userProfile?.walletAddress || "")}
                   </span>
                   <Button
                     variant="ghost"

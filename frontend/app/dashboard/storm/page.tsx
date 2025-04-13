@@ -502,7 +502,7 @@ const StormToolManager: React.FC = () => {
               manage your function tools
             </p>
           </div>
-
+  
           {authenticated && walletAddress && (
             <div className="bg-gray-800 border border-blue-700 rounded-lg p-4 mb-6">
               <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
@@ -511,7 +511,7 @@ const StormToolManager: React.FC = () => {
               </div>
             </div>
           )}
-
+  
           {/* Info Card */}
           <div className="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-4 mb-6">
             <div className="flex">
@@ -527,7 +527,7 @@ const StormToolManager: React.FC = () => {
               </div>
             </div>
           </div>
-
+  
           {/* Bucket Selection */}
           <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
@@ -554,18 +554,9 @@ const StormToolManager: React.FC = () => {
                     </>
                   )}
                 </Button>
-              ) : (
-                <Button
-                  onClick={() => login()}
-                  className="flex items-center gap-2 mt-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500"
-                  size="sm"
-                >
-                  <FolderPlus className="mr-1 h-4 w-4 text-blue-300" />
-                  Login to Create
-                </Button>
-              )}
+              ) : null}
             </div>
-
+  
             {bucketCreationError && (
               <div className="bg-red-900 bg-opacity-20 border border-red-800 rounded-md p-3 mb-4 flex items-center">
                 <AlertTriangle className="h-4 w-4 text-red-400 mr-2" />
@@ -581,7 +572,7 @@ const StormToolManager: React.FC = () => {
                 </p>
               </div>
             )}
-
+  
             {authenticated && bucket && (
               <div className="bg-gray-900 p-4 rounded-md border border-blue-600 border-opacity-30 mb-4">
                 <div className="flex items-center mb-2">
@@ -600,7 +591,7 @@ const StormToolManager: React.FC = () => {
                 )}
               </div>
             )}
-
+  
             {/* Bucket Cards Display */}
             <div className="mt-4">
               {!authenticated ? (
@@ -661,7 +652,7 @@ const StormToolManager: React.FC = () => {
               )}
             </div>
           </div>
-
+  
           {selectedBucket && (
             <>
               {/* Tabs */}
@@ -691,7 +682,7 @@ const StormToolManager: React.FC = () => {
                   </div>
                 </button>
               </div>
-
+  
               {/* Content based on active tab */}
               {activeTab === "create" ? (
                 <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
@@ -714,7 +705,7 @@ const StormToolManager: React.FC = () => {
                       <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
                     </div>
                   </div>
-
+  
                   <div className="space-y-4 mb-4">
                     <div>
                       <label
@@ -804,7 +795,7 @@ const StormToolManager: React.FC = () => {
                       </div>
                     )}
                   </div>
-
+  
                   <button
                     onClick={addTool}
                     disabled={isAddingTool || !recallClient || !authenticated}
@@ -813,11 +804,6 @@ const StormToolManager: React.FC = () => {
                     {isAddingTool ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
-                      </>
-                    ) : !authenticated ? (
-                      <>
-                        <FolderPlus className="mr-2 h-4 w-4" />
-                        Login to Save Tool
                       </>
                     ) : (
                       <>
@@ -861,7 +847,7 @@ const StormToolManager: React.FC = () => {
                       <span className="text-xs font-mono text-blue-300">{selectedBucket.bucketId}</span>
                     </div>
                   </div>
-
+  
                   {isLoadingTools ? (
                     <div className="flex justify-center py-8">
                       <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
