@@ -239,14 +239,14 @@ export default function ToolDetailsPage() {
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-blue-800/30">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-blue-400" />
-            <span className="text-blue-300">
-              by <span className="text-cyan-400" title={tool.walletAddress}>
-                {(tool.user?.githubUsername) || shortenAddress(tool.walletAddress)}
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-blue-400" />
+              <span className="text-blue-300">
+                by <span className="text-cyan-400" title={tool.walletAddress}>
+                  {(tool.user?.githubUsername) || shortenAddress(tool.walletAddress)}
+                </span>
               </span>
-            </span>
-          </div>
+            </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-400" />
               <span className="text-blue-300" suppressHydrationWarning>
@@ -321,9 +321,19 @@ export default function ToolDetailsPage() {
                       Tool Details
                     </h4>
                     <div className="space-y-2">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-blue-300">RECALL Bucket ID:</span>
-                        <span className="text-cyan-400" title={tool.bucketId}>{shortenAddress(tool.bucketId)}</span>
+                        <div className="flex items-center">
+                          <span className="text-cyan-400" title={tool.bucketId}>
+                            {shortenAddress(tool.bucketId)}
+                          </span>
+                          <button 
+                            onClick={() => copyToClipboard(tool.bucketId)}
+                            className="ml-2 text-blue-400 hover:text-cyan-400"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-blue-300">Uses:</span>
@@ -359,17 +369,26 @@ export default function ToolDetailsPage() {
                         {tool.walletAddress.charAt(2).toUpperCase()}
                       </div>
                       <div>
-                        
-                        <div className="font-medium text-cyan-400" title={tool.walletAddress}>
-                          {shortenAddress(tool.walletAddress)}
-                        </div>
-                        <div className="text-xs text-blue-300">
-                          Tool Creator
+                        {tool.user?.githubUsername && (
+                          <div className="font-medium text-cyan-400">
+                            {tool.user.githubUsername}
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          <span className="text-cyan-400" title={tool.walletAddress}>
+                            {shortenAddress(tool.walletAddress)}
+                          </span>
+                          <button 
+                            onClick={() => copyToClipboard(tool.walletAddress)}
+                            className="ml-2 text-blue-400 hover:text-cyan-400"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
                     </div>
                     <p className="text-blue-300 text-sm">
-                      {(tool.user?.description)}
+                      {tool.user?.description || "No description provided"}
                     </p>
                   </div>
                 </div>
@@ -410,50 +429,76 @@ export default function ToolDetailsPage() {
 
             {/* Code Tab */}
             {activeTab === "code" && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium text-cyan-400">
-                    Source Code
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-blue-700 text-blue-300 hover:bg-gray-700"
-                    onClick={() => copyToClipboard(tool.code || '')}
-                  >
-                    {isCopied ? "Copied!" : "Copy Code"}
-                    <Copy className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="border border-blue-800/30 rounded-lg overflow-hidden">
-                  <Editor
-                    height="400px"
-                    defaultLanguage="javascript"
-                    value={tool.code || '// No code available for this tool'}
-                    theme="vs-dark"
-                    options={{
-                      readOnly: true,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      lineNumbers: "on",
-                      wordWrap: "on",
-                    }}
-                  />
-                </div>
-                
-                {tool.params && (
-                  <div className="space-y-4 mt-6">
+              <div className="space-y-6">
+                {/* Function Code Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium text-cyan-400">
-                      Parameters
+                      Function Code
                     </h3>
-                    <div className="border border-blue-800/30 rounded-lg overflow-hidden bg-gray-900 p-4">
-                      <pre className="text-blue-300 whitespace-pre-wrap">
-                        {tool.params}
-                      </pre>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-blue-700 text-blue-300 hover:bg-gray-700"
+                      onClick={() => copyToClipboard(tool.code || '')}
+                    >
+                      {isCopied ? "Copied!" : "Copy Code"}
+                      <Copy className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="border border-blue-800/30 rounded-lg overflow-hidden">
+                    <Editor
+                      height="300px"
+                      defaultLanguage="javascript"
+                      value={tool.code || '// No code available for this tool'}
+                      theme="vs-dark"
+                      options={{
+                        readOnly: true,
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        lineNumbers: "on",
+                        wordWrap: "on",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Parameters Section */}
+                {tool.params && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-medium text-cyan-400">
+                        Parameters
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-700 text-blue-300 hover:bg-gray-700"
+                        onClick={() => copyToClipboard(tool.params || '')}
+                      >
+                        {isCopied ? "Copied!" : "Copy Parameters"}
+                        <Copy className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="border border-blue-800/30 rounded-lg overflow-hidden">
+                      <Editor
+                        height="200px"
+                        defaultLanguage="json"
+                        value={tool.params || '// No parameters available'}
+                        theme="vs-dark"
+                        options={{
+                          readOnly: true,
+                          minimap: { enabled: false },
+                          scrollBeyondLastLine: false,
+                          lineNumbers: "on",
+                          wordWrap: "on",
+                        }}
+                      />
                     </div>
                   </div>
                 )}
-                
+
+                {/* Usage Guidelines */}
                 <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-800/30">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5" />
