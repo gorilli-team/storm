@@ -88,11 +88,11 @@ await storm.publishTool(myTool);`;
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
-              Storm MCP Marketplace
+              Documentation
             </h1>
             <p className="text-blue-300 mt-2 flex items-center">
               <Terminal className="inline mr-2 h-4 w-4 text-yellow-400" />
-              A decentralized marketplace for AI tools powered by Recall Network
+              A decentralized marketplace connecting developers and users through MCP tools, enabling monetization via Recall tokens and creating a seamless ecosystem for specialized AI capabilities.
             </p>
           </div>
 
