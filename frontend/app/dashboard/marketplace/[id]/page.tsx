@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { BaseLayout } from "../../../components/layout/base-layout";
 import { Button } from "../../../components/ui/button";
 import axios from "axios";
+import { usePrivy } from "@privy-io/react-auth";
 import {
   ArrowLeft,
   ArrowUp,
@@ -60,6 +61,8 @@ export default function ToolDetailsPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { ready, authenticated, user } = usePrivy();
 
   useEffect(() => {
     const fetchToolDetails = async () => {
@@ -523,11 +526,12 @@ export default function ToolDetailsPage() {
                   <h3 className="text-lg font-medium text-cyan-400">
                     User Reviews
                   </h3>
-                  <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500">
-                    <MessageSquare className="mr-2 h-4 w-4" /> Write a Review
-                  </Button>
+                  {authenticated && user?.wallet?.address && user.wallet.address.toLowerCase() !== tool.walletAddress.toLowerCase() && (
+                    <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500">
+                      <MessageSquare className="mr-2 h-4 w-4" /> Write a Review
+                    </Button>
+                  )}
                 </div>
-                {/* Since reviews aren't in the current data model, show the empty state */}
                 <div className="text-center py-8 bg-gray-900 rounded-lg border border-blue-800/30">
                   <MessageSquare className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
                   <h3 className="text-xl font-medium text-cyan-400 mb-2">No reviews yet</h3>

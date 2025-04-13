@@ -9,7 +9,9 @@ import {
   createTool,
   getToolsByBucket,
   getAllTools,
-  getToolById
+  getToolById, 
+  getToolReviews,
+  addReview
 } from "../controllers/ToolController.js";
 import {
   createUserIfNotExists,
@@ -57,6 +59,10 @@ router.post("/api/tools", createTool);
 router.get("/api/tools/bucket/:bucketId", getToolsByBucket);
 router.get("/api/tools", getAllTools);
 router.get("/api/tools/:id", getToolById);
+
+// Tool reviews
+router.post("/api/tools/:toolId/reviews", addReview);
+router.get("/api/tools/:toolId/reviews", getToolReviews);
 
 // User routes
 router.post("/api/users", createUserIfNotExists);

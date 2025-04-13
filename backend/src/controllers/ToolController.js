@@ -181,3 +181,88 @@ export const getToolById = async (req, res) => {
       });
     }
 };
+
+export const addReview = async (req, res) => {
+    try {
+      const { toolId } = req.params;
+      const { 
+        walletAddress, 
+        githubUsername = '', 
+        text 
+      } = req.body;
+
+      if (!toolId || !walletAddress || !text) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Tool ID, wallet address, and review text are required' 
+        });
+      }
+
+      const tool = await Tool.findById(toolId);
+      if (!tool) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Tool not found' 
+        });
+      }
+  
+      const newReview = {
+        walletAddress,
+        githubUsername,
+        text,
+        createdAt: new Date()
+      };
+  
+      tool.reviews.push(newReview);
+      await tool.save();
+  
+      return res.status(201).json({
+        success: true,
+        message: 'Review added successfully',
+        data: newReview
+      });
+      
+    } catch (error) {
+      console.error('Error adding review:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error while adding review',
+        error: error.message
+      });
+    }
+  };
+  
+  export const getToolReviews = async (req, res) => {
+    try {
+      const { toolId } = req.params;
+  
+      if (!toolId) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Tool ID is required' 
+        });
+      }
+  
+      const tool = await Tool.findById(toolId);
+      if (!tool) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Tool not found' 
+        });
+      }
+  
+      return res.status(200).json({
+        success: true,
+        count: tool.reviews.length,
+        data: tool.reviews
+      });
+      
+    } catch (error) {
+      console.error('Error fetching tool reviews:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error while fetching tool reviews',
+        error: error.message
+      });
+    }
+  };

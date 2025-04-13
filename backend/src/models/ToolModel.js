@@ -47,6 +47,26 @@ const toolSchema = new mongoose.Schema({
       },
     },
   ],
+  reviews: [
+    {
+      walletAddress: {
+        type: String,
+        required: true,
+      },
+      githubUsername: {
+        type: String,
+        default: ""
+      },
+      text: {
+        type: String,
+        required: true,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      }
+    }
+  ],
   code: {
     type: String,
     default: "",
