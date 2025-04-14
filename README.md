@@ -115,6 +115,8 @@ Our project is particularly strong in the Verifiability and Interoperability cat
 
 ## 🔄 Recall Integration
 
+Developer Note: The current frontend implementation requests the user's Private Key to access Recall functionality. This is a temporary solution created during the Hackathon to allow publishing to blockchain storage buckets owned by wallets generated through the Recall SDK. This approach is not appropriate for production and will need to be replaced before launch.
+
 ### Decentralized AI Data Management
 
 | Component                         | Description                                                                                                                                                                                        |
