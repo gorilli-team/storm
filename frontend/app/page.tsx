@@ -276,17 +276,11 @@ export default function Home() {
               <span className="text-xl font-bold text-cyan-400">Storm</span>
             </div>
             <div className="flex gap-6 text-blue-300">
-              <Link href="#" className="hover:text-cyan-400">
-                About
-              </Link>
-              <Link href="#" className="hover:text-cyan-400">
+              <Link
+                href="/dashboard/documentation"
+                className="hover:text-cyan-400"
+              >
                 Documentation
-              </Link>
-              <Link href="#" className="hover:text-cyan-400">
-                Terms
-              </Link>
-              <Link href="#" className="hover:text-cyan-400">
-                Privacy
               </Link>
             </div>
           </div>
