@@ -83,21 +83,21 @@ await storm.publishTool(myTool);`;
 
   return (
     <BaseLayout>
-      <div className="p-6 bg-gray-900 text-gray-100 min-h-screen">
-        <div className="container">
+      <div className="px-4 py-4 sm:px-6 sm:py-6 bg-gray-900 text-gray-100 min-h-screen">
+        <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
               Documentation
             </h1>
-            <p className="text-blue-300 mt-2 flex items-center">
-              <Terminal className="inline mr-2 h-4 w-4 text-yellow-400" />
-              A decentralized marketplace connecting developers and users through MCP tools, enabling monetization via Recall tokens and creating a seamless ecosystem for specialized AI capabilities.
+            <p className="text-blue-300 mt-2 flex items-center text-sm sm:text-base">
+              <Terminal className="inline mr-2 h-4 w-4 text-yellow-400 flex-shrink-0" />
+              <span>A decentralized marketplace connecting developers and users through MCP tools, enabling monetization via Recall tokens and creating a seamless ecosystem for specialized AI capabilities.</span>
             </p>
           </div>
 
           {/* Overview Section */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Zap className="mr-2 h-5 w-5 text-blue-400" /> Overview
             </h2>
@@ -110,7 +110,7 @@ await storm.publishTool(myTool);`;
           </div>
 
           {/* Key Features */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Cpu className="mr-2 h-5 w-5 text-blue-400" /> Key Features
             </h2>
@@ -137,17 +137,17 @@ await storm.publishTool(myTool);`;
           </div>
 
           {/* Technical Architecture */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Layers className="mr-2 h-5 w-5 text-blue-400" /> Technical Architecture
             </h2>
             
             {/* Tool Management Flow */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
                 <Workflow className="mr-2 h-5 w-5 text-blue-400" /> Tool Management Flow
               </h3>
-              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800">
+              <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800">
                 <div className="text-gray-400 text-sm mb-2">
                   The Storm platform uses a sophisticated workflow to securely store and retrieve tools:
                 </div>
@@ -168,11 +168,11 @@ await storm.publishTool(myTool);`;
             </div>
 
             {/* Tool Bucket Structure */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
                 <Box className="mr-2 h-5 w-5 text-blue-400" /> Tool Bucket Structure
               </h3>
-              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800">
+              <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800">
                 <div className="text-gray-400 text-sm mb-2">
                   Tools in Storm are organized in buckets with detailed component information:
                 </div>
@@ -195,11 +195,11 @@ await storm.publishTool(myTool);`;
             </div>
 
             {/* Detailed Tool Processing Workflow */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
                 <Workflow className="mr-2 h-5 w-5 text-blue-400" /> Detailed Tool Processing Workflow
               </h3>
-              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800">
+              <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800">
                 <div className="text-gray-400 text-sm mb-2">
                   When a developer adds a new tool to Storm:
                 </div>
@@ -221,11 +221,11 @@ await storm.publishTool(myTool);`;
             </div>
 
             {/* Tool Retrieval and Execution */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <h3 className="text-lg font-medium text-cyan-400 mb-2 flex items-center">
                 <Workflow className="mr-2 h-5 w-5 text-blue-400" /> Tool Retrieval and Execution
               </h3>
-              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800">
+              <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800">
                 <div className="text-gray-400 text-sm mb-2">
                   When a user requests a tool:
                 </div>
@@ -248,7 +248,7 @@ await storm.publishTool(myTool);`;
           </div>
 
           {/* How It Works */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Rocket className="mr-2 h-5 w-5 text-blue-400" /> How It Works
             </h2>
@@ -303,7 +303,7 @@ await storm.publishTool(myTool);`;
           </div>
 
           {/* Current Tool Types */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <FileSearch className="mr-2 h-5 w-5 text-blue-400" /> Current Tool Types
             </h2>
@@ -333,7 +333,7 @@ await storm.publishTool(myTool);`;
           </div>
 
           {/* Security Features */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Shield className="mr-2 h-5 w-5 text-blue-400" /> Security Features
             </h2>
@@ -385,14 +385,14 @@ await storm.publishTool(myTool);`;
           </div> */}
 
           {/* API Example */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Code className="mr-2 h-5 w-5 text-blue-400" /> API Example
             </h2>
-            <div className="bg-gray-900 p-4 rounded-lg border border-blue-800 relative">
+            <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800 relative overflow-x-auto">
               <Button
                 onClick={() => handleCopy(toolExample)}
-                className="absolute top-3 right-3 h-9 w-9 p-0 bg-gray-800 hover:bg-gray-700"
+                className="absolute top-2 right-2 sm:top-3 sm:right-3 h-8 w-8 sm:h-9 sm:w-9 p-0 bg-gray-800 hover:bg-gray-700"
                 size="sm"
               >
                 {copied ? (
@@ -401,7 +401,7 @@ await storm.publishTool(myTool);`;
                   <Copy className="h-4 w-4" />
                 )}
               </Button>
-              <pre className="text-cyan-400 font-mono text-sm overflow-x-auto">
+              <pre className="text-cyan-400 font-mono text-xs sm:text-sm overflow-x-auto pr-12 sm:pr-14">
                 {toolExample}
               </pre>
             </div>
