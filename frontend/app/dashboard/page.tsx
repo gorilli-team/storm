@@ -7,21 +7,21 @@ import { Zap } from "lucide-react";
 export default function DashboardPage() {
   return (
     <BaseLayout>
-      <div className="space-y-8 w-full px-6 text-gray-100">
+      <div className="space-y-6 sm:space-y-8 w-full px-4 sm:px-6 text-gray-100 max-w-5xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
               Dashboard
             </h1>
-            <p className="text-blue-300 mt-2 flex items-center">
-              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" /> Welcome to
+            <p className="text-blue-300 mt-2 flex items-center text-sm sm:text-base">
+              <Zap className="inline mr-2 h-4 w-4 text-yellow-400 flex-shrink-0" /> Welcome to
               your Storm dashboard
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
             <h2 className="text-xl font-bold text-cyan-400 mb-4">
               Quick Stats
             </h2>
@@ -37,14 +37,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
             <h2 className="text-xl font-bold text-cyan-400 mb-4">
               Recent Activity
             </h2>
             <p className="text-blue-300">No recent activity</p>
           </div>
 
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
             <h2 className="text-xl font-bold text-cyan-400 mb-4">
               Getting Started
             </h2>

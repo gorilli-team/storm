@@ -98,19 +98,19 @@ export default function StormMarketplacePage() {
 
   return (
     <BaseLayout>
-      <div className="space-y-8 w-full px-6 text-gray-100">
+      <div className="space-y-6 sm:space-y-8 w-full px-4 sm:px-6 text-gray-100 max-w-5xl mx-auto">
         <div>
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
             Storm Marketplace
           </h1>
-          <p className="text-blue-300 mt-2 flex items-center">
-            <Zap className="inline mr-2 h-4 w-4 text-cyan-400" /> Discover and
+          <p className="text-blue-300 mt-2 flex items-center text-sm sm:text-base">
+            <Zap className="inline mr-2 h-4 w-4 text-cyan-400 flex-shrink-0" /> Discover and
             use MCP tools from the community
           </p>
         </div>
 
         {/* Search Section */}
-        <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+        <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
@@ -141,7 +141,7 @@ export default function StormMarketplacePage() {
 
         {/* Empty state */}
         {!isLoading && !error && tools.length === 0 && (
-          <div className="text-center py-12 bg-gray-800 rounded-lg border border-blue-700 border-opacity-30">
+          <div className="text-center py-8 sm:py-12 bg-gray-800 rounded-lg border border-blue-700 border-opacity-30 px-4">
             <Zap className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
             <h3 className="text-xl font-medium text-cyan-400 mb-2">No tools found</h3>
             <p className="text-blue-300">No tools are available yet. Create your first tool in the Tool Manager.</p>
@@ -150,7 +150,7 @@ export default function StormMarketplacePage() {
 
         {/* No results state */}
         {!isLoading && !error && tools.length > 0 && filteredTools.length === 0 && (
-          <div className="text-center py-12 bg-gray-800 rounded-lg border border-blue-700 border-opacity-30">
+          <div className="text-center py-8 sm:py-12 bg-gray-800 rounded-lg border border-blue-700 border-opacity-30 px-4">
             <Search className="mx-auto h-12 w-12 text-blue-400 opacity-50 mb-4" />
             <h3 className="text-xl font-medium text-cyan-400 mb-2">No results found</h3>
             <p className="text-blue-300">No tools match your search criteria. Try a different search term.</p>
@@ -162,7 +162,7 @@ export default function StormMarketplacePage() {
           {filteredTools.map((tool) => (
             <div
               key={tool._id}
-              className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50 hover:border-blue-400 transition-colors"
+              className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50 hover:border-blue-400 transition-colors"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-grow">
@@ -181,7 +181,7 @@ export default function StormMarketplacePage() {
                   </Link>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-blue-800/30">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4 pt-4 border-t border-blue-800/30">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-blue-400" />
                   <span className="text-blue-300">

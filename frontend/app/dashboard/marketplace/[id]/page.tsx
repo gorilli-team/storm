@@ -332,7 +332,7 @@ export default function ToolDetailsPage() {
   if (error || !tool) {
     return (
       <BaseLayout>
-        <div className="p-6">
+        <div className="p-4 sm:p-6 max-w-5xl mx-auto">
           <Link
             href="/dashboard/marketplace"
             className="inline-flex items-center text-blue-300 hover:text-cyan-400 mb-4"
@@ -349,7 +349,7 @@ export default function ToolDetailsPage() {
 
   return (
     <BaseLayout>
-      <div className="space-y-8 w-full px-6 text-gray-100">
+      <div className="space-y-6 sm:space-y-8 w-full px-4 sm:px-6 text-gray-100 max-w-5xl mx-auto">
         <Link
           href="/dashboard/marketplace"
           className="inline-flex items-center text-blue-300 hover:text-cyan-400"
@@ -358,25 +358,25 @@ export default function ToolDetailsPage() {
         </Link>
         
         {reviewSuccess && (
-          <div className="fixed bottom-4 right-4 bg-green-900 bg-opacity-70 border border-green-700 rounded-md p-3 text-green-400 flex items-center shadow-lg z-50">
+          <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 bg-green-900 bg-opacity-70 border border-green-700 rounded-md p-3 text-green-400 flex items-center shadow-lg z-50">
             <CheckCircle className="h-5 w-5 mr-2" />
             Review published successfully!
           </div>
         )}
         
         {voteSuccess && (
-          <div className="fixed bottom-4 right-4 bg-green-900 bg-opacity-70 border border-green-700 rounded-md p-3 text-green-400 flex items-center shadow-lg z-50">
+          <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 bg-green-900 bg-opacity-70 border border-green-700 rounded-md p-3 text-green-400 flex items-center shadow-lg z-50">
             <CheckCircle className="h-5 w-5 mr-2" />
             Vote submitted successfully!
           </div>
         )}
         
         {/* Tool Header */}
-        <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+        <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div className="flex-grow">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-cyan-400">
+                <h1 className="text-xl sm:text-2xl font-bold text-cyan-400">
                   {tool.toolName}
                 </h1>
               </div>
@@ -473,7 +473,7 @@ export default function ToolDetailsPage() {
             )}
           </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-blue-800/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-4 pt-4 border-t border-blue-800/30">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-blue-400" />
               <span className="text-blue-300">
@@ -539,7 +539,7 @@ export default function ToolDetailsPage() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* Overview Tab */}
             {activeTab === "overview" && (
               <div className="space-y-6">
@@ -551,7 +551,7 @@ export default function ToolDetailsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-900 p-4 rounded-lg border border-blue-800/30">
+                  <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800/30">
                     <h4 className="text-sm font-medium text-cyan-400 mb-3">
                       Tool Details
                     </h4>
@@ -595,7 +595,7 @@ export default function ToolDetailsPage() {
                     </div>
                   </div>
 
-                  <div className="bg-gray-900 p-4 rounded-lg border border-blue-800/30">
+                  <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800/30">
                     <h4 className="text-sm font-medium text-cyan-400 mb-3">
                       Developer
                     </h4>
@@ -628,7 +628,7 @@ export default function ToolDetailsPage() {
                   </div>
                 </div>
 
-                <div className="bg-gray-900 p-4 rounded-lg border border-blue-800/30">
+                <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800/30">
                   <h4 className="text-sm font-medium text-cyan-400 mb-3">
                     Usage Statistics
                   </h4>
@@ -749,7 +749,7 @@ export default function ToolDetailsPage() {
             {/* Reviews Tab */}
             {activeTab === "reviews" && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <h3 className="text-lg font-medium text-cyan-400">
                     User Reviews
                   </h3>
@@ -763,8 +763,8 @@ export default function ToolDetailsPage() {
                       </Button>
 
                       {isReviewModalOpen && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-blue-800/30">
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 w-full max-w-md border border-blue-800/30">
                             <div className="flex justify-between items-center mb-4">
                               <h3 className="text-lg font-medium text-cyan-400">Write a Review</h3>
                               <button 
@@ -819,7 +819,7 @@ export default function ToolDetailsPage() {
                 ) : reviews && reviews.length > 0 ? (
                   <div className="space-y-4">
                     {reviews.map((review, index) => (
-                      <div key={index} className="bg-gray-900 p-4 rounded-lg border border-blue-800/30">
+                      <div key={index} className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800/30">
                         <div className="flex justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold">

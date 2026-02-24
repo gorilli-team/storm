@@ -42,21 +42,21 @@ export default function MCPSetupPage() {
 
   return (
     <BaseLayout>
-      <div className="p-6 bg-gray-900 text-gray-100 min-h-screen">
-        <div className="container">
+      <div className="px-4 py-4 sm:px-6 sm:py-6 bg-gray-900 text-gray-100 min-h-screen">
+        <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
               MCP Integration Setup
             </h1>
-            <p className="text-blue-300 mt-2 flex items-center">
-              <Terminal className="inline mr-2 h-4 w-4 text-yellow-400" />{" "}
+            <p className="text-blue-300 mt-2 flex items-center text-sm sm:text-base">
+              <Terminal className="inline mr-2 h-4 w-4 text-yellow-400 flex-shrink-0" />{" "}
               Connect your Storm tools to Claude and other MCP clients
             </p>
           </div>
 
           {/* Local Setup Section */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-4">
               <Download className="mr-2 h-5 w-5 text-blue-400" /> Local Setup Instructions
             </h2>
@@ -66,7 +66,7 @@ export default function MCPSetupPage() {
                 Currently, Storm needs to be installed locally. Cloud deployment is a work in progress.
               </p>
               
-              <div className="flex items-center justify-between mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600 hover:border-blue-500 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600 hover:border-blue-500 transition-colors">
                 <div className="flex items-center">
                   <Github className="h-6 w-6 text-gray-300 mr-3" />
                   <span className="text-gray-200">GitHub Repository:</span>
@@ -86,7 +86,7 @@ export default function MCPSetupPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-gray-900 p-5 rounded-lg border border-gray-700">
+              <div className="bg-gray-900 p-3 sm:p-5 rounded-lg border border-gray-700">
                 <h3 className="font-medium text-cyan-400 mb-3 flex items-center">
                   <Server className="mr-2 h-5 w-5 text-blue-400" /> Install Dependencies
                 </h3>
@@ -103,7 +103,7 @@ export default function MCPSetupPage() {
           </div>
 
           {/* MCP Protocol Section */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold flex items-center text-cyan-400 mb-6">
               <FileJson className="mr-2 h-5 w-5 text-blue-400" /> MCP Protocol Configuration
             </h2>
@@ -112,10 +112,10 @@ export default function MCPSetupPage() {
               <h3 className="text-lg font-medium text-cyan-400 mb-3">
                 MCP Server Setup
               </h3>
-              <div className="bg-gray-900 p-4 rounded-lg border border-blue-800 relative">
+              <div className="bg-gray-900 p-3 sm:p-4 rounded-lg border border-blue-800 relative overflow-x-auto">
                 <Button
                   onClick={() => handleCopy(mcpSetup)}
-                  className="absolute top-3 right-3 h-9 w-9 p-0 bg-gray-800 hover:bg-gray-700"
+                  className="absolute top-2 right-2 sm:top-3 sm:right-3 h-8 w-8 sm:h-9 sm:w-9 p-0 bg-gray-800 hover:bg-gray-700"
                   size="sm"
                 >
                   {copied ? (
@@ -124,14 +124,14 @@ export default function MCPSetupPage() {
                     <Copy className="h-4 w-4" />
                   )}
                 </Button>
-                <pre className="text-cyan-400 font-mono text-sm overflow-x-auto whitespace-pre">
+                <pre className="text-cyan-400 font-mono text-xs sm:text-sm overflow-x-auto whitespace-pre pr-12 sm:pr-14">
                   {mcpSetup}
                 </pre>
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-gray-900/50 p-5 rounded-lg border border-blue-800/50">
+              <div className="bg-gray-900/50 p-3 sm:p-5 rounded-lg border border-blue-800/50">
                 <h4 className="font-medium text-cyan-400 mb-3 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

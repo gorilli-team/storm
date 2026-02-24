@@ -74,21 +74,21 @@ export default function AnalyticsPage() {
 
   return (
     <BaseLayout>
-      <div className="p-6 bg-gray-900 text-gray-100 min-h-screen">
-        <div className="container">
+      <div className="px-4 py-4 sm:px-6 sm:py-6 bg-gray-900 text-gray-100 min-h-screen">
+        <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
               Analytics Dashboard
             </h1>
-            <p className="text-blue-300 mt-2 flex items-center">
-              <Activity className="inline mr-2 h-4 w-4 text-yellow-400" />{" "}
+            <p className="text-blue-300 mt-2 flex items-center text-sm sm:text-base">
+              <Activity className="inline mr-2 h-4 w-4 text-yellow-400 flex-shrink-0" />{" "}
               Monitor your tool usage and performance
             </p>
           </div>
 
           {/* Filters */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-4 mb-6 border border-blue-700 border-opacity-30 flex flex-wrap gap-4 items-center">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-blue-700 border-opacity-30 flex flex-wrap gap-3 sm:gap-4 items-center">
             <div className="flex items-center">
               <Filter className="h-4 w-4 text-blue-400 mr-2" />
               <span className="text-blue-300 mr-2">Filter by:</span>
@@ -134,8 +134,8 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-800 shadow-lg rounded-lg p-4 border border-blue-700 border-opacity-30">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-3 sm:p-4 border border-blue-700 border-opacity-30">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-gray-400 text-sm">Total API Calls</p>
@@ -153,7 +153,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 shadow-lg rounded-lg p-4 border border-blue-700 border-opacity-30">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-3 sm:p-4 border border-blue-700 border-opacity-30">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-gray-400 text-sm">Active Users</p>
@@ -171,7 +171,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 shadow-lg rounded-lg p-4 border border-blue-700 border-opacity-30">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-3 sm:p-4 border border-blue-700 border-opacity-30">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-gray-400 text-sm">Avg. Latency</p>
@@ -189,7 +189,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 shadow-lg rounded-lg p-4 border border-blue-700 border-opacity-30">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-3 sm:p-4 border border-blue-700 border-opacity-30">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-gray-400 text-sm">Success Rate</p>
@@ -209,9 +209,9 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
             {/* Usage Over Time */}
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-700 border-opacity-30">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-700 border-opacity-30">
               <h2 className="text-xl font-bold text-cyan-400 mb-4">
                 Usage Over Time
               </h2>
@@ -231,7 +231,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Tool Usage Distribution */}
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-700 border-opacity-30">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-700 border-opacity-30">
               <h2 className="text-xl font-bold text-cyan-400 mb-4">
                 Tool Usage Distribution
               </h2>
@@ -272,8 +272,8 @@ export default function AnalyticsPage() {
                     ></div>
                   </div>
 
-                  {/* Legend */}
-                  <div className="absolute -right-32 top-0 w-28">
+                  {/* Legend - desktop */}
+                  <div className="absolute -right-32 top-0 w-28 hidden lg:block">
                     <div className="flex items-center mb-2">
                       <div className="w-3 h-3 bg-blue-600 rounded-full mr-2"></div>
                       <span className="text-sm text-blue-300">
@@ -295,11 +295,26 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
               </div>
+              {/* Legend - mobile */}
+              <div className="flex flex-col gap-2 mt-4 lg:hidden">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-600 rounded-full mr-2"></div>
+                  <span className="text-sm text-blue-300">getWeather (42%)</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-cyan-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-blue-300">translateText (33%)</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                  <span className="text-sm text-blue-300">analyzeSentiment (25%)</span>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Error Analysis */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold text-cyan-400 mb-4">
               Error Analysis
             </h2>
@@ -356,7 +371,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Recommendations */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-700 border-opacity-30">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-700 border-opacity-30">
             <h2 className="text-xl font-bold text-cyan-400 mb-4">
               Recommendations
             </h2>

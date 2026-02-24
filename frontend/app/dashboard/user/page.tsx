@@ -147,9 +147,9 @@ export default function ProfilePage() {
 
   return (
     <BaseLayout>
-      <div className="space-y-8 w-full px-6 text-gray-100">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+      <div className="space-y-6 sm:space-y-8 w-full px-4 sm:px-6 text-gray-100 max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
             Profile
           </h1>
           {isEditing ? (
@@ -181,9 +181,9 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
           <div className="md:col-span-1">
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-20">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-20">
               <div className="flex flex-col items-center mb-4">
                 <div className="bg-blue-900 bg-opacity-30 rounded-full p-6 mb-3">
                   <User className="h-12 w-12 text-cyan-400" />
@@ -245,7 +245,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="md:col-span-3">
-            <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-20">
+            <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-20">
               <h3 className="text-lg font-medium text-cyan-400 mb-4">About</h3>
               {isEditing ? (
                 <textarea
@@ -262,7 +262,7 @@ export default function ProfilePage() {
             </div>
 
             {userProfile?.githubUsername && !isEditing && (
-              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-20 mt-6">
+              <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-20 mt-4 sm:mt-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium text-cyan-400">GitHub Profile</h3>
                   <Link

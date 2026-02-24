@@ -141,7 +141,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
             </div>
           </div>
         </header>
-        <main className="container mx-auto p-4 lg:p-8">{children}</main>
+        <main className="container mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>
   );

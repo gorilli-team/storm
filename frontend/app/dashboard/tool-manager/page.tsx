@@ -512,22 +512,22 @@ const StormToolManager: React.FC = () => {
 
   return (
     <BaseLayout>
-      <div className="p-6 bg-gray-900 text-gray-100 min-h-screen">
-        <div className="container">
+      <div className="px-4 py-4 sm:px-6 sm:py-6 bg-gray-900 text-gray-100 min-h-screen">
+        <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400 pb-1">
               Storm Tool Manager
             </h1>
-            <p className="text-blue-300 mt-2 flex items-center">
-              <Zap className="inline mr-2 h-4 w-4 text-yellow-400" /> Welcome to
+            <p className="text-blue-300 mt-2 flex items-center text-sm sm:text-base">
+              <Zap className="inline mr-2 h-4 w-4 text-yellow-400 flex-shrink-0" /> Welcome to
               your Storm dashboard. Create and manage your function tools
             </p>
           </div>
 
           {authenticated && walletAddress && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+              <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
                 <h2 className="text-xl font-bold text-cyan-400 mb-4">
                   Quick Stats
                 </h2>
@@ -543,14 +543,14 @@ const StormToolManager: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+              <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
                   <h3 className="text-sm font-medium text-cyan-400 mb-2">Connected Wallet</h3>
                   <div className="bg-gray-800 p-2 rounded text-xs font-mono overflow-auto text-blue-300 border border-gray-700">
                     {walletAddress}
                   </div>
               </div>
 
-              <div className="bg-gray-800 shadow-lg rounded-lg p-6 border border-blue-500 border-opacity-50">
+              <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 border border-blue-500 border-opacity-50">
                 <h2 className="text-xl font-bold text-cyan-400 mb-4">
                   Getting Started
                 </h2>
@@ -568,11 +568,11 @@ const StormToolManager: React.FC = () => {
             </div>
           )}
 
-          <div className="bg-gray-800 border border-blue-500 border-opacity-50 rounded-lg p-4 mb-6">
+          <div className="bg-gray-800 border border-blue-500 border-opacity-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
             <h3 className="text-sm font-medium text-cyan-400 mb-2 flex items-center">
               <Key className="w-4 h-4 mr-2 text-yellow-400" /> Wallet Private Key for RECALL
             </h3>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
               <div className="flex-1 relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -618,7 +618,7 @@ const StormToolManager: React.FC = () => {
           </div>
 
           {/* Bucket Selection */}
-          <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-500 border-opacity-50">
+          <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-500 border-opacity-50">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold flex items-center text-cyan-400">
                 <Database className="mr-2 h-5 w-5 text-blue-400" /> Buckets
@@ -774,7 +774,7 @@ const StormToolManager: React.FC = () => {
 
               {/* Content based on active tab */}
               {activeTab === "create" ? (
-                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-cyan-400">
                       Create Tool for Bucket
@@ -969,7 +969,7 @@ const StormToolManager: React.FC = () => {
                   ) : null}
                 </div>
               ) : (
-                <div className="bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-blue-700 border-opacity-30">
+                <div className="bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-blue-700 border-opacity-30">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-cyan-400">
                       Tools in Bucket
